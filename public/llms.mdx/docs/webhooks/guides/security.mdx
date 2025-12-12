@@ -1,0 +1,879 @@
+# Webhooks: undefined
+URL: /docs/webhooks/guides/security
+Source: content/docs/webhooks/guides/security.mdx
+
+
+
+---
+title: Security Best Practices
+description: Secure your webhook endpoints with HMAC-SHA256 signature verification, IP whitelisting, HTTPS, and custom authentication headers.
+---
+
+## Security Layers
+
+Implement multiple security layers for defense in depth:
+
+```mermaid
+graph TD
+    A[Incoming Webhook] -->|Layer 1| B{HTTPS?}
+    B -->|No| C[Reject]
+    B -->|Yes| D{IP Whitelisted?}
+    D -->|No| E[Reject]
+    D -->|Yes| F{Valid Signature?}
+    F -->|No| G[Reject]
+    F -->|Yes| H{Custom Auth?}
+    H -->|No| I[Reject]
+    H -->|Yes| J[Process Event]
+    
+    style C fill:#ff6b6b
+    style E fill:#ff6b6b
+    style G fill:#ff6b6b
+    style I fill:#ff6b6b
+    style J fill:#51cf66
+```
+
+---
+
+## 1. HTTPS Only
+
+**Critical**: Always use HTTPS endpoints. Field Nation rejects HTTP webhook URLs.
+
+### Why HTTPS Matters
+
+- **Encryption**: Protects data in transit from eavesdropping
+- **Integrity**: Prevents man-in-the-middle attacks
+- **Authentication**: Verifies server identity
+
+### SSL Certificate Requirements
+
+Your endpoint must have a valid SSL certificate:
+
+✅ **Valid Certificates**:
+- Certificates from trusted CAs (Let's Encrypt, DigiCert, etc.)
+- Wildcard certificates (`*.example.com`)
+- Multi-domain certificates (SAN)
+
+❌ **Invalid Certificates**:
+- Self-signed certificates
+- Expired certificates
+- Mismatched domain names
+
+### Testing Your Certificate
+
+```bash
+# Check SSL certificate validity
+curl -v https://your-endpoint.com/webhooks
+
+# Should see:
+# * SSL connection using TLSv1.3
+# * Server certificate:
+# *  subject: CN=your-endpoint.com
+# *  issuer: CN=Let's Encrypt Authority
+# *  SSL certificate verify ok
+```
+
+### Free SSL with Let's Encrypt
+
+```bash
+# Install certbot
+sudo apt-get install certbot
+
+# Get certificate
+sudo certbot certonly --standalone -d your-endpoint.com
+
+# Auto-renewal
+sudo certbot renew --dry-run
+```
+
+---
+
+## 2. Signature Verification (HMAC-SHA256)
+
+**Essential**: Always verify webhook signatures to ensure requests come from Field Nation.
+
+### How It Works
+
+1. Field Nation generates HMAC-SHA256 hash of request body using your webhook secret
+2. Hash is sent in `x-fn-signature` header
+3. You recompute the hash with your secret
+4. Compare hashes using timing-safe comparison
+
+### Signature Format
+
+```plaintext
+x-fn-signature: sha256=abc123def456...
+```
+
+Format: `{algorithm}={hex_digest}`
+
+---
+
+### Implementation Examples
+
+  
+    ```javascript
+    const crypto = require('crypto');
+    const express = require('express');
+    const app = express();
+
+    // IMPORTANT: Use raw body parser
+    app.use(express.raw({ type: 'application/json' }));
+
+    function verifyWebhookSignature(rawBody, signature, secret) {
+      if (!signature) {
+        return false;
+      }
+      
+      // Parse algorithm and hash from signature
+      const [algorithm, requestHash] = signature.split('=');
+      
+      if (algorithm !== 'sha256') {
+        return false;
+      }
+      
+      // Compute expected hash
+      const expectedHash = crypto
+        .createHmac('sha256', secret)
+        .update(rawBody)
+        .digest('hex');
+      
+      // Timing-safe comparison
+      try {
+        return crypto.timingSafeEqual(
+          Buffer.from(expectedHash, 'hex'),
+          Buffer.from(requestHash, 'hex')
+        );
+      } catch {
+        return false;
+      }
+    }
+
+    app.post('/webhooks/fieldnation', (req, res) => {
+      const signature = req.headers['x-fn-signature'];
+      const secret = process.env.WEBHOOK_SECRET;
+      
+      // Verify signature
+      if (!verifyWebhookSignature(req.body, signature, secret)) {
+        console.error('Invalid webhook signature');
+        return res.status(401).send('Unauthorized');
+      }
+      
+      // Signature valid, process webhook
+      const payload = JSON.parse(req.body.toString());
+      console.log('Verified webhook:', payload.eventName);
+      
+      res.status(200).send('OK');
+    });
+
+    app.listen(3000);
+    ```
+    
+    > **Critical**: Use raw body (`Buffer`) for signature verification, not parsed JSON. Parsing changes formatting and breaks signature validation.
+  
+  
+    ```python
+    import os
+    import hmac
+    import hashlib
+    from flask import Flask, request
+
+    app = Flask(__name__)
+
+    def verify_webhook_signature(body, signature, secret):
+        if not signature:
+            return False
+        
+        # Parse algorithm and hash
+        try:
+            algorithm, request_hash = signature.split('=')
+        except ValueError:
+            return False
+        
+        if algorithm != 'sha256':
+            return False
+        
+        # Compute expected hash
+        expected_hash = hmac.new(
+            secret.encode('utf-8'),
+            body,
+            hashlib.sha256
+        ).hexdigest()
+        
+        # Timing-safe comparison
+        return hmac.compare_digest(expected_hash, request_hash)
+
+    @app.route('/webhooks/fieldnation', methods=['POST'])
+    def handle_webhook():
+        signature = request.headers.get('x-fn-signature')
+        secret = os.environ['WEBHOOK_SECRET']
+        body = request.get_data()
+        
+        # Verify signature
+        if not verify_webhook_signature(body, signature, secret):
+            print('Invalid webhook signature')
+            return 'Unauthorized', 401
+        
+        # Signature valid, process webhook
+        payload = request.get_json()
+        print(f"Verified webhook: {payload['eventName']}")
+        
+        return 'OK', 200
+
+    if __name__ == '__main__':
+        app.run(port=3000)
+    ```
+  
+  
+    ```php
+    <?php
+    function verifyWebhookSignature($body, $signature, $secret) {
+        if (empty($signature)) {
+            return false;
+        }
+        
+        // Parse algorithm and hash
+        $parts = explode('=', $signature, 2);
+        if (count($parts) !== 2) {
+            return false;
+        }
+        
+        [$algorithm, $requestHash] = $parts;
+        
+        if ($algorithm !== 'sha256') {
+            return false;
+        }
+        
+        // Compute expected hash
+        $expectedHash = hash_hmac('sha256', $body, $secret);
+        
+        // Timing-safe comparison
+        return hash_equals($expectedHash, $requestHash);
+    }
+
+    // Get request data
+    $signature = $_SERVER['HTTP_X_FN_SIGNATURE'] ?? '';
+    $secret = getenv('WEBHOOK_SECRET');
+    $body = file_get_contents('php://input');
+
+    // Verify signature
+    if (!verifyWebhookSignature($body, $signature, $secret)) {
+        error_log('Invalid webhook signature');
+        http_response_code(401);
+        exit('Unauthorized');
+    }
+
+    // Signature valid, process webhook
+    $payload = json_decode($body, true);
+    error_log("Verified webhook: " . $payload['eventName']);
+
+    http_response_code(200);
+    echo 'OK';
+    ?>
+    ```
+  
+  
+    ```go
+    package main
+
+    import (
+        "crypto/hmac"
+        "crypto/sha256"
+        "crypto/subtle"
+        "encoding/hex"
+        "io"
+        "log"
+        "net/http"
+        "os"
+        "strings"
+    )
+
+    func verifyWebhookSignature(body []byte, signature, secret string) bool {
+        if signature == "" {
+            return false
+        }
+        
+        // Parse algorithm and hash
+        parts := strings.SplitN(signature, "=", 2)
+        if len(parts) != 2 {
+            return false
+        }
+        
+        algorithm, requestHash := parts[0], parts[1]
+        
+        if algorithm != "sha256" {
+            return false
+        }
+        
+        // Compute expected hash
+        h := hmac.New(sha256.New, []byte(secret))
+        h.Write(body)
+        expectedHash := hex.EncodeToString(h.Sum(nil))
+        
+        // Timing-safe comparison
+        return subtle.ConstantTimeCompare(
+            []byte(expectedHash),
+            []byte(requestHash),
+        ) == 1
+    }
+
+    func handleWebhook(w http.ResponseWriter, r *http.Request) {
+        signature := r.Header.Get("x-fn-signature")
+        secret := os.Getenv("WEBHOOK_SECRET")
+        
+        // Read body
+        body, err := io.ReadAll(r.Body)
+        if err != nil {
+            http.Error(w, "Bad request", http.StatusBadRequest)
+            return
+        }
+        
+        // Verify signature
+        if !verifyWebhookSignature(body, signature, secret) {
+            log.Println("Invalid webhook signature")
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+        
+        // Signature valid, process webhook
+        log.Println("Verified webhook")
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("OK"))
+    }
+
+    func main() {
+        http.HandleFunc("/webhooks/fieldnation", handleWebhook)
+        log.Fatal(http.Listen AndServe(":3000", nil))
+    }
+    ```
+  
+  
+    ```ruby
+    require 'sinatra'
+    require 'openssl'
+    require 'json'
+
+    def verify_webhook_signature(body, signature, secret)
+      return false if signature.nil? || signature.empty?
+      
+      # Parse algorithm and hash
+      algorithm, request_hash = signature.split('=', 2)
+      return false if algorithm != 'sha256'
+      
+      # Compute expected hash
+      expected_hash = OpenSSL::HMAC.hexdigest(
+        'sha256',
+        secret,
+        body
+      )
+      
+      # Timing-safe comparison
+      Rack::Utils.secure_compare(expected_hash, request_hash)
+    end
+
+    post '/webhooks/fieldnation' do
+      signature = request.env['HTTP_X_FN_SIGNATURE']
+      secret = ENV['WEBHOOK_SECRET']
+      body = request.body.read
+      
+      # Verify signature
+      unless verify_webhook_signature(body, signature, secret)
+        puts 'Invalid webhook signature'
+        halt 401, 'Unauthorized'
+      end
+      
+      # Signature valid, process webhook
+      payload = JSON.parse(body)
+      puts "Verified webhook: #{payload['eventName']}"
+      
+      status 200
+      body 'OK'
+    end
+    ```
+  
+
+### Common Signature Verification Mistakes
+
+  
+    **Wrong**:
+    ```javascript
+    app.use(express.json());
+    const hash = crypto.createHmac('sha256', secret)
+      .update(JSON.stringify(req.body)) // ❌ Won't match
+      .digest('hex');
+    ```
+    
+    **Correct**:
+    ```javascript
+    app.use(express.raw({ type: 'application/json' }));
+    const hash = crypto.createHmac('sha256', secret)
+      .update(req.body) // ✅ Raw buffer
+      .digest('hex');
+    ```
+  
+  
+    **Wrong**:
+    ```javascript
+    if (expectedHash === requestHash) { // ❌ Vulnerable to timing attacks
+      return true;
+    }
+    ```
+    
+    **Correct**:
+    ```javascript
+    return crypto.timingSafeEqual( // ✅ Timing-safe
+      Buffer.from(expectedHash),
+      Buffer.from(requestHash)
+    );
+    ```
+  
+  
+    **Wrong**:
+    ```python
+    # request_hash is hex string, but comparing with bytes
+    return expected_hash == request_hash.encode()
+    ```
+    
+    **Correct**:
+    ```python
+    # Both as hex strings
+    expected_hash = hmac.new(secret, body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected_hash, request_hash)
+    ```
+  
+
+---
+
+## 3. IP Whitelisting
+
+Restrict webhook delivery to Field Nation's IP addresses for an additional security layer.
+
+### Field Nation IP Addresses
+
+  
+    ```plaintext
+    44.225.211.232
+    44.237.253.26
+    ```
+  
+  
+    ```plaintext
+    3.226.5.230
+    34.198.172.230
+    ```
+  
+
+> **Important**: These IPs may change. Subscribe to Field Nation's infrastructure updates or check documentation regularly.
+
+### Implementation Examples
+
+  
+    ```nginx
+    # /etc/nginx/sites-available/your-site
+    
+    geo $is_fieldnation {
+        default 0;
+        
+        # Sandbox IPs
+        44.225.211.232 1;
+        44.237.253.26 1;
+        
+        # Production IPs
+        3.226.5.230 1;
+        34.198.172.230 1;
+    }
+    
+    server {
+        listen 443 ssl;
+        server_name your-endpoint.com;
+        
+        location /webhooks/fieldnation {
+            if ($is_fieldnation = 0) {
+                return 403;
+            }
+            
+            proxy_pass http://localhost:3000;
+        }
+    }
+    ```
+  
+  
+    ```apache
+    # /etc/apache2/sites-available/your-site.conf
+    
+    <VirtualHost *:443>
+        ServerName your-endpoint.com
+        
+        <Location /webhooks/fieldnation>
+            # Require Field Nation IPs
+            Require ip 44.225.211.232
+            Require ip 44.237.253.26
+            Require ip 3.226.5.230
+            Require ip 34.198.172.230
+        </Location>
+    </VirtualHost>
+    ```
+  
+  
+    ```bash
+    # AWS CLI - Create security group rule
+    
+    # Sandbox IPs
+    aws ec2 authorize-security-group-ingress \
+      --group-id sg-xxx \
+      --protocol tcp \
+      --port 443 \
+      --cidr 44.225.211.232/32
+    
+    aws ec2 authorize-security-group-ingress \
+      --group-id sg-xxx \
+      --protocol tcp \
+      --port 443 \
+      --cidr 44.237.253.26/32
+    
+    # Production IPs
+    aws ec2 authorize-security-group-ingress \
+      --group-id sg-xxx \
+      --protocol tcp \
+      --port 443 \
+      --cidr 3.226.5.230/32
+    
+    aws ec2 authorize-security-group-ingress \
+      --group-id sg-xxx \
+      --protocol tcp \
+      --port 443 \
+      --cidr 34.198.172.230/32
+    ```
+  
+  
+    ```javascript
+    const express = require('express');
+    const app = express();
+
+    const FIELDNATION_IPS = [
+      '44.225.211.232', // Sandbox
+      '44.237.253.26',  // Sandbox
+      '3.226.5.230',    // Production
+      '34.198.172.230'  // Production
+    ];
+
+    function ipWhitelist(req, res, next) {
+      // Get client IP (handle X-Forwarded-For if behind proxy)
+      const clientIP = req.headers['x-forwarded-for']?.split(',')[0].trim()
+        || req.socket.remoteAddress;
+      
+      // Check if IP is whitelisted
+      if (!FIELDNATION_IPS.includes(clientIP)) {
+        console.error(`Rejected request from non-whitelisted IP: ${clientIP}`);
+        return res.status(403).send('Forbidden');
+      }
+      
+      next();
+    }
+
+    // Apply to webhook endpoints
+    app.use('/webhooks/fieldnation', ipWhitelist);
+
+    app.post('/webhooks/fieldnation', (req, res) => {
+      // Process webhook
+      res.status(200).send('OK');
+    });
+    ```
+  
+
+---
+
+## 4. Custom Authentication Headers
+
+Add your own authentication layer using custom headers configured in the webhook.
+
+### Setting Up Custom Headers
+
+When creating the webhook:
+
+```json
+{
+  "url": "https://your-endpoint.com/webhooks",
+  "webhookAttribute": {
+    "header": {
+      "Authorization": "Bearer your-secret-api-token",
+      "X-API-Key": "your-api-key",
+      "X-Webhook-Secret": "additional-secret"
+    }
+  }
+}
+```
+
+### Validating Custom Headers
+
+```javascript
+function validateCustomAuth(req) {
+  const authHeader = req.headers['authorization'];
+  const apiKey = req.headers['x-api-key'];
+  
+  // Validate Authorization header
+  if (authHeader !== `Bearer ${process.env.API_TOKEN}`) {
+    return false;
+  }
+  
+  // Validate API key
+  if (apiKey !== process.env.API_KEY) {
+    return false;
+  }
+  
+  return true;
+}
+
+app.post('/webhooks/fieldnation', (req, res) => {
+  // Verify signature first
+  if (!verifySignature(req.body, req.headers['x-fn-signature'])) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Then check custom auth
+  if (!validateCustomAuth(req)) {
+    return res.status(401).send('Invalid authentication');
+  }
+  
+  // All checks passed, process webhook
+  res.status(200).send('OK');
+});
+```
+
+> [INFO] **Best Practice**: Use custom headers for additional authentication, but **always** verify Field Nation's signature first. Custom headers alone are not sufficient security.
+
+---
+
+## 5. Rate Limiting
+
+Protect your endpoint from potential abuse with rate limiting:
+
+###Express Rate Limit
+
+```javascript
+const rateLimit = require('express-rate-limit');
+
+const webhookLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+  message: 'Too many webhook requests',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use('/webhooks/fieldnation', webhookLimiter);
+```
+
+### nginx Rate Limiting
+
+```nginx
+# Define rate limit zone (10 req/sec)
+limit_req_zone $binary_remote_addr zone=webhook_limit:10m rate=10r/s;
+
+server {
+    location /webhooks/fieldnation {
+        # Apply rate limit
+        limit_req zone=webhook_limit burst=20 nodelay;
+        
+        proxy_pass http://localhost:3000;
+    }
+}
+```
+
+---
+
+## 6. Logging & Monitoring
+
+Log security events for auditing and incident response:
+
+### What to Log
+
+```javascript
+function logSecurityEvent(type, details) {
+  const event = {
+    timestamp: new Date().toISOString(),
+    type,
+    ...details
+  };
+  
+  console.log(JSON.stringify(event));
+  
+  // Send to monitoring system
+  if (type === 'security_violation') {
+    alertSecurityTeam(event);
+  }
+}
+
+app.post('/webhooks/fieldnation', (req, res) => {
+  const clientIP = req.socket.remoteAddress;
+  
+  // Log all webhook attempts
+  logSecurityEvent('webhook_attempt', {
+    ip: clientIP,
+    eventName: req.headers['x-fn-event-name']
+  });
+  
+  // Verify signature
+  if (!verifySignature(req.body, req.headers['x-fn-signature'])) {
+    logSecurityEvent('security_violation', {
+      reason: 'invalid_signature',
+      ip: clientIP
+    });
+    return res.status(401).send('Unauthorized');
+  }
+  
+  // Log successful verification
+  logSecurityEvent('webhook_verified', {
+    ip: clientIP,
+    eventId: JSON.parse(req.body.toString()).eventId
+  });
+  
+  res.status(200).send('OK');
+});
+```
+
+### What NOT to Log
+
+> **Never log**:
+- Webhook secrets
+- Raw request bodies (may contain PII)
+- Authorization tokens
+- Payment information
+- Personal identifying information (PII)
+
+---
+
+## Complete Security Implementation
+
+Here's a production-ready example with all security layers:
+
+```javascript title="secure-webhook-handler.js"
+const express = require('express');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+
+const app = express();
+
+// Configuration
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+const API_TOKEN = process.env.API_TOKEN;
+const FIELDNATION_IPS = [
+  '44.225.211.232',
+  '44.237.253.26',
+  '3.226.5.230',
+  '34.198.172.230'
+];
+
+// Rate limiting
+const webhookLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: 'Too many requests'
+});
+
+// Raw body parser (for signature verification)
+app.use(express.raw({ type: 'application/json' }));
+
+// IP whitelist middleware
+function ipWhitelist(req, res, next) {
+  const clientIP = req.headers['x-forwarded-for']?.split(',')[0].trim()
+    || req.socket.remoteAddress;
+  
+  if (!FIELDNATION_IPS.includes(clientIP)) {
+    console.error(`Rejected: Non-whitelisted IP ${clientIP}`);
+    return res.status(403).send('Forbidden');
+  }
+  
+  next();
+}
+
+// Signature verification
+function verifySignature(rawBody, signature, secret) {
+  if (!signature) return false;
+  
+  const [algorithm, requestHash] = signature.split('=');
+  if (algorithm !== 'sha256') return false;
+  
+  const expectedHash = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex');
+  
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedHash),
+      Buffer.from(requestHash)
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Custom auth validation
+function validateCustomAuth(req) {
+  const authHeader = req.headers['authorization'];
+  return authHeader === `Bearer ${API_TOKEN}`;
+}
+
+// Webhook endpoint with all security layers
+app.post('/webhooks/fieldnation',
+  webhookLimiter,        // Layer 1: Rate limiting
+  ipWhitelist,           // Layer 2: IP whitelist
+  (req, res) => {
+    try {
+      // Layer 3: Signature verification
+      const signature = req.headers['x-fn-signature'];
+      if (!verifySignature(req.body, signature, WEBHOOK_SECRET)) {
+        console.error('Invalid signature');
+        return res.status(401).send('Unauthorized');
+      }
+      
+      // Layer 4: Custom authentication
+      if (!validateCustomAuth(req)) {
+        console.error('Invalid custom authentication');
+        return res.status(401).send('Unauthorized');
+      }
+      
+      // All security checks passed
+      const payload = JSON.parse(req.body.toString());
+      console.log(`Verified webhook: ${payload.eventName}`);
+      
+      // Respond immediately
+      res.status(200).send('OK');
+      
+      // Process asynchronously
+      processWebhookAsync(payload);
+      
+    } catch (error) {
+      console.error('Webhook processing error:', error);
+      res.status(500).send('Internal error');
+    }
+  }
+);
+
+async function processWebhookAsync(payload) {
+  // Your business logic here
+}
+
+app.listen(3000, () => {
+  console.log('Secure webhook server running on port 3000');
+});
+```
+
+---
+
+## Security Checklist
+
+Before going to production:
+
+- ✅ HTTPS with valid SSL certificate
+- ✅ Signature verification implemented
+- ✅ IP whitelisting configured
+- ✅ Custom authentication headers (optional but recommended)
+- ✅ Rate limiting enabled
+- ✅ Security event logging
+- ✅ Monitoring and alerts set up
+- ✅ Secrets stored securely (not in code)
+- ✅ Error handling doesn't leak sensitive info
+- ✅ Regular security audits scheduled
+
+---

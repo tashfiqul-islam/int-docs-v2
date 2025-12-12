@@ -1,0 +1,582 @@
+---
+title: Field Mappings
+description: Configure how data transforms between Field Nation and external platforms using flexible mapping actions.
+---
+
+## Mapping Fundamentals
+
+Every field mapping consists of:
+
+<TypeTable
+  type={{
+    "Source Field": {
+      type: "string",
+      description: "The field path in the originating system (e.g., `assignee.user.first_name`)",
+      required: true
+    },
+    "Target Field": {
+      type: "string",
+      description: "The field path in the destination system where data will be written",
+      required: true
+    },
+    "Transformation Action": {
+      type: "enum",
+      description: "How to transform the data: Sync, Set Static, Array Map, Range Map, Date Convert, Concat, Custom JSONNET",
+      required: true
+    },
+    "Default Value": {
+      type: "any",
+      description: "Value to use if source field is empty, null, or missing",
+      required: false
+    }
+  }}
+/>
+
+---
+
+## Transformation Actions
+
+### Sync (ACTION_TYPE_SYNC)
+
+**Direct field-to-field copy with optional type conversion.**
+
+The simplest mapping action - copies the source field value directly to the target field.
+
+```jsonnet
+{
+  // Field Nation → External System
+  "source": "workorder.title",
+  "target": "external_system.job_name",
+  "action": "sync"
+}
+```
+
+**Use Cases:**
+- Simple field copies (title → name, id → external_id)
+- Numeric values (amount → cost)
+- Boolean flags (is_active → active_status)
+
+---
+
+### Set Static (ACTION_TYPE_SET_STATIC)
+
+**Assign a predetermined static value regardless of source data.**
+
+Always sets the target field to a specific value.
+
+```jsonnet
+{
+  "target": "priority",
+  "action": "set_static",
+  "value": "High"
+}
+```
+
+**Use Cases:**
+- Default priority levels
+- Fixed category assignments
+- Constant flags (e.g., `source_system: "Field Nation"`)
+- Required fields without source data
+
+**Example: Always set status to "New"**
+```jsonnet
+{
+  "target": "status",
+  "action": "set_static",
+  "value": "New"
+}
+```
+
+---
+
+### Array Map (ACTION_TYPE_ARRAY_MAP)
+
+**Map source values to target values using exact match lookups.**
+
+Performs equality checks and returns corresponding mapped values.
+
+```jsonnet
+{
+  "source": "pay.type",
+  "target": "payment_type",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "fixed", "value": "Fixed Price" },
+    { "compare": "hourly", "value": "Hourly Rate" },
+    { "compare": "blended", "value": "Blended Rate" }
+  ],
+  "default": "Unknown"
+}
+```
+
+**Use Cases:**
+- Status code mapping (draft → New, assigned → Assigned)
+- Priority levels (1 → Low, 2 → Medium, 3 → High)
+- Category translation (service → Service Call, install → Installation)
+- Enum value conversion
+
+**Example: Work Order Status Mapping**
+```jsonnet
+{
+  "source": "status.name",
+  "target": "external_status",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "draft", "value": "New" },
+    { "compare": "assigned", "value": "Assigned" },
+    { "compare": "work_done", "value": "Completed" },
+    { "compare": "approved", "value": "Approved" }
+  ],
+  "default": "Unknown"
+}
+```
+
+---
+
+### Range Map (ACTION_TYPE_RANGE_MAP)
+
+**Map numeric values to categories based on range comparisons.**
+
+Uses less-than-or-equal comparisons from right to left.
+
+```jsonnet
+{
+  "source": "time_logs.hours",
+  "target": "duration_category",
+  "action": "range_map",
+  "ranges": [
+    { "compare": 0.5, "value": "15-30 Minutes" },
+    { "compare": 1, "value": "31-60 Minutes" },
+    { "compare": 2, "value": "1-2 Hours" },
+    { "compare": 4, "value": "2-4 Hours" }
+  ],
+  "default": "4+ Hours"
+}
+```
+
+**How it works:**
+- Value `0.3` → "15-30 Minutes" (≤ 0.5)
+- Value `1.5` → "1-2 Hours" (≤ 2)
+- Value `5` → "4+ Hours" (default, exceeds all ranges)
+
+**Use Cases:**
+- Duration categorization
+- Cost tiers (0-100 → Low, 101-500 → Medium, 501+ → High)
+- Severity levels based on numeric scores
+- SLA priority based on response time
+
+---
+
+### Date Convert (ACTION_TYPE_DATE_CONVERT)
+
+**Transform date values between formats and timezones.**
+
+```jsonnet
+{
+  "source": "schedule.service_window.start.utc",
+  "target": "scheduled_date",
+  "action": "date_convert",
+  "input_format": "YYYY-MM-DD HH:mm:ss",
+  "output_format": "MM/DD/YYYY h:mm:ss A",
+  "timezone_in": "UTC",
+  "timezone_out": "America/New_York"
+}
+```
+
+**Common Date Formats:**
+- ISO 8601: `YYYY-MM-DDTHH:mm:ssZ`
+- US Format: `MM/DD/YYYY`
+- Full DateTime: `YYYY-MM-DD HH:mm:ss`
+- Unix Timestamp: `X` (seconds) or `x` (milliseconds)
+
+**Use Cases:**
+- UTC → Local timezone conversion
+- Format standardization (ISO → US format)
+- Date-only extraction from datetime fields
+- Adding/subtracting time offsets
+
+**Example: UTC to Local Business Hours**
+```jsonnet
+{
+  "source": "created_at",
+  "target": "created_local",
+  "action": "date_convert",
+  "input_format": "YYYY-MM-DD HH:mm:ss",
+  "output_format": "MM/DD/YYYY hh:mm A",
+  "timezone_in": "UTC",
+  "timezone_out": "America/Chicago"
+}
+```
+
+---
+
+### Concat (ACTION_TYPE_CONCAT)
+
+**Combine multiple fields into a single target field.**
+
+```jsonnet
+{
+  "target": "full_name",
+  "action": "concat",
+  "parts": [
+    { "type": "field", "value": "assignee.user.first_name" },
+    { "type": "static", "value": " " },
+    { "type": "field", "value": "assignee.user.last_name" }
+  ]
+}
+```
+
+**Use Cases:**
+- Full names from first/last names
+- Address lines (street, city, state, zip)
+- Composite identifiers (prefix + ID + suffix)
+- Description building from multiple fields
+
+**Example: Full Address**
+```jsonnet
+{
+  "target": "full_address",
+  "action": "concat",
+  "parts": [
+    { "type": "field", "value": "location.address1" },
+    { "type": "static", "value": ", " },
+    { "type": "field", "value": "location.city" },
+    { "type": "static", "value": ", " },
+    { "type": "field", "value": "location.state" },
+    { "type": "static", "value": " " },
+    { "type": "field", "value": "location.zip" }
+  ]
+}
+```
+
+---
+
+### Custom (ACTION_TYPE_CUSTOM)
+
+**Execute custom JSONNET code for complex transformations.**
+
+For logic that can't be expressed through standard actions, write custom JSONNET.
+
+```jsonnet
+{
+  "target": "priority_level",
+  "action": "custom",
+  "script": |||
+    local hours = $.util.lookup_field($.input, 'time_logs.hours', 0);
+    local is_urgent = $.util.lookup_field($.input, 'priority', '') == 'urgent';
+    
+    if is_urgent && hours > 2 then
+      "Critical"
+    else if is_urgent then
+      "High"
+    else if hours > 4 then
+      "Medium"
+    else
+      "Low"
+  |||
+}
+```
+
+[Learn more about custom actions →](/docs/connectors/concepts/custom-actions)
+
+---
+
+## Mapping Patterns
+
+### Bidirectional Mappings
+
+Configure separate mappings for each direction:
+
+**Inbound (External → Field Nation)**
+```jsonnet
+{
+  "source": "external_system.job_title",
+  "target": "workorder.title",
+  "action": "sync"
+}
+```
+
+**Outbound (Field Nation → External)**
+```jsonnet
+{
+  "source": "workorder.status.name",
+  "target": "external_system.status",
+  "action": "array_map",
+  "mappings": [...]
+}
+```
+
+---
+
+### Nested Field Access
+
+Use dot notation to access nested objects:
+
+```jsonnet
+{
+  "source": "workorder.location.company.name",
+  "target": "company_name",
+  "action": "sync"
+}
+```
+
+Access array elements:
+```jsonnet
+{
+  "source": "workorder.contacts[0].email",
+  "target": "primary_contact_email",
+  "action": "sync"
+}
+```
+
+---
+
+### Custom Field Mappings
+
+Field Nation custom fields require special handling:
+
+**Mapping Custom Fields:**
+```jsonnet
+{
+  "action": "custom",
+  "target": "external_field",
+  "script": |||
+    $.util.lookup_custom_field('835', $.input, 'Default Value')
+  |||
+}
+```
+
+The `lookup_custom_field` function handles Field Nation's custom field structure automatically.
+
+[Learn about custom field IDs →](/docs/rest-api/introduction)
+
+---
+
+## Best Practices
+
+### Field Mapping Strategy
+
+<Accordions type="multiple">
+  <Accordion title="Start Simple, Add Complexity">
+    Begin with essential fields using Sync actions. Add complex transformations only after core synchronization works.
+    
+    **Phase 1**: Required fields (title, description, dates)  
+    **Phase 2**: Status and assignment mapping  
+    **Phase 3**: Custom fields and advanced logic
+  </Accordion>
+  
+  <Accordion title="Use Default Values">
+    Always provide default values for optional fields to prevent sync failures from missing data.
+    
+    ```jsonnet
+    {
+      "source": "optional_field",
+      "target": "required_field",
+      "action": "sync",
+      "default": "N/A"
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Document Complex Mappings">
+    Add comments to JSONNET scripts explaining business logic:
+    
+    ```jsonnet
+    // Priority calculation:
+    // - Urgent + >2 hours = Critical
+    // - Urgent only = High
+    // - >4 hours = Medium
+    // - Otherwise = Low
+    ```
+  </Accordion>
+  
+  <Accordion title="Test Each Mapping Individually">
+    When adding new mappings:
+    1. Test the mapping in isolation
+    2. Verify source data availability
+    3. Confirm target field accepts the value
+    4. Check edge cases (null, empty, unexpected values)
+  </Accordion>
+</Accordions>
+
+### Performance Considerations
+
+**Keep Mappings Efficient:**
+- ✅ Use native actions (Sync, Array Map) when possible
+- ✅ Minimize custom JSONNET complexity
+- ✅ Cache repeated calculations in local variables
+- ⚠️ Avoid nested loops in custom actions
+- ⚠️ Limit external API calls within mappings
+
+---
+
+## Common Mapping Scenarios
+
+### Status Synchronization
+
+Map bidirectional status values:
+
+```jsonnet
+// Inbound: External → Field Nation
+{
+  "source": "status",
+  "target": "status_id",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "New", "value": "1" },
+    { "compare": "Assigned", "value": "2" },
+    { "compare": "Completed", "value": "5" }
+  ]
+}
+
+// Outbound: Field Nation → External
+{
+  "source": "status.id",
+  "target": "external_status",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "1", "value": "Open" },
+    { "compare": "2", "value": "In Progress" },
+    { "compare": "5", "value": "Closed" }
+  ]
+}
+```
+
+### Contact Information
+
+Combine or split contact fields:
+
+```jsonnet
+// Combine first + last name
+{
+  "target": "full_name",
+  "action": "concat",
+  "parts": [
+    { "type": "field", "value": "user.first_name" },
+    { "type": "static", "value": " " },
+    { "type": "field", "value": "user.last_name" }
+  ]
+}
+
+// Extract email domain
+{
+  "action": "custom",
+  "target": "email_domain",
+  "script": |||
+    local email = $.util.lookup_field($.input, 'user.email', '');
+    local parts = std.split(email, '@');
+    if std.length(parts) > 1 then parts[1] else ''
+  |||
+}
+```
+
+### Financial Data
+
+Handle currency and decimal precision:
+
+```jsonnet
+{
+  "source": "pay.amount",
+  "target": "cost",
+  "action": "custom",
+  "script": |||
+    local amount = $.util.lookup_field($.input, 'pay.amount', 0);
+    std.round(amount * 100) / 100  // Round to 2 decimal places
+  |||
+}
+```
+
+---
+
+## Field Discovery
+
+The Integration Broker automatically discovers available fields from external systems.
+
+### Automatic Field Discovery
+
+1. Navigate to Integration Settings
+2. Select your connector
+3. Click "Refresh Fields"
+4. System queries external API metadata
+5. Available fields populate in dropdown menus
+
+### Field Types Discovered
+
+- **Standard Fields**: Built-in platform fields
+- **Custom Fields**: User-defined fields
+- **Related Objects**: Parent/child relationships
+- **Picklist Values**: Available enum values
+- **Required Fields**: Marked for validation
+
+---
+
+## Troubleshooting
+
+<Accordions type="multiple">
+  <Accordion title="Field Not Populating">
+    **Possible Causes:**
+    - Source field path incorrect (check dot notation)
+    - Source field empty/null (add default value)
+    - Target field not writable (check permissions)
+    - Data type mismatch (add conversion logic)
+    
+    **Debug:**
+    ```jsonnet
+    // Log the source value
+    {
+      "action": "custom",
+      "target": "debug_output",
+      "script": |||
+        local value = $.util.lookup_field($.input, 'source.path', 'NOT_FOUND');
+        std.trace("Source value: " + std.toString(value), value)
+      |||
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Array Map Not Matching">
+    **Possible Causes:**
+    - Case sensitivity (compare: "new" vs "New")
+    - Extra whitespace in source value
+    - Numeric vs string comparison
+    - Missing default value
+    
+    **Solution:**
+    ```jsonnet
+    {
+      "action": "custom",
+      "target": "status",
+      "script": |||
+        local raw = $.util.lookup_field($.input, 'status', '');
+        local normalized = std.asciiLower(std.stripChars(raw, ' '));
+        $.util.array_map([...], normalized, 'Unknown')
+      |||
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Date Conversion Failing">
+    **Possible Causes:**
+    - Input format doesn't match actual data format
+    - Timezone string invalid
+    - Null/empty date value
+    
+    **Solution:**
+    Add validation before conversion:
+    ```jsonnet
+    {
+      "action": "custom",
+      "target": "converted_date",
+      "script": |||
+        local date_str = $.util.lookup_field($.input, 'date_field', '');
+        if date_str != '' then
+          $.util.date_convert(date_str, 'YYYY-MM-DD', 'MM/DD/YYYY')
+        else
+          ''
+      |||
+    }
+    ```
+  </Accordion>
+</Accordions>
+
+---

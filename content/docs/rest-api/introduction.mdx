@@ -1,0 +1,273 @@
+---
+title: Introduction
+description: Overview of the Field Nation REST API v2 for programmatic access to field service management operations.
+icon: CodeXml
+---
+
+The Field Nation REST API v2 provides comprehensive programmatic access to the Field Nation platform for managing all aspects of field service operations.
+
+## What is the REST API?
+
+The REST API enables you to:
+- **Create and manage work orders** programmatically
+- **Integrate** Field Nation with your existing systems
+- **Automate** field service workflows
+- **Access** real-time data about work orders, providers, and operations
+- **Build custom applications** on top of Field Nation
+
+---
+
+## API Overview
+
+### Base URLs
+
+<Tabs items={['Sandbox', 'Production']}>
+  <Tab value="Sandbox">
+    ```
+    https://api-sandbox.fndev.net
+    ```
+    
+    Use sandbox for testing and development. All features available without affecting production data.
+  </Tab>
+  
+  <Tab value="Production">
+    ```
+    https://api.fieldnation.com
+    ```
+    
+    Contact Field Nation support for production API access credentials.
+  </Tab>
+</Tabs>
+
+---
+
+### API Version
+
+**Current Version:** REST API v2.0
+
+The v2 API provides:
+- ✅ Comprehensive resource management
+- ✅ Advanced filtering and pagination
+- ✅ Rich resource relationships
+- ✅ Extensive customization options
+
+---
+
+## Available Resources
+
+The REST API provides access to the following resources:
+
+<Accordions type="multiple">
+  <Accordion title="Work Orders">
+    **Core Operations:**
+    - List, create, read, update, delete work orders
+    - Publish, approve, route, assign work orders
+    - Manage work order lifecycle (draft → published → assigned → completed → paid)
+    
+    **Related Data:**
+    - Schedule, location, pay, status
+    - Messages, attachments, signatures
+    - Time logs, expenses, bonuses, penalties
+    - Tasks, qualifications, contacts, custom fields
+  </Accordion>
+  
+  <Accordion title="Authentication">
+    OAuth 2.0 token generation and management for secure API access.
+  </Accordion>
+  
+  <Accordion title="Templates">
+    Reusable work order templates for common job types.
+  </Accordion>
+  
+  <Accordion title="Company Management">
+    - Company settings and configuration
+    - Tags, expense types, networks
+    - Managers, revisit reasons
+  </Accordion>
+  
+  <Accordion title="Talent Management">
+    - **Talent Pools**: Groups of providers with tiers and attributes
+    - **Talent Pool Groups**: Collections of talent pools with associated providers
+    - **Preferred Providers** (legacy): Direct provider relationships
+  </Accordion>
+  
+  <Accordion title="Organization">
+    - **Projects**: Project organization and settings
+    - **Clients**: Client company management
+    - **Locations**: Saved locations and location groups
+  </Accordion>
+  
+  <Accordion title="Configuration">
+    - **Types of Work**: Service categories
+    - **Custom Fields**: Custom field definitions
+    - **Bonuses & Penalties**: Compensation adjustments
+  </Accordion>
+</Accordions>
+
+---
+
+## Core Capabilities
+
+### Work Order Management
+
+The API provides complete work order lifecycle management:
+
+```mermaid
+graph LR
+    A[Create] --> B[Publish]
+    B --> C[Route/Assign]
+    C --> D[Execute]
+    D --> E[Complete]
+    E --> F[Approve & Pay]
+```
+
+**Capabilities:**
+- Create work orders with schedules, locations, and requirements
+- Publish to marketplace or route to specific providers
+- Manage assignments and confirmations
+- Track progress with time logs and status updates
+- Process completion, approval, and payment
+
+---
+
+### Advanced Filtering & Pagination
+
+List endpoints support extensive filtering:
+
+**Work Order Filters:**
+- Status, dates (created, published, scheduled, completed)
+- Location (city, state, zip, radius, saved locations)
+- Pay range, hourly vs. fixed
+- Templates, types of work, custom fields
+- Assigned providers, networks, managers
+- Projects, clients, tags
+
+**Pagination:**
+- `page` - Page number (default: 1)
+- `per_page` - Items per page (default: 30)
+- `columns` - Control which fields are returned
+- `sort` & `order` - Sort results
+
+---
+
+### Resource Relationships
+
+The API provides rich relationships between resources:
+
+```
+Work Order
+├── Location (address, coordinates, timezone)
+├── Schedule (service window, ETA)
+├── Pay (base, increases, discounts, bonuses, penalties)
+├── Assignee (provider information)
+├── Messages (communication thread)
+├── Attachments (files, photos)
+├── Tasks (checklist items with alerts)
+├── Time Logs (clock in/out records)
+├── Expenses (reimbursable costs)
+├── Contacts (on-site contacts)
+├── Qualifications (required certifications)
+├── Custom Fields (company-specific data)
+└── Signatures (completion signatures)
+```
+
+---
+
+## Authentication
+
+All API requests require OAuth 2.0 authentication:
+
+1. **Obtain Token**: Call `/authentication/api/oauth/token` with client credentials
+2. **Use Token**: Include as query parameter `?access_token=YOUR_TOKEN` in all requests
+3. **Refresh**: Token expires after a period - obtain new token as needed
+
+[Authentication guide →](/docs/rest-api/authentication)
+
+---
+
+## Response Format
+
+All API responses are JSON with consistent structure:
+
+**Successful Response:**
+```json
+{
+  "id": 12345,
+  "title": "Network Equipment Installation",
+  "status": {
+    "id": 2,
+    "name": "Assigned"
+  },
+  // ... other fields
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": {
+    "code": "InvalidRequest",
+    "message": "Missing required field: title"
+  }
+}
+```
+
+---
+
+## Rate Limits
+
+- **Default**: Reasonable use limits apply
+- **Monitoring**: Track your usage to avoid throttling
+- **Best Practice**: Implement exponential backoff for retries
+
+Contact Field Nation support for higher rate limits if needed.
+
+---
+
+## Data Formats
+
+### Dates & Times
+
+- **Format**: ISO 8601 (`YYYY-MM-DDTHH:mm:ssZ`)
+- **Timezone**: UTC or specific timezone with offset
+- **Example**: `2024-12-07T14:30:00Z`
+
+### Money
+
+- **Format**: Decimal number
+- **Currency**: USD (unless specified)
+- **Example**: `150.00` ($150.00)
+
+### IDs
+
+- **Format**: Integer
+- **Example**: `work_order_id: 12345`
+
+---
+
+## Versioning
+
+- **Current**: v2.0
+- **Stability**: Production-ready, stable API
+- **Breaking Changes**: Major version updates only
+- **Deprecation**: Advance notice provided for deprecated features
+
+---
+
+## Getting Help
+
+<Cards>
+  <Card title="Quickstart" icon="Zap" href="/docs/rest-api/quickstart">
+    Create your first work order in 5 minutes
+  </Card>
+  <Card title="Authentication" icon="Lock" href="/docs/rest-api/authentication">
+    OAuth 2.0 setup and token management
+  </Card>
+  <Card title="Common Patterns" icon="Code" href="/docs/rest-api/common-patterns">
+    Frequently used workflows and examples
+  </Card>
+  <Card title="Support" icon="CircleQuestionMark" href="/docs/resources/support">
+    Get help from Field Nation support
+  </Card>
+</Cards>
+

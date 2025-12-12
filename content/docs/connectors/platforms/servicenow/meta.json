@@ -1,0 +1,6 @@
+{
+  "title": "ServiceNow",
+  "description": "Connect Field Nation with ServiceNow ITSM",
+  "icon": "Server",
+  "pages": ["overview", "configuration", "workflow"]
+}

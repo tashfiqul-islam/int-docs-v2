@@ -1,0 +1,20 @@
+{
+  "title": "Platforms",
+  "description": "Platform-specific guides for each supported connector",
+  "icon": "LayoutGrid",
+  "pages": [
+    "---PSA Platforms---",
+    "autotask",
+    "connectwise",
+    "---CRM & Support---",
+    "freshdesk",
+    "salesforce",
+    "servicenow",
+    "---ERP & Project Management---",
+    "netsuite",
+    "quickbase",
+    "smartsheet",
+    "---Universal---",
+    "rest-connector"
+  ]
+}

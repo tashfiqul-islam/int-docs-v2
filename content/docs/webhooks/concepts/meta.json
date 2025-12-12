@@ -1,0 +1,6 @@
+{
+  "title": "Core Concepts",
+  "description": "Fundamental concepts for understanding webhooks",
+  "icon": "Lightbulb",
+  "pages": ["events", "payload-structure", "delivery", "webhook-lifecycle"]
+}

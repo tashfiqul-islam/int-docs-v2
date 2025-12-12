@@ -1,0 +1,6 @@
+{
+  "title": "Quickbase",
+  "description": "Sync Field Nation with Quickbase applications",
+  "icon": "Database",
+  "pages": ["overview", "configuration", "workflow"]
+}

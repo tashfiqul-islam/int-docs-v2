@@ -1,0 +1,344 @@
+---
+title: Support & Help
+description: Get help with Field Nation Integration through support cases, phone support, and comprehensive resources.
+icon: LifeBuoy
+---
+
+## Support Channels
+
+### Submit a Support Case
+
+The primary way to get integration support is through the Field Nation Support Portal.
+
+**Support Portal**: [app.fieldnation.com/support-cases](https://app.fieldnation.com/support-cases)
+
+**When to submit a case:**
+- Request API credentials or sandbox access
+- Report technical issues or errors
+- Get help with integration configuration
+- Request feature enhancements
+- Report security concerns
+
+<Callout type="info">
+**Response Time**: Support cases are typically responded to within 1 business day for standard issues. Critical issues receive faster attention.
+</Callout>
+
+---
+
+### Phone Support
+
+For urgent issues or immediate assistance:
+
+**Field Nation Support**: +1 877-573-4353
+
+**Available**: 24/7, including weekends and holidays
+
+- **Monday - Friday**: Full support capacity
+- **Weekends & Holidays**: Limited support capacity
+
+**Best for:**
+- Critical production issues
+- Time-sensitive problems
+- Complex technical discussions
+- Escalation of existing cases
+
+<Callout type="info">
+**24/7 Availability**: Field Nation support is available around the clock. For the fastest resolution, submitting a support case with detailed error logs and screenshots is recommended, especially for non-urgent integration-specific technical issues.
+</Callout>
+
+---
+
+## What to Include in Support Requests
+
+### Essential Information
+
+Always include these details when submitting a support case:
+
+<Steps>
+
+### Environment Details
+
+Specify which environment you're working with:
+- **Sandbox**: `https://app-sandbox.fndev.net` or `https://api-sandbox.fndev.net`
+- **Production**: `https://app.fieldnation.com` or `https://api.fieldnation.com`
+
+### Company Information
+
+- **Company ID**: Found in Company Settings > Company Profile
+- **Company Name**: Your organization name in Field Nation
+
+### Integration Type
+
+Specify your integration approach:
+- REST API v2
+- Webhooks v3
+- Pre-built Connector (specify which: Salesforce, ServiceNow, etc.)
+- Custom integration
+
+### Error Details
+
+Include comprehensive error information:
+- Full error messages
+- HTTP status codes
+- Timestamps (in UTC or with timezone)
+- Request/response payloads (remove sensitive data)
+- Relevant log excerpts
+
+### Steps to Reproduce
+
+Provide clear steps to recreate the issue:
+1. What you were trying to do
+2. Actions you took
+3. What you expected to happen
+4. What actually happened
+
+### Impact Assessment
+
+Help us prioritize:
+- How many users/work orders affected?
+- Is this blocking production operations?
+- Is there a workaround available?
+
+</Steps>
+
+---
+
+## Support Request Templates
+
+### API Credential Request
+
+```
+Subject: API Credential Request - [Sandbox/Production]
+
+Environment: [Sandbox/Production]
+Company ID: [Your Company ID]
+Company Name: [Your Company Name]
+Integration Type: [REST API / Webhooks / Connector Name]
+
+Purpose:
+[Brief description of your integration goals]
+
+Requested Access:
+- [ ] REST API v2 access
+- [ ] Webhooks v3 access
+- [ ] Specific connector access
+
+Technical Contact:
+Name: [Name]
+Email: [Email]
+Phone: [Phone]
+```
+
+---
+
+### Technical Issue Report
+
+```
+Subject: [Integration Issue] - Brief Description
+
+Environment: [Sandbox/Production]
+Company ID: [Your Company ID]
+Integration Type: [REST API / Webhooks / Connector]
+
+Issue Description:
+[Clear description of the problem]
+
+Error Details:
+- Error Message: [Full error message]
+- Status Code: [HTTP status code if applicable]
+- Timestamp: [When the error occurred]
+- Request ID: [If available]
+
+Steps to Reproduce:
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+Expected Behavior:
+[What should happen]
+
+Actual Behavior:
+[What actually happens]
+
+Impact:
+[How this affects your operations]
+
+Logs/Screenshots:
+[Attach relevant logs or screenshots]
+```
+
+---
+
+### Webhook Delivery Failure
+
+```
+Subject: Webhook Delivery Failures - [Webhook ID]
+
+Environment: [Sandbox/Production]
+Company ID: [Your Company ID]
+Webhook ID: [wh_xxxxx]
+Endpoint URL: [Your webhook URL]
+
+Issue:
+Webhooks are failing to deliver with [error description]
+
+Delivery Log Details:
+- Delivery ID: [del_xxxxx]
+- Event Name: [event name]
+- Delivery Status: [HTTP status]
+- Error Message: [error from delivery log]
+- Timestamp: [when failures started]
+
+Endpoint Status:
+- [ ] Endpoint is publicly accessible
+- [ ] SSL certificate is valid
+- [ ] Firewall allows Field Nation IPs
+- [ ] Endpoint responds within 30 seconds
+
+Recent Changes:
+[Any recent changes to your endpoint or infrastructure]
+```
+
+---
+
+## Self-Service Resources
+
+### Documentation
+
+Comprehensive documentation for all integration approaches:
+
+- **Getting Started**: [Introduction](/docs/getting-started/introduction)
+- **REST API**: Available in REST API section (to be built)
+- **Webhooks**: [Introduction](/docs/webhooks/introduction)
+- **Connectors**: Available in Connectors section (to be built)
+
+### Status Page
+
+Check current system status and incident history:
+
+**Status Page**: [status.fieldnation.com](https://status.fieldnation.com)
+
+**What's available:**
+- Real-time system status (Web App, Mobile App, API, Connectors)
+- Active incidents and resolution progress
+- Scheduled maintenance notifications
+- Past incident history
+- Subscribe to email/SMS notifications
+
+<Callout type="info">
+Before submitting a support case, check the status page to see if there's a known issue affecting your integration.
+</Callout>
+
+---
+
+### FAQ
+
+Quick answers to common questions:
+
+[View FAQ →](/docs/resources/faq)
+
+**Popular topics:**
+- Getting started and account setup
+- API credentials and authentication
+- Webhook configuration
+- Integration troubleshooting
+- Data synchronization
+
+---
+
+### Glossary
+
+Understand Field Nation terminology:
+
+[View Glossary →](/docs/resources/glossary)
+
+Comprehensive A-Z reference for platform concepts, technical terms, and integration terminology.
+
+---
+
+## Emergency Escalation
+
+### Production-Critical Issues
+
+If you're experiencing a production-critical issue:
+
+1. **Call Support Immediately**: +1 877-573-4353
+2. **Mark Case as Critical**: When submitting a case, indicate severity level
+3. **Provide Impact Details**: Number of affected work orders, users, or transactions
+4. **Include Workaround Status**: Whether operations are completely blocked
+
+### Security Issues
+
+For security vulnerabilities or concerns:
+
+1. **Do not post in public forums**
+2. **Submit a confidential support case** marked "Security Issue"
+3. **Include detailed vulnerability description**
+4. **Follow responsible disclosure practices**
+
+---
+
+## Support Response Times
+
+| Severity | Response Time | Example |
+|----------|---------------|---------|
+| **Critical** | 2-4 hours | Production system down, data loss, security breach |
+| **High** | 4-8 hours | Major feature not working, significant user impact |
+| **Medium** | 1 business day | Non-critical bugs, minor feature issues |
+| **Low** | 2-3 business days | Enhancement requests, documentation questions |
+
+<Callout type="info">
+**Note**: Response times are for initial response. Resolution time varies based on issue complexity.
+</Callout>
+
+---
+
+## Additional Resources
+
+### Community & Feedback
+
+**Feature Requests**: Submit through support portal with detailed use case
+
+**Feedback**: Share your integration experience through support cases
+
+### Training & Onboarding
+
+Contact your Field Nation representative for:
+- Integration onboarding sessions
+- Technical training
+- Best practices consultation
+- Architecture review
+
+---
+
+## Tips for Effective Support Requests
+
+### Do's ✅
+
+- Provide complete error messages and logs
+- Include timestamps in UTC or with timezone
+- Attach screenshots when helpful
+- Specify exact steps to reproduce
+- Remove sensitive data before sharing logs
+- Follow up with additional information if requested
+
+### Don'ts ❌
+
+- Don't say "it doesn't work" without details
+- Don't share API credentials in support cases
+- Don't submit duplicate cases for the same issue
+- Don't expect instant resolution for complex issues
+- Don't wait until production to test and report issues
+
+---
+
+## Contact Information Quick Reference
+
+| Need | Channel | Link |
+|------|---------|------|
+| **Submit Case** | Support Portal | [app.fieldnation.com/support-cases](https://app.fieldnation.com/support-cases) |
+| **Phone Support** | Phone | +1 877-573-4353 |
+| **System Status** | Status Page | [status.fieldnation.com](https://status.fieldnation.com) |
+| **Documentation** | Docs Site | [developers.fieldnation.com](https://developers.fieldnation.com) |
+
+---

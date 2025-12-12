@@ -1,0 +1,97 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/connectwise/workflow
+Source: content/docs/connectors/platforms/connectwise/workflow.mdx
+
+
+
+---
+title: Workflow Setup
+description: Configure ConnectWise callbacks to automatically send service ticket data to Field Nation.
+---
+
+## Prerequisites
+
+- ☐ [Field Nation configuration complete](/docs/connectors/platforms/connectwise/configuration)
+- ☐ Trigger URL copied
+- ☐ ConnectWise admin access
+
+---
+
+## Configure Callback in ConnectWise
+
+### Navigate to Callbacks
+
+System → Setup Tables → Callbacks
+
+### Create New Callback
+
+Click "+" to add new callback
+
+### Configure Callback
+
+**Description**: `Field Nation Integration`
+
+**URL**: Paste Field Nation trigger URL
+
+**Object Type**: `Service Ticket`
+
+**Level**: `Owner Level` or `All Levels`
+
+**Trigger Events:**
+- ☑ Added
+- ☑ Changed
+- ☐ Deleted (optional)
+
+**Inactive Members**: Unchecked
+
+---
+
+## Define Trigger Conditions
+
+**Option 1: Status-Based**
+```
+Status changed to "Dispatch"
+```
+
+**Option 2: Board-Based**
+```
+Board = "Field Services"
+```
+
+**Option 3: Custom Field**
+```
+Custom Field "Send to FN" = true
+```
+
+Use ConnectWise workflow rules or automation to set these conditions.
+
+---
+
+## Test Integration
+
+1. Create test service ticket
+2. Update to trigger callback conditions
+3. Verify webhook fires (System → Callback Log)
+4. Check Field Nation for work order
+
+---
+
+## Troubleshooting
+
+  
+    Check:
+    - Callback active
+    - Trigger events selected
+    - Level permissions correct
+    - URL accessible
+  
+  
+  
+    Check:
+    - Field Nation credentials valid
+    - All required fields mapped
+    - Callback log for errors
+    - Integration Broker logs
+  
+
+---

@@ -1,0 +1,686 @@
+---
+title: Custom Actions with JSONNET
+description: Write advanced data transformation logic using JSONNET for complex field mapping scenarios.
+---
+
+## JSONNET Overview
+
+JSONNET is a data templating language developed by Google that generates JSON through programmable logic. It's designed for configuration management and data transformation.
+
+### Key Features
+
+**Functions** - Define reusable transformation logic with parameters
+
+**Variables** - Store intermediate values using `local` bindings
+
+**Conditionals** - Implement branching with `if-then-else`
+
+**Standard Library** - Built-in functions for strings, arrays, objects, math
+
+**Imports** - Include external libraries for code reuse
+
+[Official JSONNET Documentation →](https://jsonnet.org/)
+
+---
+
+## Execution Context
+
+Every custom action executes within a special context providing access to data and utilities:
+
+<TypeTable
+  type={{
+    "$.input": {
+      type: "object",
+      description: "Complete input payload containing work order or external record data. Access nested fields with dot notation: `$.input.workorder.id`",
+      required: true
+    },
+    "$.util": {
+      type: "object",
+      description: "Utility library with helper functions for common transformations (field lookup, date conversion, mapping)",
+      required: true
+    },
+    "std": {
+      type: "object",
+      description: "JSONNET standard library with array, string, math, and type functions",
+      required: true
+    }
+  }}
+/>
+
+---
+
+## Basic Custom Action
+
+The simplest custom action directly accesses input fields:
+
+```jsonnet
+{
+  full_name: $.util.lookup_field($.input, 'assignee.user.first_name', '') + ' ' + 
+             $.util.lookup_field($.input, 'assignee.user.last_name', '')
+}
+```
+
+**Result**: Concatenates first and last name with space, using safe defaults for missing fields.
+
+---
+
+## Utility Library ($.util)
+
+The Integration Broker provides comprehensive utility functions optimized for field mappings.
+
+### Field Lookup Functions
+
+#### lookup_field(obj, path, default, raw=false)
+
+Safely retrieves nested values using dot notation.
+
+```jsonnet
+{
+  work_order_id: $.util.lookup_field($.input, 'workorder.id', 0),
+  company_name: $.util.lookup_field($.input, 'workorder.location.company.name', 'Unknown')
+}
+```
+
+**Parameters:**
+- `obj`: Source object to search
+- `path`: Dot-notation path (e.g., `'user.email'`)
+- `default`: Value if path doesn't exist
+- `raw`: Treat path as literal property name (no dot parsing)
+
+---
+
+#### lookup_custom_field(id, obj, default="")
+
+Retrieves Field Nation custom field values by ID.
+
+```jsonnet
+{
+  po_number: $.util.lookup_custom_field('835', $.input, 'N/A'),
+  site_contact: $.util.lookup_custom_field('912', $.input, '')
+}
+```
+
+Field Nation custom fields have nested structure - this function handles it automatically.
+
+---
+
+### Mapping Functions
+
+#### array_map(array_def, val, default)
+
+Maps values using exact match comparisons.
+
+```jsonnet
+{
+  payment_type: $.util.array_map(
+    [
+      { cmp: "fixed", val: "Fixed Price" },
+      { cmp: "hourly", val: "Hourly Rate" },
+      { cmp: "blended", val: "Blended Rate" }
+    ],
+    $.util.lookup_field($.input, 'pay.type', ''),
+    "Unknown"
+  )
+}
+```
+
+---
+
+#### range_map(range_def, val, default)
+
+Maps numeric values to categories using range comparisons (right-to-left, less-than-or-equal).
+
+```jsonnet
+{
+  duration_category: $.util.range_map(
+    [
+      { cmp: 0.5, val: "15-30 Minutes" },
+      { cmp: 1, val: "31-60 Minutes" },
+      { cmp: 2, val: "1-2 Hours" }
+    ],
+    $.util.lookup_field($.input, 'time_logs.hours', 0),
+    "2+ Hours"
+  )
+}
+```
+
+**How it works:**
+- `0.3` hours → "15-30 Minutes" (≤ 0.5)
+- `1.5` hours → "1-2 Hours" (≤ 2)
+- `3` hours → "2+ Hours" (default)
+
+---
+
+### Date Conversion Functions
+
+#### date_convert(value, format_input, format_output, timezone_in='UTC', timezone_out='UTC')
+
+Transforms dates between formats and timezones.
+
+```jsonnet
+{
+  scheduled_date: $.util.date_convert(
+    $.util.lookup_field($.input, 'schedule.service_window.start.utc', ''),
+    $.util.date_time_format_fn_utc(),  // "YYYY-MM-DD HH:mm:ss"
+    "MM/DD/YYYY h:mm:ss A",
+    'UTC',
+    'America/New_York'
+  )
+}
+```
+
+**Common Formats:**
+- `YYYY-MM-DD HH:mm:ss` - Standard datetime
+- `MM/DD/YYYY` - US date format
+- `h:mm A` - 12-hour time
+- `X` - Unix timestamp (seconds)
+- `x` - Unix timestamp (milliseconds)
+
+---
+
+#### date_time_format_fn_utc()
+
+Returns standard UTC format string: `"YYYY-MM-DD HH:mm:ss"`
+
+---
+
+#### date_add(value, format_input="")
+
+Adds one day to a date value.
+
+```jsonnet
+{
+  due_date: $.util.date_add(
+    $.util.lookup_field($.input, 'schedule.service_window.start.utc', ''),
+    $.util.date_time_format_fn_utc()
+  )
+}
+```
+
+---
+
+### Array Processing Functions
+
+#### array_sum(array)
+
+Sums all numeric elements.
+
+```jsonnet
+{
+  total_hours: $.util.array_sum([10, 22, 4])  // Returns 36
+}
+```
+
+---
+
+#### object_map_array(arr, map)
+
+Transforms array of objects by mapping their fields.
+
+```jsonnet
+{
+  mapped_expenses: $.util.object_map_array(
+    $.input.pay.expense.results,
+    {
+      "amount": "expense_amount",
+      "category.name": "expense_category",
+      "description": "expense_desc"
+    }
+  )
+}
+```
+
+**Input:**
+```json
+[
+  { "amount": 50, "category": { "name": "Travel" }, "description": "Mileage" },
+  { "amount": 25, "category": { "name": "Materials" }, "description": "Parts" }
+]
+```
+
+**Output:**
+```json
+[
+  { "expense_amount": 50, "expense_category": "Travel", "expense_desc": "Mileage" },
+  { "expense_amount": 25, "expense_category": "Materials", "expense_desc": "Parts" }
+]
+```
+
+---
+
+#### results_values(results, field, default='', raw=false)
+
+Extracts values for a specific field from array of objects.
+
+```jsonnet
+{
+  all_categories: $.util.results_values(
+    $.input.pay.expense.results,
+    "category.name",
+    'Unknown'
+  )
+  // Returns: ["Travel", "Materials", "Travel", "Lodging"]
+}
+```
+
+---
+
+#### results_values_unique(results, field, default='', raw=false)
+
+Like `results_values` but returns only unique values.
+
+```jsonnet
+{
+  unique_categories: $.util.results_values_unique(
+    $.input.pay.expense.results,
+    "category.name"
+  )
+  // Returns: ["Travel", "Materials", "Lodging"]
+}
+```
+
+---
+
+#### results_group_by(results, group_by_field, additional_filter, raw=false)
+
+Groups array elements by field value with optional filtering.
+
+```jsonnet
+{
+  expenses_by_category: $.util.results_group_by(
+    $.input.pay.expense.results,
+    "category.name",
+    $.util.is_expense_approved_fn,
+    false
+  )
+}
+```
+
+---
+
+### Expense Aggregation Functions
+
+#### is_expense_approved_fn(expense)
+
+Filter function for approved expenses.
+
+```jsonnet
+local approved_expenses = std.filter(
+  $.util.is_expense_approved_fn,
+  $.input.pay.expense.results
+);
+```
+
+---
+
+#### sum_expense_field(expenses, field)
+
+Sums a specific field across expense array.
+
+```jsonnet
+{
+  total_expense_amount: $.util.sum_expense_field(
+    $.input.pay.expense.results,
+    "amount"
+  )
+}
+```
+
+---
+
+## Common Patterns
+
+### Conditional Logic
+
+```jsonnet
+{
+  priority: 
+    local hours = $.util.lookup_field($.input, 'time_logs.hours', 0);
+    local is_urgent = $.util.lookup_field($.input, 'priority', '') == 'urgent';
+    
+    if is_urgent && hours > 2 then
+      "Critical"
+    else if is_urgent then
+      "High"
+    else if hours > 4 then
+      "Medium"
+    else
+      "Low"
+}
+```
+
+---
+
+### String Manipulation
+
+```jsonnet
+{
+  // Uppercase
+  title_upper: std.asciiUpper($.util.lookup_field($.input, 'workorder.title', '')),
+  
+  // Extract email domain
+  email_domain: 
+    local email = $.util.lookup_field($.input, 'user.email', '');
+    local parts = std.split(email, '@');
+    if std.length(parts) > 1 then parts[1] else '',
+  
+  // Remove whitespace
+  clean_text: std.stripChars($.util.lookup_field($.input, 'description', ''), ' \t\n')
+}
+```
+
+---
+
+### Array Transformations
+
+```jsonnet
+{
+  // Filter array
+  high_value_expenses: 
+    local all_expenses = $.input.pay.expense.results;
+    std.filter(function(e) e.amount > 100, all_expenses),
+  
+  // Map array
+  expense_amounts: 
+    std.map(
+      function(e) e.amount,
+      $.input.pay.expense.results
+    ),
+  
+  // Find element
+  first_travel_expense:
+    local expenses = $.input.pay.expense.results;
+    local travel = std.filter(
+      function(e) e.category.name == 'Travel',
+      expenses
+    );
+    if std.length(travel) > 0 then travel[0] else null
+}
+```
+
+---
+
+### Number Formatting
+
+```jsonnet
+{
+  // Round to 2 decimal places
+  rounded_cost: std.round($.input.pay.amount * 100) / 100,
+  
+  // Format as currency
+  formatted_amount:
+    local amount = $.util.lookup_field($.input, 'pay.amount', 0);
+    "$" + std.toString(std.round(amount * 100) / 100),
+  
+  // Percentage calculation
+  completion_rate:
+    local completed = $.util.lookup_field($.input, 'tasks_completed', 0);
+    local total = $.util.lookup_field($.input, 'tasks_total', 1);
+    std.round((completed / total) * 100) + "%"
+}
+```
+
+---
+
+### Object Construction
+
+```jsonnet
+{
+  // Build nested object
+  contact_info: {
+    name: $.util.lookup_field($.input, 'assignee.user.first_name', '') + ' ' +
+          $.util.lookup_field($.input, 'assignee.user.last_name', ''),
+    email: $.util.lookup_field($.input, 'assignee.user.email', ''),
+    phone: $.util.lookup_field($.input, 'assignee.user.phone', ''),
+    address: {
+      street: $.util.lookup_field($.input, 'location.address1', ''),
+      city: $.util.lookup_field($.input, 'location.city', ''),
+      state: $.util.lookup_field($.input, 'location.state', ''),
+      zip: $.util.lookup_field($.input, 'location.zip', '')
+    }
+  }
+}
+```
+
+---
+
+## Advanced Examples
+
+### Complex Status Mapping
+
+```jsonnet
+{
+  external_status:
+    local fn_status = $.util.lookup_field($.input, 'status.name', '');
+    local is_assigned = $.util.lookup_field($.input, 'assignee.user.id', 0) > 0;
+    local is_completed = fn_status == 'work_done';
+    local is_approved = fn_status == 'approved';
+    
+    if is_approved then
+      "Closed - Approved"
+    else if is_completed then
+      "Closed - Completed"
+    else if is_assigned then
+      "In Progress"
+    else if fn_status == 'published' then
+      "Open - Available"
+    else
+      "Draft"
+}
+```
+
+---
+
+### Multi-Field Validation
+
+```jsonnet
+{
+  validation_status:
+    local title = $.util.lookup_field($.input, 'workorder.title', '');
+    local amount = $.util.lookup_field($.input, 'pay.amount', 0);
+    local start_date = $.util.lookup_field($.input, 'schedule.service_window.start.utc', '');
+    
+    local errors = [];
+    local errors2 = if title == '' then errors + ["Missing title"] else errors;
+    local errors3 = if amount <= 0 then errors2 + ["Invalid amount"] else errors2;
+    local errors4 = if start_date == '' then errors3 + ["Missing schedule"] else errors3;
+    
+    if std.length(errors4) > 0 then
+      { valid: false, errors: errors4 }
+    else
+      { valid: true, errors: [] }
+}
+```
+
+---
+
+### Dynamic Field Selection
+
+```jsonnet
+{
+  primary_contact:
+    local contacts = $.util.lookup_field($.input, 'workorder.contacts', []);
+    local primary = std.filter(
+      function(c) c.is_primary == true,
+      contacts
+    );
+    
+    if std.length(primary) > 0 then
+      primary[0].email
+    else if std.length(contacts) > 0 then
+      contacts[0].email
+    else
+      ''
+}
+```
+
+---
+
+## Best Practices
+
+### Code Organization
+
+**Use Local Variables** for readability and performance:
+
+```jsonnet
+{
+  result:
+    // ✅ Good - reusable, clear
+    local hours = $.util.lookup_field($.input, 'time_logs.hours', 0);
+    local rate = $.util.lookup_field($.input, 'pay.hourly_rate', 0);
+    local total = hours * rate;
+    std.round(total * 100) / 100
+}
+```
+
+```jsonnet
+{
+  result:
+    // ❌ Bad - repeated lookups, hard to read
+    std.round(($.util.lookup_field($.input, 'time_logs.hours', 0) * 
+               $.util.lookup_field($.input, 'pay.hourly_rate', 0)) * 100) / 100
+}
+```
+
+---
+
+### Error Handling
+
+**Always provide defaults** to prevent null pointer errors:
+
+```jsonnet
+{
+  // ✅ Good - safe with defaults
+  total: $.util.lookup_field($.input, 'amount', 0) + 
+         $.util.lookup_field($.input, 'tax', 0),
+  
+  // ❌ Bad - may crash if fields missing
+  total: $.input.amount + $.input.tax
+}
+```
+
+---
+
+### Performance Optimization
+
+**Cache expensive operations:**
+
+```jsonnet
+{
+  // ✅ Good - calculate once, use multiple times
+  result:
+    local all_expenses = $.input.pay.expense.results;
+    local total = $.util.sum_expense_field(all_expenses, "amount");
+    local count = std.length(all_expenses);
+    {
+      total: total,
+      count: count,
+      average: if count > 0 then total / count else 0
+    }
+}
+```
+
+---
+
+### Type Safety
+
+**Check types before operations:**
+
+```jsonnet
+{
+  safe_division:
+    local numerator = $.util.lookup_field($.input, 'completed', 0);
+    local denominator = $.util.lookup_field($.input, 'total', 1);
+    
+    if std.isNumber(numerator) && std.isNumber(denominator) && denominator != 0 then
+      numerator / denominator
+    else
+      0
+}
+```
+
+---
+
+## Testing Custom Actions
+
+### Test in Isolation
+
+Create a test payload and validate output:
+
+```jsonnet
+// Test payload
+local test_input = {
+  workorder: {
+    id: 12345,
+    title: "Test WO",
+    pay: { amount: 150.50 }
+  }
+};
+
+// Your transformation
+local result = {
+  id: test_input.workorder.id,
+  formatted_amount: "$" + std.toString(test_input.workorder.pay.amount)
+};
+
+// Output for testing
+result
+```
+
+---
+
+### Debug with std.trace
+
+Add trace statements to inspect values:
+
+```jsonnet
+{
+  result:
+    local value = $.util.lookup_field($.input, 'some.field', 'default');
+    local traced = std.trace("Field value: " + std.toString(value), value);
+    // Transformation continues with traced value
+    traced
+}
+```
+
+Trace output appears in integration logs.
+
+---
+
+## Troubleshooting
+
+<Accordions type="multiple">
+  <Accordion title="Syntax Errors">
+    **Common Issues:**
+    - Missing commas between object properties
+    - Unmatched brackets/braces
+    - Missing semicolons in local bindings
+    
+    **Solution:** Use a JSONNET validator or linter before deploying.
+  </Accordion>
+  
+  <Accordion title="Null Pointer Errors">
+    **Cause:** Accessing fields that don't exist
+    
+    **Solution:** Always use `lookup_field` with defaults instead of direct access:
+    ```jsonnet
+    // ✅ Good
+    $.util.lookup_field($.input, 'field', 'default')
+    
+    // ❌ Bad
+    $.input.field
+    ```
+  </Accordion>
+  
+  <Accordion title="Type Errors">
+    **Cause:** Operations on mismatched types (string + number)
+    
+    **Solution:** Use type checking and conversion:
+    ```jsonnet
+    local value = $.util.lookup_field($.input, 'field', '');
+    if std.isNumber(value) then value else std.parseInt(value)
+    ```
+  </Accordion>
+</Accordions>
+
+---

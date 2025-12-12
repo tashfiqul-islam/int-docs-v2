@@ -1,0 +1,184 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/netsuite/overview
+Source: content/docs/connectors/platforms/netsuite/overview.mdx
+
+
+
+---
+title: NetSuite Connector
+description: Integrate NetSuite ERP with Field Nation for automated work order creation and service management synchronization.
+---
+
+## Overview
+
+The NetSuite connector enables seamless integration between NetSuite ERP and Field Nation:
+- **Service order dispatch**: Create work orders from NetSuite service records
+- **SuiteTalk SOAP API**: Token-based authentication (TBA)
+- **SuiteScript integration**: Custom triggers via SuiteScripts
+- **Bidirectional sync**: Status, costs, and completion data flow both ways
+- **Custom fields support**: Map NetSuite custom fields
+
+---
+
+## At a Glance
+
+  
+    Token-Based Authentication (TBA) - Account ID + Consumer Key/Secret + Token Key/Secret
+  
+  
+    Service Orders, Cases, Custom Records
+  
+  
+    SuiteScript + Webhooks
+  
+  
+    Bidirectional (create, update, financial)
+  
+
+---
+
+## How It Works
+
+### Deploy SuiteScript
+
+Deploy custom SuiteScript in NetSuite that monitors service records
+
+### Script Triggers
+
+SuiteScript evaluates conditions (status change, custom field) and sends webhook
+
+### Field Nation Receives
+
+Integration Broker receives notification with NetSuite record ID
+
+### Fetch Record Data
+
+Broker retrieves complete record via SuiteTalk SOAP API
+
+### Create Work Order
+
+Transformed data creates Field Nation work order
+
+---
+
+## Common Use Cases
+
+### Service Order Dispatch
+
+```
+Service Order Status = "Ready for Dispatch"
+  → SuiteScript triggers
+  → Work order created
+  → Service order updated
+```
+
+### Case-Based Dispatch
+
+```
+Case Type = "On-Site Service"
+AND Status = "Escalated"
+  → Webhook fires
+  → Field technician dispatched
+```
+
+### Financial Tracking
+
+```
+FN Work Order = "Approved"
+  → NetSuite Service Order updated
+  → Costs synchronized
+  → Invoice generated
+```
+
+---
+
+## Features
+
+### Field Mapping Capabilities
+
+- **Standard Fields**: Title, Message, Status, Sales Order Number
+- **Custom Fields**: All custom fields on target record type
+- **Related Records**: Customer, Contact, Location, Item
+- **Financial Fields**: Cost, revenue, billing codes
+- **Sublists**: Line items, time entries, expenses
+
+### Supported Operations
+
+---
+
+## Prerequisites
+
+### NetSuite Requirements
+
+  
+    Enable TBA in NetSuite:
+    1. Setup → Company → Enable Features
+    2. SuiteCloud → Token-Based Authentication ✅
+    3. Save
+  
+  
+  
+    Create integration record:
+    1. Setup → Integration → Manage Integrations → New
+    2. Name: "Field Nation Integration"
+    3. State: Enabled
+    4. Copy: Consumer Key, Consumer Secret
+  
+  
+  
+    Generate access token:
+    1. Setup → Users/Roles → Access Tokens → New
+    2. Application Name: Field Nation Integration (from above)
+    3. User: Integration user
+    4. Role: Administrator or custom integration role
+    5. Copy: Token ID, Token Secret
+  
+  
+  
+    - Ability to deploy SuiteScripts
+    - Admin or developer role
+    - Access to target record types
+  
+
+---
+
+## Authentication
+
+NetSuite uses **Token-Based Authentication (TBA)** with OAuth 1.0:
+
+```
+Account ID: {account_id}
+Consumer Key: {consumer_key}
+Consumer Secret: {consumer_secret}
+Token ID: {token_id}
+Token Secret: {token_secret}
+```
+
+**Generate Credentials:**
+1. Enable TBA in NetSuite Features
+2. Create Integration Record → Get Consumer Key/Secret
+3. Generate Access Token → Get Token ID/Secret
+4. Note Account ID (found in Setup → Company Information)
+
+> **Security**: Token Secret shown ONCE during generation. Save immediately to secure location.
+
+---
+
+## Best Practices
+
+- ✅ Use dedicated integration role
+- ✅ Test SuiteScripts in sandbox account
+- ✅ Monitor SuiteTalk API usage
+- ✅ Handle NetSuite's complex data model carefully
+- ✅ Document SuiteScript logic thoroughly
+
+---
+
+## Limitations
+
+- SOAP-based API (more complex than REST)
+- Token rotation required periodically
+- SuiteScript deployment requires technical expertise
+- Sublist/line item mapping can be complex
+
+---

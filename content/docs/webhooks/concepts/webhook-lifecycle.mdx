@@ -1,0 +1,578 @@
+---
+title: Webhook Lifecycle
+description: Understanding webhook states (active, inactive, archived), transitions, history tracking, and change auditing.
+---
+
+## Webhook States
+
+```mermaid
+stateDiagram-v2
+    [*] --> active: Create (default)
+    [*] --> inactive: Create (paused)
+    active --> inactive: Pause deliveries
+    inactive --> active: Resume deliveries
+    active --> archived: Deactivate
+    inactive --> archived: Deactivate
+    archived --> [*]: Permanent (read-only)
+    
+    note right of active
+        Receiving notifications
+        Events queued & delivered
+    end note
+    
+    note right of inactive
+        Paused temporarily
+        Events not delivered
+    end note
+    
+    note right of archived
+        Permanently deactivated
+        Cannot be reactivated
+    end note
+```
+
+---
+
+## Active State
+
+**Definition**: Webhook is fully operational and receiving event notifications.
+
+### Characteristics
+
+- ✅ Events are queued for delivery
+- ✅ Delivery attempts made according to retry policy
+- ✅ Delivery logs generated
+- ✅ Can be modified (events, URL, etc.)
+- ✅ Can transition to inactive or archived
+
+### When to Use
+
+- **Production webhooks**: Actively processing events
+- **Monitoring**: Need real-time updates
+- **Integration running**: System operational
+
+### Creating Active Webhook
+
+<Tabs items={["API", "Web UI"]}>
+  <Tab value="API">
+    ```bash
+    curl -X POST https://api-sandbox.fndev.net/api/v1/webhooks \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://your-endpoint.com/webhooks",
+        "method": "post",
+        "status": "active",
+        "events": ["workorder.status.published"]
+      }'
+    ```
+  </Tab>
+  <Tab value="Web UI">
+    1. Navigate to [Webhooks Dashboard](https://ui-sandbox.fndev.net/integrations/webhooks)
+    2. Click "Create New"
+    3. Fill in configuration
+    4. Set **Status** to "Active"
+    5. Click "Create"
+  </Tab>
+</Tabs>
+
+---
+
+## Inactive State
+
+**Definition**: Webhook is temporarily paused and not receiving events.
+
+### Characteristics
+
+- ❌ Events are **not** queued or delivered
+- ❌ No delivery attempts made
+- ✅ Configuration preserved
+- ✅ Historical delivery logs remain accessible
+- ✅ Can be modified
+- ✅ Can transition to active or archived
+
+### When to Use
+
+- **Maintenance**: Endpoint undergoing updates
+- **Temporary issues**: Fixing integration problems
+- **Testing**: Paused during development
+- **Rate limiting**: Temporarily reduce load
+
+### Common Use Cases
+
+#### Maintenance Window
+
+```javascript
+// Pause webhook during deployment
+await fetch('https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123', {
+  method: 'PUT',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ status: 'inactive' })
+});
+
+// Perform deployment...
+
+// Reactivate after deployment
+await fetch('https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123', {
+  method: 'PUT',
+  headers: {
+    'Authorization': `Bearer ${accessToken}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ status: 'active' })
+});
+```
+
+#### Incident Response
+
+```bash
+# Quickly pause webhook during incident
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "inactive"}'
+```
+
+### Pausing vs Deleting
+
+<Callout type="info">
+**Best Practice**: Use `inactive` for temporary pauses instead of deleting and recreating. This preserves:
+- Webhook ID and secret
+- Delivery history
+- Configuration settings
+- Change history
+</Callout>
+
+---
+
+## Archived State
+
+**Definition**: Webhook is permanently deactivated and read-only.
+
+### Characteristics
+
+- ❌ Events are **not** delivered
+- ❌ Cannot be reactivated (permanent)
+- ❌ Cannot be modified
+- ✅ Configuration visible (read-only)
+- ✅ Historical delivery logs preserved
+- ✅ Appears in webhook list with "archived" badge
+
+### When to Use
+
+- **Decommissioned integrations**: Project ended
+- **Replaced webhooks**: New version created
+- **Historical record**: Keep audit trail
+- **Cleanup**: Organize active webhooks
+
+### Archiving a Webhook
+
+<Tabs items={["API", "Web UI"]}>
+  <Tab value="API">
+    ```bash
+    curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "status": "archived"
+      }'
+    ```
+    
+    <Callout type="warn">
+    **Irreversible**: Once archived, a webhook cannot be reactivated. Create a new webhook if needed.
+    </Callout>
+  </Tab>
+  <Tab value="Web UI">
+    1. Navigate to webhook details
+    2. Click "Settings"
+    3. Change **Status** to "Archived"
+    4. Confirm action
+    
+    <Callout type="warn">
+    **Irreversible**: Cannot undo archival. Consider using "Inactive" for temporary pauses.
+    </Callout>
+  </Tab>
+</Tabs>
+
+### Archive vs Delete
+
+| Action | Configuration | Delivery Logs | Reversible |
+|--------|--------------|---------------|------------|
+| **Archive** | Preserved (read-only) | Preserved | No |
+| **Delete** | Removed | Preserved | No |
+
+<Callout type="info">
+**Recommendation**: Archive webhooks instead of deleting to maintain audit trails.
+</Callout>
+
+---
+
+## State Transitions
+
+### Valid Transitions
+
+```plaintext
+active ⟷ inactive    ✅ Bidirectional
+active → archived    ✅ One-way
+inactive → archived  ✅ One-way
+archived → active    ❌ Not allowed
+archived → inactive  ❌ Not allowed
+```
+
+### Transition API
+
+```bash
+# Active → Inactive
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "inactive"}'
+
+# Inactive → Active
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "active"}'
+
+# Any → Archived (permanent)
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "archived"}'
+```
+
+---
+
+## Automatic State Changes
+
+Field Nation may automatically change webhook state under certain conditions:
+
+### Auto-Deactivation
+
+**Trigger**: 7 consecutive days of failed deliveries
+
+**Action**: `active` → `inactive`
+
+**Notification**: Email sent to `notificationEmail` (if configured)
+
+**Reason**: Prevent infinite retry loops on broken endpoints
+
+**Recovery**:
+
+```bash
+# Fix endpoint issues first, then reactivate
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "active"}'
+```
+
+<Callout type="warn">
+**Important**: Fix underlying issues before reactivating. Repeated auto-deactivations may result in webhook being permanently archived.
+</Callout>
+
+---
+
+## Change History & Audit Trail
+
+Every webhook modification is tracked in a comprehensive change history.
+
+### Tracked Changes
+
+- Status transitions (active ⟷ inactive, → archived)
+- URL modifications
+- Event subscriptions (added/removed)
+- HTTP method changes
+- Secret regeneration
+- Custom header updates
+- Notification email changes
+
+### Accessing Change History
+
+#### Via API
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/history" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T11:00:00Z",
+    "count": 5,
+    "total": 5
+  },
+  "result": [
+    {
+      "id": 123,
+      "userId": 456,
+      "action": "status_changed",
+      "changes": {
+        "status": {
+          "from": "active",
+          "to": "inactive"
+        }
+      },
+      "createdAt": "2025-01-15T10:45:00Z",
+      "updatedAt": "2025-01-15T10:45:00Z"
+    },
+    {
+      "id": 122,
+      "userId": 456,
+      "action": "events_updated",
+      "changes": {
+        "events": {
+          "added": ["workorder.status.approved"],
+          "removed": ["workorder.status.draft"]
+        }
+      },
+      "createdAt": "2025-01-15T09:30:00Z",
+      "updatedAt": "2025-01-15T09:30:00Z"
+    },
+    {
+      "id": 121,
+      "userId": 456,
+      "action": "url_changed",
+      "changes": {
+        "url": {
+          "from": "https://old-endpoint.com/webhook",
+          "to": "https://new-endpoint.com/webhooks"
+        }
+      },
+      "createdAt": "2025-01-14T15:20:00Z",
+      "updatedAt": "2025-01-14T15:20:00Z"
+    }
+  ]
+}
+```
+
+#### Via Web UI
+
+1. Navigate to [Webhooks Dashboard](https://ui-sandbox.fndev.net/integrations/webhooks)
+2. Click on webhook
+3. Go to "History" tab
+4. View chronological list of changes
+
+![Webhook Change History](/docs/webhook-v3/webhook-update-history.png)
+
+### Filter History
+
+```bash
+# Filter by user
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/history?userId=456" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Filter by action
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/history?search=status_changed" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+---
+
+## Lifecycle Management Best Practices
+
+### Use Descriptive Notification Emails
+
+Configure an email to receive alerts:
+
+```json
+{
+  "notificationEmail": "webhook-alerts+production@example.com"
+}
+```
+
+Benefits:
+- Receive auto-deactivation warnings
+- Track delivery failures
+- Monitor webhook health
+
+### Tag Webhooks for Organization
+
+Use naming conventions or custom headers to identify webhooks:
+
+```javascript
+// Create webhook with identifier in URL or custom headers
+{
+  "url": "https://your-endpoint.com/webhooks/production",
+  "webhookAttribute": {
+    "header": {
+      "X-Webhook-Environment": "production",
+      "X-Webhook-Owner": "team-integrations"
+    }
+  }
+}
+```
+
+### Monitor State Changes
+
+Track webhook state changes in your monitoring system:
+
+```javascript
+async function checkWebhookHealth() {
+  const webhooks = await fetch(
+    'https://api-sandbox.fndev.net/api/v1/webhooks',
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  ).then(r => r.json());
+  
+  const inactive = webhooks.result.filter(w => w.status === 'inactive');
+  
+  if (inactive.length > 0) {
+    await alertTeam(`${inactive.length} webhooks are inactive`, inactive);
+  }
+}
+```
+
+### Implement Graceful Deprecation
+
+When replacing webhooks:
+
+<Steps>
+
+### Create New Webhook
+
+Create the new webhook with updated configuration:
+
+```bash
+curl -X POST https://api-sandbox.fndev.net/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://new-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "events": ["workorder.status.published"]
+  }'
+```
+
+### Test New Webhook
+
+Verify new webhook works correctly before deactivating old one.
+
+### Pause Old Webhook
+
+Set old webhook to `inactive`:
+
+```bash
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_old123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "inactive"}'
+```
+
+### Monitor for Issues
+
+Watch for missing events or processing errors.
+
+### Archive Old Webhook
+
+Once confident, archive the old webhook:
+
+```bash
+curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_old123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "archived"}'
+```
+
+</Steps>
+
+---
+
+## Viewing Webhook Status
+
+### List Webhooks by Status
+
+<Tabs items={["Active Only", "Inactive Only", "Archived Only", "All States"]}>
+  <Tab value="Active Only">
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?status=active" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+  <Tab value="Inactive Only">
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?status=inactive" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+  <Tab value="Archived Only">
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?status=archived" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+  <Tab value="All States">
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+</Tabs>
+
+### Get Specific Webhook Status
+
+```bash
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T11:00:00Z"
+  },
+  "result": {
+    "id": 123,
+    "webhookId": "wh_abc123",
+    "url": "https://your-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "events": ["workorder.status.published", "workorder.status.assigned"],
+    "createdAt": "2025-01-10T10:00:00Z",
+    "updatedAt": "2025-01-15T10:45:00Z"
+  }
+}
+```
+
+---
+
+## Lifecycle Event Flow
+
+```mermaid
+graph TD
+    A[Create Webhook] -->|Default| B[Active]
+    A -->|Specify inactive| C[Inactive]
+    
+    B -->|Process Events| D[Event Occurs]
+    D -->|Queue & Deliver| E[Delivery Attempt]
+    
+    E -->|Success| F[Log Success]
+    E -->|Failure| G{7 Days Failed?}
+    
+    G -->|Yes| H[Auto-Deactivate to Inactive]
+    G -->|No| I[Retry with Backoff]
+    
+    B -->|Manual Pause| C
+    C -->|Manual Reactivate| B
+    
+    B -->|Permanent Deactivate| J[Archived]
+    C -->|Permanent Deactivate| J
+    
+    J -->|Read-Only| K[Historical Record]
+    
+    style B fill:#90EE90
+    style C fill:#FFD700
+    style J fill:#D3D3D3
+```
+
+---

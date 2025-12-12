@@ -1,0 +1,6 @@
+{
+  "title": "ConnectWise",
+  "description": "Integrate Field Nation with ConnectWise Manage",
+  "icon": "Network",
+  "pages": ["overview", "configuration", "workflow"]
+}

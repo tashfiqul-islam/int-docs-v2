@@ -1,0 +1,19 @@
+{
+  "title": "Webhooks",
+  "description": "Real-time event notifications",
+  "icon": "Webhook",
+  "root": true,
+  "defaultOpen": true,
+  "pages": [
+    "introduction",
+    "quickstart",
+    "api-playground",
+    "---Documentation---",
+    "concepts",
+    "guides",
+    "api-reference",
+    "---Support---",
+    "troubleshooting",
+    "migration"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Guides",
+  "description": "Step-by-step guides for implementing and managing webhooks",
+  "icon": "BookOpen",
+  "pages": [
+    "creating-webhooks",
+    "security",
+    "---Implementation---",
+    "handling-events",
+    "monitoring",
+    "testing"
+  ]
+}

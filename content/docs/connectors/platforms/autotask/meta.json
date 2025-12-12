@@ -1,0 +1,6 @@
+{
+  "title": "Autotask",
+  "description": "Sync Field Nation with Datto Autotask PSA",
+  "icon": "Briefcase",
+  "pages": ["overview", "configuration", "workflow"]
+}

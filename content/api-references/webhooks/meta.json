@@ -1,0 +1,15 @@
+{
+  "title": "Webhooks",
+  "description": "Real-time event notifications",
+  "icon": "Webhook",
+  "root": true,
+  "defaultOpen": true,
+  "pages": [
+    "v3/index",
+    "v3/core-operations",
+    "v3/events",
+    "v3/delivery-logs",
+    "v3/history",
+    "v3/attributes"
+  ]
+}

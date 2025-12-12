@@ -1,0 +1,10 @@
+{
+  "title": "Field Nation Integration",
+  "pages": [
+    "getting-started",
+    "rest-api",
+    "webhooks",
+    "connectors",
+    "resources"
+  ]
+}

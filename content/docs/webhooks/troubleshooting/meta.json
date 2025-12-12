@@ -1,0 +1,6 @@
+{
+  "title": "Troubleshooting",
+  "description": "Common issues and debugging techniques for webhooks",
+  "icon": "Bug",
+  "pages": ["common-issues", "delivery-failures", "debugging"]
+}

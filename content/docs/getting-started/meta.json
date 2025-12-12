@@ -1,0 +1,14 @@
+{
+  "title": "Getting Started",
+  "description": "Integration Core Framwork",
+  "icon": "Rocket",
+  "root": true,
+  "defaultOpen": true,
+  "pages": [
+    "introduction",
+    "prerequisites",
+    "choosing-your-approach",
+    "platform-overview",
+    "key-concepts"
+  ]
+}

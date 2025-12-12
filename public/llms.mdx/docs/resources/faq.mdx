@@ -1,0 +1,437 @@
+# Resources: undefined
+URL: /docs/resources/faq
+Source: content/docs/resources/faq.mdx
+
+
+
+---
+title: Frequently Asked Questions
+description: Quick answers to common questions about Field Nation Integration including getting started, features, webhooks, and support.
+icon: CircleQuestionMark
+---
+
+## Getting Started & Account Setup
+
+### What do I need to get started with Field Nation integrations?
+
+To begin integrating with Field Nation, you need:
+
+1. **Active Buyer Account** - You must have an active buyer account in the Field Nation platform. Service companies and providers do not have access to API/integration features.
+2. **Integration Contract** - Contact your Sales representative to discuss integration needs and establish an integration contract.
+3. **Sandbox Access** - Request sandbox environment access for development and testing.
+4. **API Credentials** - Obtain `client_id` and `client_secret` for authentication.
+
+[Quickstart Guide →](/docs/getting-started/introduction)
+
+---
+
+### How do I get access to the Sandbox environment?
+
+The Field Nation Sandbox environment is available at:
+
+- **UI**: [https://app-sandbox.fndev.net/](https://app-sandbox.fndev.net/)
+- **API**: [https://api-sandbox.fndev.net/](https://api-sandbox.fndev.net/)
+
+To request sandbox access:
+
+1. Submit a [support case](https://app.fieldnation.com/support-cases) with:
+   - Environment: Sandbox
+   - Company ID
+   - Company Name
+   - Integration requirements
+2. Our integration program management team will review and provision your account
+3. You'll receive access credentials to begin development
+
+[Learn more about environments →](/docs/resources/environments)
+
+---
+
+### How do I find my Company ID?
+
+Your Company ID is a numerical identifier required for API authentication and support requests. To locate it:
+
+1. Log in to the [Field Nation Platform](https://app.fieldnation.com/)
+2. Click your user icon in the top right corner
+3. Select **Company Settings** from the dropdown menu
+4. Click **Company Profile**
+5. Your Company ID appears in the URL (e.g., `/company/profile/999` where `999` is your Company ID)
+
+[Prerequisites guide →](/docs/getting-started/prerequisites)
+
+---
+
+### How do I obtain API credentials (client_id and client_secret)?
+
+To request API credentials for Sandbox or Production environments:
+
+1. Submit a [support case](https://app.fieldnation.com/support-cases) with:
+   - **Environment URL**: Specify Sandbox or Production
+   - **Company ID**: Your Field Nation Company ID
+   - **Company Name**: Your organization's name
+   - **Integration Type**: REST API, Webhooks, or Connectors
+2. Our integration team will review and provide credentials
+3. Store credentials securely and never commit to version control
+
+**Security Best Practice**: Use environment variables or secure credential management systems to store API credentials.
+
+[Support resources →](/docs/resources/support)
+
+---
+
+### Can service companies or providers access the API?
+
+No. Currently, Field Nation only provides API and integration access to **buyers** (companies that post work orders). Service companies and providers do not have access to API credentials or integration features.
+
+If you're a service company interested in integration capabilities, please contact your Field Nation representative to discuss available options.
+
+## Integration Architecture & Options
+
+### What integration options does Field Nation offer?
+
+Field Nation provides three primary integration approaches:
+
+1. **Pre-built Connectors** - Out-of-the-box integrations with popular field service management platforms (Salesforce, ServiceNow, Autotask, ConnectWise, etc.). Minimal code required, configured through UI.
+
+2. **REST API** - Direct API integration for pushing work order data to Field Nation. Use for custom integrations or when a pre-built connector isn't available.
+
+3. **Webhooks** - Subscribe to work order events and status changes to receive real-time updates from Field Nation. Use webhooks to pull data and maintain synchronization.
+
+Most successful integrations use a combination: REST API for pushing data and Webhooks for receiving updates.
+
+[Choosing Your Approach →](/docs/getting-started/choosing-your-approach)
+
+---
+
+### What's the difference between code-based and connector integrations?
+
+**Code-Based Integration (REST API + Webhooks):**
+- Maximum flexibility and customization
+- Requires coding, API knowledge, error handling logic
+- Best for custom workflows, unique data transformations
+- Your team maintains code, monitors APIs
+
+**Connector Integration (Pre-built):**
+- Configuration-driven, less code (or no code for out-of-the-box)
+- Standardized sync with popular platforms (CRM, ERP, PSA)
+- Field Nation manages connector updates, API changes, retry logic
+- Best for standard workflows, quick deployment
+
+[Platform Overview →](/docs/getting-started/platform-overview)
+
+---
+
+### Which platforms are supported by out-of-the-box connectors?
+
+Field Nation provides pre-built connectors for:
+
+- **Autotask** - Datto Autotask PSA integration
+- **ConnectWise** - ConnectWise Manage integration
+- **Freshdesk** - Freshdesk ticketing system
+- **NetSuite** - NetSuite ERP integration
+- **Quickbase** - Quickbase application integration
+- **Salesforce** - Salesforce Service Cloud integration
+- **ServiceNow** - ServiceNow ITSM integration
+- **Smartsheet** - Smartsheet project management integration
+- **Zendesk** - Zendesk Support integration
+
+Each connector includes configuration guides, workflow documentation, and troubleshooting resources.
+
+---
+
+### Can I sync custom fields between systems?
+
+Yes. Most out-of-the-box integrations support custom field synchronization. To sync custom fields:
+
+1. **Create Corresponding Fields** - Ensure custom fields exist in both Field Nation and your external system with compatible data types
+2. **Configure Field Mappings** - Map the custom fields in the Integration Broker configuration
+3. **Verify Permissions** - Ensure the integration API user has access to read/write custom fields
+4. **Handle Data Types** - Use appropriate data type conversions if needed
+
+Some platforms require additional configuration. Refer to your specific connector documentation for platform-specific requirements.
+
+---
+
+### Should I use templates and projects in Field Nation?
+
+Yes. Using templates and projects is strongly recommended:
+
+**Benefits:**
+- **Reduced API Payload Size** - Reference templates instead of sending all work order details
+- **Consistency** - Standardized information across work orders
+- **Efficiency** - Faster work order creation with pre-configured data
+
+**What Templates Include:**
+- Tasks for providers (Check In, Check Out, Photo requirements)
+- Custom fields for buyers and providers
+- Attachments included with work orders
+- Consistent Scope of Work (SOW) formatting
+- Contact information
+
+**Best Practice**: Set up templates in Field Nation before building your integration. This minimizes the data you need to send through the API for each work order.
+
+## REST API & Webhooks
+
+### What data can I push and pull through the APIs?
+
+**Push to Field Nation (REST API):**
+- Create and update work orders
+- Manage work order assignments
+- Update work order statuses
+- Submit deliverables and close-out information
+
+**Pull from Field Nation (Webhooks):**
+- Work order status changes (33 events)
+- Assignment updates
+- Provider responses and requests
+- Task completions
+- Deliverable uploads
+- Payment and approval events
+
+**Recommended Approach:**
+- Use **REST API** for pushing data to Field Nation
+- Use **Webhooks** for pulling data and receiving real-time updates
+
+[Webhooks documentation →](/docs/webhooks/introduction)
+
+---
+
+### What data do I receive in webhook payloads?
+
+Webhook payloads include the **complete work order model**, not just snippets. When you subscribe to work order events, you receive:
+
+- Full work order details (ID, title, description, location, schedule)
+- Assignment information (provider details, status, pay rates)
+- Task information (completed tasks, pending tasks)
+- Custom field values
+- Deliverables and attachments
+- Status history and timestamps
+
+The payload structure matches the REST API v2 work order model.
+
+[Payload Structure →](/docs/webhooks/concepts/payload-structure)
+
+---
+
+### How do I test webhooks during development?
+
+To test webhooks in a local development environment:
+
+1. **Use a Tunnel Service:**
+   - [ngrok](https://ngrok.com/) - Expose local servers to the internet
+   - [localtunnel](https://localtunnel.github.io/www/) - Alternative tunnel service
+   - Configure your webhook endpoint URL to point to the tunnel
+
+2. **Set Up Your Endpoint:**
+   - Ensure endpoint receives HTTP POST requests
+   - Log all incoming requests for debugging
+   - Return appropriate HTTP status codes (200-299 for success)
+
+3. **Test in Sandbox:**
+   - Configure webhooks in [Sandbox environment](https://ui-sandbox.fndev.net/integrations/webhooks)
+   - Trigger test events in Field Nation
+   - Verify payloads are received correctly
+
+4. **Monitor Delivery Logs:**
+   - Check webhook delivery logs in the Field Nation dashboard
+   - Review any error responses from your endpoint
+   - Verify retry behavior for failed deliveries
+
+[Testing Guide →](/docs/webhooks/guides/testing)
+
+---
+
+### How are timestamps handled in the API?
+
+Timestamps are sent as **UTC with timezone offsets**. The format follows ISO 8601 standards with offset information.
+
+**Example:**
+- `2012-12-05T17:00+05:00` (UTC+5)
+- `2012-12-05T18:00+06:00` (UTC+6)
+
+Both represent the same absolute time when converted to UTC (`2012-12-06T00:00+00:00`).
+
+**Key Points:**
+- Timestamps are universal and timezone-aware
+- The offset indicates the timezone of the event
+- Conversion to UTC is straightforward using the offset
+- The timezone may vary based on the event location and type
+
+---
+
+### Can I assign work orders directly from my system?
+
+Yes, but with important considerations:
+
+**Technical Capability:**
+- The API supports direct work order assignment
+- You can assign providers to work orders programmatically
+
+**Best Practice Recommendations:**
+- Field Nation's platform includes sophisticated provider vetting tools (selection rules, recommended providers, performance metrics) that aren't available via API
+- Most successful integrations focus on work order creation and status synchronization rather than automated assignment
+- If assigning directly, build trusted preferred provider groups based on historical performance
+
+**Important Note**: Unless you're a W2 provider, direct assignment bypasses Field Nation's marketplace matching algorithms.
+
+## Field Service Connectors
+
+### What is the Integration Broker and how does it work?
+
+The Integration Broker is Field Nation's middleware system that manages bidirectional data synchronization between Field Nation and third-party platforms. It handles:
+
+- **Authentication** - Manages API credentials and OAuth tokens for external systems
+- **Field Discovery** - Automatically reads field metadata from connected platforms
+- **Data Transformation** - Translates data schemas between systems using configurable mappings
+- **Message Queuing** - Ensures reliable message delivery with retry mechanisms
+- **Error Handling** - Logs errors, retries failed operations, and maintains error states
+
+The broker operates as a message-driven architecture, processing inbound (external system → Field Nation) and outbound (Field Nation → external system) data flows.
+
+---
+
+### How do I customize field mappings in out-of-the-box integrations?
+
+Field mappings can be customized using several approaches:
+
+1. **Standard Mapping Actions:**
+   - **Sync** - Direct field-to-field mapping
+   - **Set Static** - Assign constant values
+   - **Array Map** - Transform array data
+   - **Range Map** - Map value ranges
+   - **Date Convert** - Transform date formats
+   - **Concat** - Combine multiple fields
+
+2. **Custom Actions with JSONNET:**
+   - Write JSONNET scripts for complex transformation logic
+   - Implement conditional logic (if-then-else)
+   - Access utility functions for common operations
+   - Handle nested data structures
+
+3. **Conditional Logic:**
+   - Use custom actions to implement business rules
+   - Populate fields based on data conditions
+   - Apply different mappings based on work order properties
+
+---
+
+### What happens if my integration encounters an error?
+
+The Integration Broker includes comprehensive error handling:
+
+1. **Automatic Retry** - Failed operations automatically retry with exponential backoff to handle temporary network issues or rate limits
+2. **Error Logging** - Detailed error information is logged with context for troubleshooting
+3. **Alerts** - Configure email notifications for integration errors
+4. **Dead Letter Queue** - Operations that exceed maximum retry attempts are held for manual review
+
+The system prevents duplicate processing while ensuring data isn't lost during temporary failures.
+
+---
+
+### My out-of-the-box integration stopped syncing. What should I check first?
+
+When an integration stops syncing, check these common issues in order:
+
+1. **Authentication** - Verify API credentials are still valid. Expired tokens, changed passwords, or revoked API keys are the most common causes.
+2. **Webhooks** - Confirm webhooks are still configured correctly in the external system and haven't been disabled or modified.
+3. **Permissions** - Ensure the integration user still has appropriate permissions in both systems. Role changes or permission updates can break integrations.
+4. **Rate Limits** - Check if you've exceeded API rate limits in either platform.
+5. **Network Connectivity** - Verify network connectivity between systems and check firewall rules.
+
+[Troubleshooting Guide →](/docs/webhooks/troubleshooting/common-issues)
+
+## Support & Resources
+
+### Who should I contact for integration help?
+
+**For Integration-Specific Questions:**
+- **Support Cases**: Submit a [support case](https://app.fieldnation.com/support-cases) for technical issues or credential requests
+- **Phone Support**: Call +1 877-573-4353 for urgent issues
+
+**For Platform Usage:**
+- **General Support**: [Field Nation Support Portal](https://app.fieldnation.com/support-cases) for platform features and usage questions
+
+**System Status:**
+- **Status Page**: [status.fieldnation.com](https://status.fieldnation.com) for current system health
+
+[Support Resources →](/docs/resources/support)
+
+---
+
+### What information should I include when requesting support?
+
+When submitting a support case, include:
+
+1. **Environment** - Specify Sandbox or Production
+2. **Company ID** - Your Field Nation Company ID
+3. **Integration Type** - REST API, Webhooks, or specific connector name
+4. **Error Details** - Error messages, timestamps, and relevant logs
+5. **Steps to Reproduce** - Clear description of what you were doing when the issue occurred
+6. **Expected vs. Actual Behavior** - What you expected to happen vs. what actually happened
+
+Providing complete information helps our support team resolve issues faster.
+
+[Support Templates →](/docs/resources/support)
+
+---
+
+### Where can I find detailed technical documentation?
+
+Comprehensive technical documentation is available:
+
+**Getting Started:**
+- [Introduction](/docs/getting-started/introduction) - Overview and quickstart
+- [Prerequisites](/docs/getting-started/prerequisites) - What you need to begin
+- [Choosing Your Approach](/docs/getting-started/choosing-your-approach) - Select integration method
+
+**Webhooks:**
+- [Introduction](/docs/webhooks/introduction) - Overview and features
+- [Quickstart](/docs/webhooks/quickstart) - 15-minute setup guide
+- [API Reference](/docs/webhooks/api-reference/overview) - Complete API documentation
+
+**Resources:**
+- [Glossary](/docs/resources/glossary) - Platform terminology
+- [Error Codes](/docs/resources/error-codes) - Common errors and solutions
+- [Environments](/docs/resources/environments) - Sandbox vs Production
+
+---
+
+### What should I build first when starting an integration?
+
+Follow this recommended order:
+
+1. **Check for Out-of-the-Box Solutions** - Review available connectors to see if a pre-built solution exists for your platform
+2. **Evaluate Integration Approach** - If a connector exists, use it. If not, plan a custom solution using REST API and Webhooks
+3. **Set Up Sandbox** - Request and configure sandbox access for development and testing
+4. **Start with Core Functionality** - Begin with work order creation and status synchronization before adding advanced features
+5. **Test Thoroughly** - Test in sandbox before moving to production
+
+[Getting Started →](/docs/getting-started/introduction)
+
+---
+
+## Still Have Questions?
+
+### Additional Resources
+
+  
+    Submit a support case or call us
+  
+  
+    Understand platform terminology
+  
+  
+    Common errors and solutions
+  
+  
+    Check system status
+  
+
+---
+
+### Quick Links
+
+- **Submit Support Case**: [app.fieldnation.com/support-cases](https://app.fieldnation.com/support-cases)
+- **Phone Support**: +1 877-573-4353
+- **Status Page**: [status.fieldnation.com](https://status.fieldnation.com)
+- **Sandbox UI**: [app-sandbox.fndev.net](https://app-sandbox.fndev.net)
+- **Sandbox API**: [api-sandbox.fndev.net](https://api-sandbox.fndev.net)

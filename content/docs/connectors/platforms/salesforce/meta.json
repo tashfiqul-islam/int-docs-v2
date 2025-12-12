@@ -1,0 +1,6 @@
+{
+  "title": "Salesforce",
+  "description": "Integrate Field Nation with Salesforce Service Cloud",
+  "icon": "Cloud",
+  "pages": ["overview", "configuration", "workflow"]
+}

@@ -1,0 +1,14 @@
+{
+  "title": "Concepts",
+  "description": "Core concepts and architecture for Field Nation connectors",
+  "icon": "Brain",
+  "pages": [
+    "broker-architecture",
+    "---Configuration---",
+    "field-mappings",
+    "custom-actions",
+    "events-and-sync",
+    "---Troubleshooting---",
+    "troubleshooting"
+  ]
+}

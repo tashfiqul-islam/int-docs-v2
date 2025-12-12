@@ -1,0 +1,1543 @@
+openapi: 3.1.0
+paths:
+  /api/v1/webhooks/events:
+    get:
+      description: |-
+        List all available webhook events that you can subscribe to, with basic details about each event.
+        Use the optional `model` query parameter to filter events for a specific model type (for example, `WorkOrder` or `Provider`).
+      operationId: ServerController_getWebhookEvents_v1
+      parameters:
+        - name: model
+          required: false
+          in: query
+          description: Specify the model for filtering events
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the list of available webhook events with their names, labels, descriptions, and associated models.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: List Webhook Events
+      tags:
+        - webhooks.events
+  /api/v1/webhooks:
+    get:
+      description: |-
+        Retrieve a paginated list of webhooks configured for your company, with filters for status, search, sorting, and selected fields.
+        Use this endpoint to quickly review and manage existing webhook configurations.
+      operationId: ServerController_getAllWebhookList_v1
+      parameters:
+        - name: sortDirection
+          required: false
+          in: query
+          description: Sort direction for the results. Use 'ASC' for ascending order or 'DESC' for descending order. Default is 'DESC'.
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Field name to sort results by. Valid values are 'id', 'webhookId', 'updatedAt', or 'createdAt'. Default is 'id'.
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number for pagination. Starts at 1. Default is 1.
+          schema:
+            type: number
+        - name: perPage
+          required: false
+          in: query
+          description: Number of items to return per page. Default is 25 items. Maximum value varies by endpoint.
+          schema:
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search query string to filter results. Supports searching across relevant fields such as webhook ID, event names, or other searchable attributes.
+          schema:
+            type: string
+        - name: fields
+          required: false
+          in: query
+          description: Comma-separated list of field names to include in the response. Only specified fields will be returned, reducing response size. Default includes all standard webhook fields.
+          schema:
+            default: id,webhookId,companyId,userId,events,url,method,status,secret,notificationEmail,modelProperties,isIntegrationOnly,createdAt,updatedAt
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Filter webhooks by their current status. Valid values are 'active' (receiving notifications), 'inactive' (paused), or 'archived' (deactivated).
+          schema:
+            enum:
+              - active
+              - inactive
+              - archived
+            type: string
+        - name: webhookId
+          required: false
+          in: query
+          description: Unique identifier of the webhook to filter by. Use this to find a specific webhook or filter delivery logs by webhook.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the paginated list of webhooks with metadata including total count and pagination information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhooksResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: List Webhooks
+      tags:
+        - webhooks.core-operations
+    post:
+      description: |-
+        Create a new webhook configuration for your company by providing the target URL, HTTP method, subscribed events, and status.
+        After creation, the webhook receives notifications for the selected events and is assigned a unique `webhookId` for future operations.
+      operationId: ServerController_createWebhook_v1
+      parameters: []
+      requestBody:
+        required: true
+        description: Webhook configuration details including endpoint URL, HTTP method, events to subscribe to, status, and optional settings like secret and notification email.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhook'
+      responses:
+        '200':
+          description: Webhook successfully created. Returns the complete webhook configuration including the assigned webhookId and all settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookInfoResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: Create Webhook
+      tags:
+        - webhooks.core-operations
+  /api/v1/webhooks/delivery-logs:
+    get:
+      description: |-
+        Retrieve a paginated list of webhook delivery attempts, including successful deliveries, failures, and retries.
+        Filter results by webhook ID, work order ID, event name, or delivery status to monitor reliability and troubleshoot issues.
+      operationId: ServerController_getAllDeliveryLogsList_v1
+      parameters:
+        - name: sortDirection
+          required: false
+          in: query
+          description: Sort direction for the results. Use 'ASC' for ascending order or 'DESC' for descending order. Default is 'DESC'.
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: 'Sort by fields is: deliveryId, webhookId, workOrderId, eventName, deliveryStatus, createdAt, default sort by is: createdAt'
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number for pagination. Starts at 1. Default is 1.
+          schema:
+            type: number
+        - name: perPage
+          required: false
+          in: query
+          description: Number of delivery log items to return per page. Default is 50 items. Maximum is 500 items per page.
+          schema:
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search query string to filter results. Supports searching across relevant fields such as webhook ID, event names, or other searchable attributes.
+          schema:
+            type: string
+        - name: fields
+          required: false
+          in: query
+          description: |-
+            Array of field names to include in the response. Only specified fields will be returned.
+            Default includes: deliveryId, webhookId, workOrderId, eventName, deliveryStatus, deliveryAttempt, createdAt.
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        - name: deliveryId
+          required: false
+          in: query
+          description: Unique identifier of a specific delivery attempt. Use this to filter delivery logs or retrieve details for a specific delivery.
+          schema:
+            type: string
+        - name: webhookId
+          required: false
+          in: query
+          description: Unique identifier of the webhook to filter by. Use this to find a specific webhook or filter delivery logs by webhook.
+          schema:
+            type: string
+        - name: workOrderId
+          required: false
+          in: query
+          description: Filter delivery logs by the associated work order identifier. Use this to see all webhook deliveries related to a specific work order.
+          schema:
+            type: number
+        - name: eventName
+          required: false
+          in: query
+          description: Filter delivery logs by the webhook event name (e.g., 'workorder.created', 'workorder.status.published'). Use this to see all deliveries for a specific event type.
+          schema:
+            type: string
+        - name: deliveryStatus
+          required: false
+          in: query
+          description: Filter delivery logs by HTTP status code returned from your endpoint. Use this to find failed deliveries (non-2xx status codes) or successful deliveries (2xx status codes).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the paginated list of delivery logs with metadata including total count, pagination information, and query parameters used.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryLogResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: List Delivery Logs
+      tags:
+        - webhooks.delivery-logs
+  /api/v1/webhooks/delivery-logs/{deliveryId}:
+    get:
+      description: |-
+        Retrieve detailed information about a single webhook delivery attempt, including status, timestamps, and a pre-signed URL to the full log file.
+        Use this endpoint to investigate why a specific delivery succeeded or failed.
+      operationId: ServerController_getDeliveryLogDetails_v1
+      parameters:
+        - name: deliveryId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved detailed information about the delivery attempt, including delivery status, attempt number, timestamps, and a pre-signed URL to access the complete delivery log file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryLogRetailsResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: Get Delivery Log Details
+      tags:
+        - webhooks.delivery-logs
+  /api/v1/webhooks/delivery-logs/{deliveryId}/retry:
+    patch:
+      description: |-
+        Retry a previously failed webhook delivery by its `deliveryId`, creating a new delivery job for the same payload.
+        Use this endpoint after fixing issues on your endpoint to reprocess specific events and track the retry by job ID.
+      operationId: ServerController_retryDeliveryLog_v1
+      parameters:
+        - name: deliveryId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Delivery retry job successfully created. Returns the new job ID that can be used to track the retry attempt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryLogRetryResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: Retry Delivery Log
+      tags:
+        - webhooks.delivery-logs
+  /api/v1/webhooks/{webhookId}:
+    get:
+      description: |-
+        Retrieve detailed information about a single webhook configuration, including subscribed events, status, and key settings.
+        Use `fields` and `webhookAttribute` query parameters to control which core fields and additional attributes are returned.
+      operationId: ServerController_getWebhookDetails_v1
+      parameters:
+        - name: webhookId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fields
+          required: false
+          in: query
+          description: |-
+            Comma-separated list of field names to include in the response. Only specified fields will be returned.
+            Default includes all standard webhook fields: id, webhookId, companyId, userId, events, url, method, status,
+            secret, notificationEmail, modelProperties, isIntegrationOnly, createdAt, updatedAt.
+          schema:
+            type: string
+        - name: webhookAttribute
+          required: false
+          in: query
+          description: Comma-separated list of webhook attribute types to include in the response. Valid values are 'legacy_field' (legacy field mappings) and 'header' (custom headers). Leave empty to exclude attributes.
+          schema:
+            default: ''
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the complete webhook configuration including all settings, subscribed events, status, and optional attributes if requested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookDetailsResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: Get Webhook Details
+      tags:
+        - webhooks.core-operations
+    put:
+      description: |-
+        Update an existing webhook configuration, such as the endpoint URL, HTTP method, subscribed events, status, or notification email.
+        Only the fields you include in the request body are changed; omitted fields keep their current values.
+      operationId: ServerController_updateWebhook_v1
+      parameters:
+        - name: webhookId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Updated webhook configuration. Only include fields that should be changed. Fields not included will remain unchanged.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhook'
+      responses:
+        '200':
+          description: Webhook successfully updated. Returns the complete updated webhook configuration with all current settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookInfoResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: Update Webhook
+      tags:
+        - webhooks.core-operations
+    delete:
+      description: |-
+        Permanently delete a webhook configuration so it no longer receives notifications.
+        Delivery logs and history remain available for auditing, but the webhook itself cannot be recovered.
+      operationId: ServerController_deleteWebhook_v1
+      parameters:
+        - name: webhookId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Webhook successfully deleted. Returns the deleted webhook configuration for confirmation. The webhook will no longer receive notifications.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookInfoResponse'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: Delete Webhook
+      tags:
+        - webhooks.core-operations
+  /api/v1/webhooks/{webhookId}/history:
+    get:
+      description: |-
+        Retrieve a paginated change history for a single webhook, including who made each change, what changed, and when it occurred.
+        Use this audit trail to track configuration updates and troubleshoot issues.
+      operationId: ServerController_getAllWebhookHistoryList_v1
+      parameters:
+        - name: webhookId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: sortDirection
+          required: false
+          in: query
+          description: Sort direction for the results. Use 'ASC' for ascending order or 'DESC' for descending order. Default is 'DESC'.
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: 'Sort by fields is: updatedAt, id, userId, action, default sort by is: id'
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number for pagination. Starts at 1. Default is 1.
+          schema:
+            type: number
+        - name: perPage
+          required: false
+          in: query
+          description: Number of items to return per page. Default is 25 items. Maximum value varies by endpoint.
+          schema:
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: 'Search by fields is: userId, action'
+          schema:
+            type: string
+        - name: fields
+          required: false
+          in: query
+          description: |-
+            Array of field names to include in the webhook history response. Only specified fields will be returned.
+            Default includes: id, userId, action, changes, createdAt, updatedAt.
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+        - name: userId
+          required: false
+          in: query
+          description: Filter webhook history by the user ID who made the change. Use this to see all modifications made by a specific user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved the paginated list of webhook change history with metadata including total count, pagination information, and all modification records.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryList'
+        '400':
+          description: 'Error: Bad Request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearer: []
+      summary: List Webhook History
+      tags:
+        - webhooks.history
+  /api/v1/webhooks/{webhookId}/{attributeType}/{attributeName}:
+    delete:
+      summary: Delete Webhook Attribute
+      description: |-
+        Remove a specific webhook attribute (for example, a custom header or legacy field mapping) by its type and name.
+        Use this endpoint to clean up attributes that are no longer needed on a webhook.
+      operationId: ServerController_deleteWebhookAttribute_v1
+      parameters:
+        - name: webhookId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: attributeType
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: attributeName
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Webhook attribute successfully removed. The specified attribute (header or legacy field mapping) has been deleted from the webhook configuration.
+      security:
+        - bearer: []
+      tags:
+        - webhooks.attributes
+info:
+  title: Field Nation Webhook API (v3)
+  description: |-
+    ## Overview
+
+    Field Nation Webhooks deliver real‑time updates about work order events and status changes to your HTTP endpoint. Instead of polling or waiting for batched processing, subscribe to relevant events and receive proactive notifications the moment changes occur in the Field Nation platform.
+
+    Webhooks enable you to build reactive integrations that respond immediately to work order lifecycle events, provider actions, and status transitions. This allows you to synchronize your systems, trigger automated workflows, and maintain real-time visibility into field service operations.
+
+    ## How it Works
+
+    1. **Register a Webhook**: Provide your HTTPS endpoint URL where you want to receive webhook notifications.
+    2. **Select Events**: Choose the specific events and/or status changes you want to subscribe to.
+    3. **Receive Notifications**: When a matching event occurs, Field Nation sends an HTTP POST or PUT request with the event payload to your endpoint.
+    4. **Monitor & Retry**: Use delivery logs to monitor delivery attempts, view detailed logs, and retry failed deliveries.
+
+    You can subscribe broadly (all events) or narrowly (a subset of events). All delivery attempts are logged in the system, allowing you to track the status of each webhook event and re-deliver them if necessary.
+
+    ## Available Events and Status Changes
+
+    Webhooks can be configured for the following events and status changes. Each event and status is associated with a particular action in the lifecycle of a work order.
+
+    ### Events
+
+    | Event | Description |
+    |-------|-------------|
+    | **Work Order created** | Triggered when a work order is created. |
+    | **Work Order routed** | Triggered when a work order is routed to a provider. |
+    | **Work Order task completed** | Triggered when a task on a work order is completed. |
+    | **Work Order task incomplete** | Triggered when a task on a work order is marked as incomplete. |
+    | **Work Order provider upload** | Triggered when a provider uploads a document to a work order. |
+    | **Work Order message posted** | Triggered when a message is posted or replied to on a work order. |
+    | **Work Order requested** | Triggered when a work order is requested. |
+    | **Work Order custom field value updated** | Triggered when a custom field value is updated on a work order. |
+    | **Work Order declined** | Triggered when a work order is declined by a provider. |
+    | **Work Order undeclined** | Triggered when a work order is undeclined by a provider. |
+    | **Work Order schedule updated** | Triggered when a schedule is updated on a work order. |
+    | **Work Order tag added** | Triggered when a tag is added to a work order. |
+    | **Work Order tag removed** | Triggered when a tag is removed from a work order. |
+
+    ### Status Changes
+
+    | Status Change | Description |
+    |---------------|-------------|
+    | **Work Order status draft** | Triggered when a work order status changes to draft. |
+    | **Work Order status routed** | Triggered when a work order status changes to routed. |
+    | **Work Order status published** | Triggered when a work order status changes to published. |
+    | **Work Order status confirmed** | Triggered when a work order status changes to confirmed. |
+    | **Work Order status assigned** | Triggered when a work order status changes to assigned. |
+    | **Work Order status assigned cancelled** | Triggered when a work order status changes to assigned cancelled. |
+    | **Work Order status at risk** | Triggered when a work order status changes to at risk. |
+    | **Work Order status delayed** | Triggered when a work order status changes to delayed. |
+    | **Work Order status on my way** | Triggered when a work order status changes to on my way. |
+    | **Work Order status checked in** | Triggered when a work order status changes to checked in. |
+    | **Work Order status checked out** | Triggered when a work order status changes to checked out. |
+    | **Work Order status work done** | Triggered when a work order status changes to work done. |
+    | **Work Order status approved** | Triggered when a work order status changes to approved. |
+    | **Work Order status paid** | Triggered when a work order status changes to paid. |
+    | **Work Order status cancelled** | Triggered when a work order status changes to cancelled. |
+    | **Work Order status deleted** | Triggered when a work order status changes to deleted. |
+    | **Work Order status postponed** | Triggered when a work order status changes to postponed. |
+    | **Work Order problem reported** | Triggered when a problem is reported or reopened on a work order. |
+    | **Work Order problem resolved** | Triggered when a problem is resolved on a work order. |
+
+    ## Authentication
+
+    The Webhook API is part of our Client API ecosystem. To authenticate:
+
+    1. Obtain an `access_token` using your `client_id` and `client_secret` via the [REST API Authentication endpoint](/docs/rest-api/v2/authentication).
+    2. Send the access token as a `Bearer` token in the `Authorization` header for all webhook API requests.
+
+    The access token is valid for a limited time and should be refreshed as needed.
+
+    ## Base URL
+
+    This API is available at:
+    - **Sandbox**: `https://api-sandbox.fndev.net` (for testing and development)
+    - **Production**: Contact Field Nation support for production API access
+
+    ## API Version
+
+    This specification documents **Webhook API v3.0**, which provides:
+    - Real-time event notifications for work order lifecycle events
+    - Comprehensive delivery logging and retry capabilities
+    - Webhook history and audit trail
+    - Flexible event and status change subscriptions
+    - Custom webhook attributes for advanced configurations
+
+    ## Getting Started
+
+    1. **Obtain Credentials**: Contact Field Nation to receive your API client credentials
+    2. **Authenticate**: Use the REST API Authentication endpoint to obtain an access token
+    3. **List Available Events**: Call the `/api/v1/webhooks/events` endpoint to see all available events
+    4. **Create a Webhook**: Register your endpoint URL and select the events you want to receive
+    5. **Test in Sandbox**: Use the sandbox environment to test your webhook integration before going live
+    6. **Monitor Deliveries**: Use delivery logs to monitor webhook delivery status and retry failed attempts
+
+    ## Best Practices
+
+    - **Use HTTPS**: Always use HTTPS endpoints for webhook delivery to ensure secure transmission
+    - **Implement Idempotency**: Handle duplicate webhook deliveries gracefully using event IDs
+    - **Respond Quickly**: Acknowledge webhook deliveries within 5 seconds to avoid timeouts
+    - **Monitor Delivery Logs**: Regularly check delivery logs to ensure successful delivery
+    - **Implement Retry Logic**: Use the retry endpoint for failed deliveries when appropriate
+    - **Validate Signatures**: Verify webhook signatures using the provided secret to ensure authenticity
+    - **Handle Errors Gracefully**: Implement proper error handling and logging for webhook processing
+
+    ## Webhook Delivery
+
+    When an event occurs, Field Nation will:
+    1. Send an HTTP POST or PUT request to your configured endpoint URL
+    2. Include the event payload in the request body
+    3. Include custom headers if configured
+    4. Log the delivery attempt in the delivery logs
+    5. Retry failed deliveries according to the retry policy
+
+    Your endpoint should respond with a 2xx status code to acknowledge successful receipt. Non-2xx responses will trigger retry attempts.
+
+    ---
+
+    ## Support & Resources
+
+    - **Documentation**: [Field Nation Developer Platform](https://developer.fieldnation.com)
+
+    - **API Playground**: [Swagger UI](https://ui-sandbox.fndev.net/integrations/webhooks/_api)
+
+    - **OpenAPI Spec**: [JSON Specification](https://ui-sandbox.fndev.net/integrations/webhooks/_api-json)
+
+    - **Support**: [Support Center](https://support.fieldnation.com)
+
+    - **Email**: integrations-engineering@fieldnation.com
+  version: '3.0'
+  contact: {}
+tags:
+  - name: webhooks.core-operations
+    x-displayName: Core Operations
+    description: Core webhook management operations including list, create, get, update, and delete webhooks.
+  - name: webhooks.events
+    x-displayName: Events
+    description: Discover and list available webhook events that can be subscribed to.
+  - name: webhooks.delivery-logs
+    x-displayName: Delivery Logs
+    description: Monitor webhook delivery attempts, view delivery details, and retry failed deliveries.
+  - name: webhooks.history
+    x-displayName: History
+    description: View webhook change history and audit trail for webhook modifications.
+  - name: webhooks.attributes
+    x-displayName: Attributes
+    description: Manage webhook attributes including custom headers and legacy field mappings.
+servers:
+  - url: https://api-sandbox.fndev.net
+    description: Sandbox environment for testing integrations
+security:
+  - bearer: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    EventsQuery:
+      type: object
+      description: Query parameters for filtering webhook events
+      properties:
+        model:
+          type: string
+          description: Filter events by model type (e.g., 'WorkOrder', 'Provider'). When specified, only events associated with the given model are returned.
+    EventResponseMetaData:
+      type: object
+      description: Metadata information included in the events response, including timestamp and query parameters used
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+          description: UTC timestamp when the response was generated
+        query:
+          description: Query parameters that were used in the request
+          allOf:
+            - $ref: '#/components/schemas/EventsQuery'
+      required:
+        - timestamp
+    EventsResponse:
+      type: object
+      description: Response containing a list of available webhook events with metadata
+      properties:
+        metadata:
+          description: Request metadata including timestamp and query parameters
+          allOf:
+            - $ref: '#/components/schemas/EventResponseMetaData'
+        result:
+          description: Array of available webhook events with their details
+          type: array
+          items:
+            $ref: '#/components/schemas/EventsResponseResult'
+      required:
+        - metadata
+        - result
+    EventsResponseResult:
+      type: object
+      description: Information about a single webhook event that can be subscribed to
+      properties:
+        name:
+          type: string
+          description: Unique identifier for the webhook event (e.g., 'workorder.created', 'workorder.status.published')
+        label:
+          type: string
+          description: Human-readable display name for the webhook event
+        description:
+          type: string
+          description: Detailed explanation of when and why this event is triggered
+        model:
+          type: string
+          description: Model or entity type associated with this event (e.g., 'WorkOrder', 'Provider')
+      required:
+        - name
+        - label
+        - description
+        - model
+    ResponseMetaData:
+      type: object
+      description: Standard metadata included in successful API responses
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+          description: UTC timestamp when the response was generated
+      required:
+        - timestamp
+    ErrorResponseMetaData:
+      type: object
+      description: Metadata included in error responses
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+          description: UTC timestamp when the error response was generated
+        path:
+          type: string
+          description: API endpoint path where the error occurred
+      required:
+        - timestamp
+        - path
+    ErrorResponse:
+      type: object
+      description: Standard error response format returned when an API request fails
+      properties:
+        metadata:
+          description: Error response metadata including timestamp and path
+          allOf:
+            - $ref: '#/components/schemas/ErrorResponseMetaData'
+        errors:
+          description: Array of error details describing what went wrong
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: number
+                description: Numeric error code identifying the type of error
+              message:
+                type: string
+                description: Human-readable error message explaining what went wrong
+        result:
+          description: Empty object for error responses
+          type: object
+      required:
+        - metadata
+        - errors
+        - result
+    WebhookInfo:
+      type: object
+      description: Complete webhook configuration information including all settings, subscribed events, and metadata
+      properties:
+        id:
+          type: number
+          description: Internal numeric identifier for the webhook
+        webhookId:
+          type: string
+          description: Unique string identifier for the webhook, used in API operations
+        companyId:
+          type: number
+          description: Identifier of the company that owns this webhook
+        userId:
+          type: number
+          description: Identifier of the user who created this webhook
+        events:
+          type: array
+          description: Array of webhook event names that this webhook is subscribed to (e.g., 'workorder.created', 'workorder.status.published')
+          items:
+            type: string
+        url:
+          type: string
+          description: HTTPS endpoint URL where webhook notifications will be sent
+        method:
+          type: string
+          description: HTTP method used for webhook delivery. Valid values are 'post' or 'put'
+          enum:
+            - post
+            - put
+        status:
+          type: string
+          description: Current status of the webhook. 'active' means receiving notifications, 'inactive' means paused, 'archived' means deactivated
+          enum:
+            - active
+            - inactive
+            - archived
+        secret:
+          type: string
+          description: Secret key used to sign webhook payloads for verification. Keep this secure and use it to validate incoming webhook requests.
+        notificationEmail:
+          type: string
+          description: Email address to receive notifications about webhook delivery failures or important events
+        modelProperties:
+          type: array
+          description: Array of model property names that should be included in webhook payloads. Used to customize the data sent with each event.
+          items:
+            type: string
+        isIntegrationOnly:
+          type: boolean
+          description: Indicates whether this webhook is restricted to integration use only
+        createdAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when the webhook was created
+        updatedAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when the webhook was last modified
+      required:
+        - id
+        - webhookId
+        - companyId
+        - userId
+        - events
+        - url
+        - method
+        - status
+        - secret
+        - notificationEmail
+        - modelProperties
+        - createdAt
+        - updatedAt
+    WebhookListingQueryDTO:
+      type: object
+      description: Query parameters for listing and filtering webhooks
+      properties:
+        sortDirection:
+          type: string
+          description: Sort direction for the results. Use 'ASC' for ascending order or 'DESC' for descending order. Default is 'DESC'.
+        sortBy:
+          type: string
+          description: Field name to sort results by. Valid values are 'id', 'webhookId', 'updatedAt', or 'createdAt'. Default is 'id'.
+        page:
+          type: number
+          description: Page number for pagination. Starts at 1. Default is 1.
+        perPage:
+          type: number
+          description: Number of items to return per page. Default is 25 items. Maximum value varies by endpoint.
+        search:
+          type: string
+          description: Search query string to filter results. Supports searching across relevant fields such as webhook ID, event names, or other searchable attributes.
+        fields:
+          type: string
+          default: id,webhookId,companyId,userId,events,url,method,status,secret,notificationEmail,modelProperties,isIntegrationOnly,createdAt,updatedAt
+          description: Comma-separated list of field names to include in the response. Only specified fields will be returned, reducing response size. Default includes all standard webhook fields.
+        status:
+          type: string
+          description: Filter webhooks by their current status. Valid values are 'active' (receiving notifications), 'inactive' (paused), or 'archived' (deactivated).
+          enum:
+            - active
+            - inactive
+            - archived
+        webhookId:
+          type: string
+          description: Unique identifier of the webhook to filter by. Use this to find a specific webhook or filter delivery logs by webhook.
+    WebhooksResponseMetaData:
+      type: object
+      description: Metadata included in paginated webhook list responses
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+          description: UTC timestamp when the response was generated
+        count:
+          type: number
+          description: Number of items returned in the current page
+        total:
+          type: number
+          description: Total number of items available across all pages
+        query:
+          description: Query parameters that were used in the request
+          allOf:
+            - $ref: '#/components/schemas/HistoryListingQueryDTO'
+      required:
+        - timestamp
+    WebhooksResponse:
+      type: object
+      description: Response containing a paginated list of webhooks with metadata
+      properties:
+        metadata:
+          description: Response metadata including timestamp, pagination information, and query parameters
+          allOf:
+            - $ref: '#/components/schemas/WebhooksResponseMetaData'
+        result:
+          description: Array of webhook configurations matching the query criteria
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookInfo'
+      required:
+        - metadata
+        - result
+    ListingResponseMetaData:
+      type: object
+      description: Standard metadata for paginated list responses
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+          description: UTC timestamp when the response was generated
+        count:
+          type: number
+          description: Number of items returned in the current page
+        total:
+          type: number
+          description: Total number of items available across all pages
+      required:
+        - timestamp
+    DeliveryLogInfo:
+      type: object
+      description: Summary information about a single webhook delivery attempt
+      properties:
+        deliveryId:
+          type: string
+          description: Unique identifier for this delivery attempt
+        webhookId:
+          type: string
+          description: Identifier of the webhook that triggered this delivery
+        eventName:
+          type: string
+          description: Name of the webhook event that was delivered (e.g., 'workorder.created')
+        deliveryStatus:
+          type: number
+          description: HTTP status code returned by your endpoint (2xx for success, non-2xx for failure)
+        deliveryAttempt:
+          type: number
+          description: Attempt number for this delivery (1 for initial attempt, increments on retries)
+        createdAt:
+          type: string
+          description: Timestamp when the delivery attempt was made
+      required:
+        - deliveryId
+        - webhookId
+        - eventName
+        - deliveryStatus
+        - deliveryAttempt
+        - createdAt
+    DeliveryLogListingDTO:
+      type: object
+      description: Query parameters for listing and filtering webhook delivery logs
+      properties:
+        sortDirection:
+          type: string
+          description: Sort direction for the results. Use 'ASC' for ascending order or 'DESC' for descending order. Default is 'DESC'.
+        sortBy:
+          type: string
+          description: Field name to sort delivery logs by. Valid values are 'deliveryId', 'webhookId', 'workOrderId', 'eventName', 'deliveryStatus', or 'createdAt'. Default is 'createdAt'.
+        page:
+          type: number
+          description: Page number for pagination. Starts at 1. Default is 1.
+        perPage:
+          type: number
+          description: Number of delivery log items to return per page. Default is 50 items. Maximum is 500 items per page.
+        search:
+          type: string
+          description: Search query string to filter results. Supports searching across relevant fields such as webhook ID, event names, or other searchable attributes.
+        fields:
+          description: |-
+            Array of field names to include in the response. Only specified fields will be returned.
+            Default includes: deliveryId, webhookId, workOrderId, eventName, deliveryStatus, deliveryAttempt, createdAt.
+          type: array
+          items:
+            type: string
+        deliveryId:
+          type: string
+          description: Unique identifier of a specific delivery attempt. Use this to filter delivery logs or retrieve details for a specific delivery.
+        webhookId:
+          type: string
+          description: Unique identifier of the webhook to filter by. Use this to find a specific webhook or filter delivery logs by webhook.
+        workOrderId:
+          type: number
+          description: Filter delivery logs by the associated work order identifier. Use this to see all webhook deliveries related to a specific work order.
+        eventName:
+          type: string
+          description: Filter delivery logs by the webhook event name (e.g., 'workorder.created', 'workorder.status.published'). Use this to see all deliveries for a specific event type.
+        deliveryStatus:
+          type: string
+          description: Filter delivery logs by HTTP status code returned from your endpoint. Use this to find failed deliveries (non-2xx status codes) or successful deliveries (2xx status codes).
+    DeliveryLogResponseMetaData:
+      type: object
+      description: Metadata included in delivery log list responses
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+          description: UTC timestamp when the response was generated
+        query:
+          description: Query parameters that were used in the request
+          allOf:
+            - $ref: '#/components/schemas/DeliveryLogListingDTO'
+      required:
+        - timestamp
+    DeliveryLogResponse:
+      type: object
+      description: Response containing a paginated list of delivery logs with metadata
+      properties:
+        metadata:
+          description: Response metadata including timestamp and query parameters
+          allOf:
+            - $ref: '#/components/schemas/DeliveryLogResponseMetaData'
+        result:
+          description: Array of delivery log entries matching the query criteria
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryLogInfo'
+      required:
+        - metadata
+        - result
+    DeliveryLogDetailsInfo:
+      type: object
+      description: Detailed information about a specific webhook delivery attempt, including access to the full delivery log
+      properties:
+        deliveryId:
+          type: string
+          description: Unique identifier for this delivery attempt
+        webhookId:
+          type: string
+          description: Identifier of the webhook that triggered this delivery
+        eventName:
+          type: string
+          description: Name of the webhook event that was delivered
+        deliveryStatus:
+          type: number
+          description: HTTP status code returned by your endpoint
+        deliveryAttempt:
+          type: number
+          description: Attempt number for this delivery
+        createdAt:
+          type: string
+          description: Timestamp when the delivery attempt was made
+        delivery_log:
+          type: string
+          description: Pre-signed URL to access the complete delivery log file containing request/response details
+      required:
+        - deliveryId
+        - webhookId
+        - eventName
+        - deliveryStatus
+        - deliveryAttempt
+        - createdAt
+        - delivery_log
+    DeliveryLogRetailsResponse:
+      type: object
+      description: Response containing detailed information about a specific delivery log entry
+      properties:
+        metadata:
+          description: Response metadata including timestamp
+          allOf:
+            - $ref: '#/components/schemas/ResponseMetaData'
+        result:
+          description: Complete delivery log details including pre-signed URL to the log file
+          allOf:
+            - $ref: '#/components/schemas/DeliveryLogDetailsInfo'
+      required:
+        - metadata
+        - result
+    DeliveryLogRetryResponseBody:
+      type: object
+      description: Information about the retry job created for a failed delivery
+      properties:
+        job_id:
+          type: string
+          description: Unique identifier for the new delivery retry job. Use this to track the retry attempt.
+      required:
+        - job_id
+    DeliveryLogRetryResponse:
+      type: object
+      description: Response confirming that a delivery retry job has been created
+      properties:
+        metadata:
+          description: Response metadata including timestamp
+          allOf:
+            - $ref: '#/components/schemas/ResponseMetaData'
+        result:
+          description: Retry job information including the new job ID
+          allOf:
+            - $ref: '#/components/schemas/DeliveryLogRetryResponseBody'
+      required:
+        - metadata
+        - result
+    CreateWebhook:
+      type: object
+      description: Request body for creating a new webhook configuration
+      properties:
+        events:
+          uniqueItems: true
+          type: array
+          description: |-
+            Array of webhook event names to subscribe to. Must contain at least one event. You can subscribe to 1, 2, or all 33 available events.
+
+            **Tip:** In the JSON editor, you can enter events as a comma-separated string in the first array item (e.g., `["workorder.created,workorder.routed,workorder.status.published"]`) and it will be automatically converted to an array. Or use the form view to add events one by one using the "+ New Item" button.
+
+            Valid event names include work order events (e.g., 'workorder.created', 'workorder.routed') and status changes (e.g., 'workorder.status.published', 'workorder.status.confirmed').
+          items:
+            type: string
+            enum:
+              - workorder.created
+              - workorder.routed
+              - workorder.task_completed
+              - workorder.task_incomplete
+              - workorder.provider_upload
+              - workorder.message_posted
+              - workorder.requested
+              - workorder.custom_field_value_updated
+              - workorder.declined
+              - workorder.undeclined
+              - workorder.schedule_updated
+              - workorder.tag_added
+              - workorder.tag_removed
+              - workorder.status.draft
+              - workorder.status.routed
+              - workorder.status.published
+              - workorder.status.confirmed
+              - workorder.status.assigned
+              - workorder.status.assigned_cancelled
+              - workorder.status.at_risk
+              - workorder.status.delayed
+              - workorder.status.on_my_way
+              - workorder.status.checked_in
+              - workorder.status.checked_out
+              - workorder.problem_reported
+              - workorder.problem_resolved
+              - workorder.status.work_done
+              - workorder.status.approved
+              - workorder.status.paid
+              - workorder.status.cancelled
+              - workorder.status.deleted
+              - workorder.status.postponed
+              - workorder.part_updated
+          minItems: 1
+          example:
+            - workorder.created
+            - workorder.status.published
+        url:
+          type: string
+          format: uri
+          description: HTTPS endpoint URL where webhook notifications will be sent. Must be a valid HTTPS URL.
+          example: https://example.com/webhook
+        method:
+          type: string
+          description: HTTP method to use for webhook delivery. Valid values are 'post' (recommended) or 'put'.
+          enum:
+            - post
+            - put
+          default: post
+          example: post
+        status:
+          type: string
+          description: Initial status of the webhook. 'active' will start receiving notifications immediately, 'inactive' creates it in paused state, 'archived' creates it deactivated.
+          enum:
+            - active
+            - inactive
+            - archived
+          default: active
+          example: active
+        secret:
+          type: string
+          format: uuid
+          description: Optional secret key for signing webhook payloads. If provided, use this to verify incoming webhook requests. If omitted, a secret will be auto-generated.
+          example: 01999f51-5c66-4449-b441-6b4a053fee6a
+        notificationEmail:
+          type: string
+          format: email
+          description: Optional email address to receive notifications about webhook delivery failures or important events.
+          example: webhook-admin@example.com
+        isIntegrationOnly:
+          type: boolean
+          description: Optional flag indicating whether this webhook is restricted to integration use only. If true, the webhook will only be accessible via API integrations.
+          default: false
+          example: true
+        webhookAttribute:
+          type: object
+          description: Optional webhook attributes including custom headers and legacy field mappings. Use this to add custom headers that will be sent with each webhook delivery.
+          properties:
+            header:
+              type: object
+              description: Custom headers to include with webhook deliveries. Each key-value pair will be sent as a header in the webhook request.
+              additionalProperties:
+                type: string
+                description: Header value
+              example:
+                X-Custom-Header: custom-value
+                X-Another-Header: another-value
+          example:
+            header:
+              test: "1254125"
+              X-Custom-Header: "custom-value"
+      required:
+        - events
+        - url
+        - method
+        - status
+    WebhookInfoResponse:
+      type: object
+      description: Response containing a single webhook configuration with metadata
+      properties:
+        metadata:
+          description: Response metadata including timestamp
+          allOf:
+            - $ref: '#/components/schemas/ResponseMetaData'
+        result:
+          description: Complete webhook configuration information
+          $ref: '#/components/schemas/WebhookInfo'
+      required:
+        - metadata
+        - result
+    Webhook:
+      type: object
+      description: Extended webhook information including change history. This schema includes all WebhookInfo fields plus webhookUpdate history.
+      properties:
+        id:
+          type: number
+          description: Internal numeric identifier for the webhook
+        webhookId:
+          type: string
+          description: Unique string identifier for the webhook
+        companyId:
+          type: number
+          description: Identifier of the company that owns this webhook
+        userId:
+          type: number
+          description: Identifier of the user who created this webhook
+        events:
+          type: array
+          description: Array of webhook event names that this webhook is subscribed to
+          items:
+            type: string
+        url:
+          type: string
+          description: HTTPS endpoint URL where webhook notifications are sent
+        method:
+          type: string
+          description: HTTP method used for webhook delivery ('post' or 'put')
+          enum:
+            - post
+            - put
+        status:
+          type: string
+          description: Current status of the webhook ('active', 'inactive', or 'archived')
+          enum:
+            - active
+            - inactive
+            - archived
+        secret:
+          type: string
+          description: Secret key used to sign webhook payloads for verification
+        notificationEmail:
+          type: string
+          description: Email address for delivery failure notifications
+        modelProperties:
+          type: array
+          description: Array of model property names included in webhook payloads
+          items:
+            type: string
+        isIntegrationOnly:
+          type: boolean
+          description: Indicates whether this webhook is restricted to integration use only
+        createdAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when the webhook was created
+        updatedAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when the webhook was last modified
+        webhookUpdate:
+          type: array
+          description: Array of change history records for this webhook
+          items:
+            $ref: '#/components/schemas/WebhookUpdate'
+      required:
+        - id
+        - webhookId
+        - companyId
+        - userId
+        - events
+        - url
+        - method
+        - status
+        - secret
+        - notificationEmail
+        - modelProperties
+        - createdAt
+        - updatedAt
+        - webhookUpdate
+    WebhookUpdate:
+      type: object
+      description: Record of a single change made to a webhook configuration
+      properties:
+        id:
+          type: number
+          description: Unique identifier for this change record
+        userId:
+          type: number
+          description: Identifier of the user who made this change
+        action:
+          type: string
+          description: Type of action performed (e.g., 'created', 'updated', 'deleted', 'status_changed')
+        changes:
+          type: object
+          description: Object containing the specific fields that were changed and their previous/new values
+        createdAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when this change was made
+      required:
+        - id
+        - userId
+        - action
+        - changes
+        - createdAt
+    WebhookDetailsQueryDTO:
+      type: object
+      description: Query parameters for retrieving detailed webhook information
+      properties:
+        fields:
+          type: string
+          description: |-
+            Comma-separated list of field names to include in the response. Only specified fields will be returned.
+            Default includes all standard webhook fields: id, webhookId, companyId, userId, events, url, method, status,
+            secret, notificationEmail, modelProperties, isIntegrationOnly, createdAt, updatedAt.
+        webhookAttribute:
+          type: string
+          default: ''
+          description: Comma-separated list of webhook attribute types to include in the response. Valid values are 'legacy_field' (legacy field mappings) and 'header' (custom headers). Leave empty to exclude attributes.
+    WebhookDetailsResponse:
+      type: object
+      description: Response containing detailed webhook configuration information
+      properties:
+        metadata:
+          description: Response metadata including timestamp
+          allOf:
+            - $ref: '#/components/schemas/ResponseMetaData'
+        result:
+          description: Complete webhook configuration with all settings and optional attributes
+          $ref: '#/components/schemas/WebhookInfo'
+      required:
+        - metadata
+        - result
+    HistoryList:
+      type: object
+      description: Single entry in the webhook change history
+      properties:
+        id:
+          type: number
+          description: Unique identifier for this history record
+        userId:
+          type: number
+          description: Identifier of the user who made this change
+        action:
+          type: string
+          description: Type of action performed (e.g., 'created', 'updated', 'deleted', 'status_changed')
+        changes:
+          type: object
+          description: Object containing the specific fields that were changed and their previous/new values
+        createdAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when this change was made
+        updatedAt:
+          format: date-time
+          type: string
+          description: UTC timestamp when this history record was last updated
+      required:
+        - id
+        - userId
+        - action
+        - changes
+        - createdAt
+        - updatedAt
+    HistoryResponse:
+      type: object
+      description: Response containing a paginated list of webhook change history with metadata
+      properties:
+        metadata:
+          description: Response metadata including timestamp, pagination information, and query parameters
+          allOf:
+            - $ref: '#/components/schemas/WebhooksResponseMetaData'
+        result:
+          description: Array of webhook change history records matching the query criteria
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryList'
+      required:
+        - metadata
+        - result
+    HistoryListingQueryDTO:
+      type: object
+      description: Query parameters for listing and filtering webhook change history
+      properties:
+        sortDirection:
+          type: string
+          description: Sort direction for the results. Use 'ASC' for ascending order or 'DESC' for descending order. Default is 'DESC'.
+        sortBy:
+          type: string
+          description: Field name to sort webhook history by. Valid values are 'updatedAt', 'id', 'userId', or 'action'. Default is 'id'.
+        page:
+          type: number
+          description: Page number for pagination. Starts at 1. Default is 1.
+        perPage:
+          type: number
+          description: Number of items to return per page. Default is 25 items. Maximum value varies by endpoint.
+        search:
+          type: string
+          description: Search query string to filter results. Supports searching by userId or action fields.
+        fields:
+          description: |-
+            Array of field names to include in the webhook history response. Only specified fields will be returned.
+            Default includes: id, userId, action, changes, createdAt, updatedAt.
+          type: array
+          items:
+            type: string
+        userId:
+          type: string
+          description: Filter webhook history by the user ID who made the change. Use this to see all modifications made by a specific user.
+    UpdateWebhook:
+      type: object
+      description: Request body for updating an existing webhook configuration. Only include fields that should be changed; omitted fields will remain unchanged.
+      properties:
+        events:
+          uniqueItems: true
+          type: array
+          description: Updated array of webhook event names to subscribe to. Replaces the existing event list. You can subscribe to 1, 2, or all 33 available events. Use the dropdown or type to select events. Valid event names include work order events (e.g., 'workorder.created', 'workorder.routed') and status changes (e.g., 'workorder.status.published', 'workorder.status.confirmed').
+          items:
+            type: string
+            enum:
+              - workorder.created
+              - workorder.routed
+              - workorder.task_completed
+              - workorder.task_incomplete
+              - workorder.provider_upload
+              - workorder.message_posted
+              - workorder.requested
+              - workorder.custom_field_value_updated
+              - workorder.declined
+              - workorder.undeclined
+              - workorder.schedule_updated
+              - workorder.tag_added
+              - workorder.tag_removed
+              - workorder.status.draft
+              - workorder.status.routed
+              - workorder.status.published
+              - workorder.status.confirmed
+              - workorder.status.assigned
+              - workorder.status.assigned_cancelled
+              - workorder.status.at_risk
+              - workorder.status.delayed
+              - workorder.status.on_my_way
+              - workorder.status.checked_in
+              - workorder.status.checked_out
+              - workorder.problem_reported
+              - workorder.problem_resolved
+              - workorder.status.work_done
+              - workorder.status.approved
+              - workorder.status.paid
+              - workorder.status.cancelled
+              - workorder.status.deleted
+              - workorder.status.postponed
+              - workorder.part_updated
+          minItems: 1
+        url:
+          type: string
+          format: uri
+          description: Updated HTTPS endpoint URL where webhook notifications will be sent. Must be a valid HTTPS URL.
+        method:
+          type: string
+          description: Updated HTTP method to use for webhook delivery. Valid values are 'post' (recommended) or 'put'.
+          enum:
+            - post
+            - put
+        status:
+          type: string
+          description: Updated status of the webhook. 'active' enables notifications, 'inactive' pauses them, 'archived' deactivates the webhook.
+          enum:
+            - active
+            - inactive
+            - archived
+        notificationEmail:
+          type: string
+          format: email
+          description: Updated email address to receive notifications about webhook delivery failures or important events.
+        secret:
+          type: string
+          format: uuid
+          description: Updated secret key for signing webhook payloads. If provided, replaces the existing secret.
+        isIntegrationOnly:
+          type: boolean
+          description: Updated flag indicating whether this webhook is restricted to integration use only.
+        webhookAttribute:
+          type: object
+          description: Updated webhook attributes including custom headers and legacy field mappings. Use this to add or update custom headers that will be sent with each webhook delivery.
+          properties:
+            header:
+              type: object
+              description: Custom headers to include with webhook deliveries. Each key-value pair will be sent as a header in the webhook request.
+              additionalProperties:
+                type: string
+                description: Header value
+              example:
+                X-Custom-Header: custom-value
+                X-Another-Header: another-value
+          example:
+            header:
+              test: "1254125"
+              X-Custom-Header: "custom-value"

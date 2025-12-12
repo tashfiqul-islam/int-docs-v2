@@ -1,0 +1,14 @@
+{
+  "title": "Resources",
+  "description": "Reference materials and support",
+  "icon": "BookOpen",
+  "root": true,
+  "defaultOpen": true,
+  "pages": [
+    "---Reference---",
+    "glossary",
+    "error-codes",
+    "support",
+    "environments"
+  ]
+}

@@ -1,0 +1,197 @@
+---
+title: Configuration
+description: Configure the Quickbase connector in Field Nation with user token and table mappings.
+---
+
+## Prerequisites
+
+- ☐ Quickbase User Token
+- ☐ Quickbase Realm (subdomain)
+- ☐ App ID and Table ID
+- ☐ Admin access to Field Nation
+
+---
+
+## Step 1: Generate Quickbase User Token
+
+<Steps>
+
+### Log into Quickbase
+
+Use admin or dedicated integration user account
+
+### Navigate to User Tokens
+
+Profile → My Preferences → Manage User Tokens
+
+### Create New Token
+
+Click "+ New User Token"
+
+**Name**: `Field Nation Integration`
+
+**Description**: Integration between Quickbase and Field Nation
+
+**Applications**: Select apps that need access
+
+**Token**: Copy immediately (shown once!)
+
+</Steps>
+
+---
+
+## Step 2: Get App & Table Information
+
+<Steps>
+
+### Find App ID
+
+Open your Quickbase app → URL shows App ID:
+```
+https://realm.quickbase.com/db/{app_id}
+```
+
+Example: `br5k3a4mn`
+
+### Find Table ID
+
+Open table → URL shows Table ID:
+```
+https://realm.quickbase.com/db/{table_id}
+```
+
+Example: `bskt8r3fn`
+
+### Note Realm
+
+Your Quickbase subdomain:
+```
+https://{realm}.quickbase.com
+```
+
+Example: If URL is `acme.quickbase.com`, realm is `acme`
+
+</Steps>
+
+---
+
+## Step 3: Configure in Field Nation
+
+Access Integration Broker → Select "Quickbase"
+
+### Realm
+
+Enter your Quickbase realm (subdomain)
+
+Example: `acme` (from `acme.quickbase.com`)
+
+---
+
+### User Token
+
+Paste user token from Step 1
+
+**Authentication Header:**
+```
+QB-USER-TOKEN {your_user_token}
+```
+
+---
+
+### App ID
+
+Enter App ID from Step 2
+
+Example: `br5k3a4mn`
+
+---
+
+### Table ID
+
+Enter Table ID from Step 2
+
+Example: `bskt8r3fn`
+
+---
+
+## Step 4: Test Connection
+
+Click "Test Connection"
+
+**Success** ✅: Token valid, app & table accessible
+
+**Failure** ❌: Check:
+
+<Accordions type="multiple">
+  <Accordion title="Invalid Token">
+    - Verify token copied correctly
+    - Ensure token not revoked/expired
+    - Check token has access to app
+  </Accordion>
+  
+  <Accordion title="Table Not Found">
+    - Verify App ID correct
+    - Check Table ID correct
+    - Ensure token user has table access
+  </Accordion>
+  
+  <Accordion title="Insufficient Permissions">
+    - Grant token access to app
+    - Check user has table read/write permissions
+    - Verify field-level permissions
+  </Accordion>
+</Accordions>
+
+---
+
+## Step 5: Refresh Fields & Map
+
+Click "Refresh Fields" → Quickbase API queries table schema
+
+**Inbound Mappings:**
+```
+Field 6 (Title) → title
+Field 7 (Description) → description
+Field 11 (Status) → status_id (Array Map)
+Field 12 (Customer Name) → location.company.name
+Field 14 (Due Date) → schedule.start (Date Convert)
+```
+
+**Field IDs**: Quickbase uses numeric field IDs (Field 6, Field 7, etc.)
+
+**Outbound Mappings:**
+```
+status.name → Field 11 (Array Map)
+completion_notes → Field 20
+completion_date → Field 21 (Date Convert)
+```
+
+[Field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 6: Save Configuration
+
+Review → Save → Copy trigger URL for Quickbase automation
+
+---
+
+## Troubleshooting
+
+<Accordions type="multiple">
+  <Accordion title="Fields Not Loading">
+    - Verify token has table access
+    - Check Table ID correct
+    - Try "Refresh Fields" again
+    - Review API response in logs
+  </Accordion>
+  
+  <Accordion title="Field Mappings Fail">
+    - Check field IDs correct
+    - Verify data type compatibility
+    - Use proper transformation actions
+    - Test with sample data
+  </Accordion>
+</Accordions>
+
+---

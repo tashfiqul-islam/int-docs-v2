@@ -1,0 +1,160 @@
+---
+title: Workflow Setup
+description: Configure Freshdesk automation rules to trigger Field Nation work order creation.
+---
+
+## Prerequisites
+
+- ☐ [Field Nation configuration complete](/docs/connectors/platforms/freshdesk/configuration)
+- ☐ Trigger URL copied
+- ☐ Freshdesk admin access
+
+---
+
+## Configure Automation in Freshdesk
+
+<Steps>
+
+### Navigate to Automations
+
+Admin → Workflows → Automations
+
+### Create Ticket Update Rule
+
+Click "+ New Rule" → Select "Ticket Updates"
+
+### Configure Trigger
+
+**Rule Name**: `Send to Field Nation`
+
+**Description**: Auto-dispatch tickets requiring field service
+
+**When an action performed by**: Agent or Requester
+
+**Involves any of these events:**
+- ☑ Status is changed
+- ☑ Tag is added
+
+**On tickets with these properties:**
+```
+Status is "Field Service Required"
+OR
+Tags contains "on-site"
+```
+
+### Configure Action
+
+**Perform these actions:**
+- Trigger webhook
+
+**Webhook URL**: Paste Field Nation trigger URL
+
+**Method**: POST
+
+**Content**: JSON
+
+**Request Body:**
+```json
+{
+  "ticket_id": "{{ticket.id}}",
+  "status": "{{ticket.status}}",
+  "priority": "{{ticket.priority}}"
+}
+```
+
+**Encoding**: JSON
+
+### Save & Activate
+
+Save rule → Toggle to "Active"
+
+</Steps>
+
+---
+
+## Test Integration
+
+<Steps>
+
+### Create Test Ticket
+
+1. Create new ticket in Freshdesk
+2. Set status to "Field Service Required"
+3. Or add "on-site" tag
+4. Save
+
+### Verify Automation
+
+Check Admin → Audit Logs:
+- Look for automation execution
+- Verify webhook sent
+
+### Check Field Nation
+
+Verify work order created with correct data
+
+</Steps>
+
+---
+
+## Troubleshooting
+
+<Accordions type="multiple">
+  <Accordion title="Automation Not Firing">
+    - Check rule is Active
+    - Verify ticket meets conditions
+    - Review Audit Logs for execution
+    - Test with simple conditions first
+  </Accordion>
+  
+  <Accordion title="Webhook Fails">
+    - Verify trigger URL correct
+    - Check Freshdesk can reach URL
+    - Review webhook response in logs
+    - Test URL with curl/Postman
+  </Accordion>
+  
+  <Accordion title="Work Order Not Creating">
+    - Check Field Nation config valid
+    - Verify all required fields mapped
+    - Review Integration Broker logs
+    - Test with minimal ticket data
+  </Accordion>
+</Accordions>
+
+---
+
+## Advanced Configuration
+
+### Multiple Automation Rules
+
+**Rule 1**: Urgent Tickets
+```
+Priority = Urgent
+→ Immediate dispatch
+```
+
+**Rule 2**: Standard Tickets
+```
+Status = "Field Service Required"
+Priority != Urgent
+→ Normal dispatch
+```
+
+### Prevent Duplicate Sends
+
+Add custom field:
+```
+Field: "Synced to FN"
+Type: Checkbox
+```
+
+Update rule conditions:
+```
+Status = "Field Service Required"
+AND "Synced to FN" is NOT true
+```
+
+After sync, set checkbox to true.
+
+---

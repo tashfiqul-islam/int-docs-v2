@@ -1,0 +1,339 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/solar.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
+@import "fumadocs-openapi/css/preset.css";
+@config "../tailwind.config.ts";
+
+/* Open Sans Font Family */
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/contents/OpenSans-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/contents/OpenSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/contents/OpenSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/contents/OpenSans-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Align layouts (nav, home, docs) to a wider max width */
+:root {
+  --fd-layout-width: 1440px;
+}
+
+@layer components {
+  /* Align nav container with layout width without breaking defaults */
+  #nd-nav {
+    @apply px-6;
+  }
+  #nd-nav > div {
+    @apply mx-auto w-full;
+    max-width: var(--fd-layout-width);
+  }
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/contents/OpenSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/contents/OpenSans-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* JetBrains Mono for code blocks */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/code/JetBrainsMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/code/JetBrainsMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/code/JetBrainsMono-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --radius: 0.625rem;
+  --destructive: oklch(0.577 0.245 27.325);
+  --input: oklch(0.922 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  --color-fd-primary: #f16a22;
+  --color-fd-primary-foreground: white;
+}
+
+.dark {
+  --destructive: oklch(0.704 0.191 22.216);
+  --input: oklch(1 0 0 / 15%);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@theme inline {
+  --color-background: var(--color-fd-background);
+  --color-foreground: var(--color-fd-foreground);
+  --color-card: var(--color-fd-card);
+  --color-card-foreground: var(--color-fd-card-foreground);
+  --color-popover: var(--color-fd-popover);
+  --color-popover-foreground: var(--color-fd-popover-foreground);
+  --color-primary: var(--color-fd-primary);
+  --color-primary-foreground: var(--color-fd-primary-foreground);
+  --color-secondary: var(--color-fd-secondary);
+  --color-secondary-foreground: var(--color-fd-secondary-foreground);
+  --color-muted: var(--color-fd-muted);
+  --color-muted-foreground: var(--color-fd-muted-foreground);
+  --color-accent: var(--color-fd-accent);
+  --color-accent-foreground: var(--color-fd-accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--color-fd-border);
+  --color-input: var(--input);
+  --color-ring: var(--color-fd-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    /* Slightly larger base font for roomier typography */
+    font-size: 1.05rem;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
+  }
+  code,
+  pre {
+    font-family: "JetBrains Mono", "Courier New", monospace;
+  }
+}
+
+@layer components {
+  .fd-api-shell {
+    @apply space-y-6;
+  }
+
+  .fd-api-grid {
+    @apply gap-6;
+  }
+
+  .fd-api-main {
+    @apply space-y-8;
+  }
+
+  .fd-api-main > * {
+    @apply scroll-m-28;
+  }
+
+  .fd-api-rail {
+    @apply space-y-4 lg:sticky lg:top-[calc(var(--nav-height,64px)+1.25rem)] lg:self-start;
+  }
+
+  .fd-api-playground {
+    @apply w-full;
+  }
+
+  .fd-api-card {
+    @apply rounded-xl border bg-card/60 p-4 shadow-sm;
+  }
+
+  .fd-api-card > :last-child {
+    @apply mb-0;
+  }
+
+  .fd-api-code pre {
+    @apply max-h-112 overflow-auto text-sm leading-relaxed;
+  }
+
+  .fd-api-code pre code {
+    @apply text-sm;
+  }
+
+  .fd-json-editor {
+    /* Catppuccin Latte (light) + Mocha (dark) */
+    --fd-json-bg-light: #eff1f5;
+    --fd-json-bg-dark: #1e1e2e;
+    --fd-json-fg-light: #4c4f69;
+    --fd-json-fg-dark: #cdd6f4;
+    --fd-json-border-light: #ccd0da;
+    --fd-json-border-dark: #313244;
+    --fd-json-selection: #45475a80;
+    --fd-json-selection-light: #8caaee45;
+    --fd-json-caret: #89b4fa;
+    @apply w-full overflow-hidden rounded-lg border shadow-sm transition-colors;
+    background: var(--fd-json-bg-light);
+    color: var(--fd-json-fg-light);
+    border-color: var(--fd-json-border-light);
+  }
+
+  .dark .fd-json-editor {
+    background: var(--fd-json-bg-dark);
+    color: var(--fd-json-fg-dark);
+    border-color: var(--fd-json-border-dark);
+  }
+
+  .fd-json-editor__textarea {
+    @apply block h-[260px] w-full resize-none bg-transparent p-3 text-sm font-mono leading-relaxed outline-none;
+    caret-color: var(--fd-json-caret);
+    tab-size: 2;
+    line-height: 1.5;
+    color: transparent;
+    background: transparent;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .fd-json-editor__scroller {
+    @apply relative h-[320px] overflow-hidden;
+  }
+
+  .fd-json-editor__code {
+    @apply absolute left-0 top-0 h-full w-full whitespace-pre wrap-break-word p-3 text-sm font-mono leading-relaxed pointer-events-none overflow-auto;
+    color: var(--fd-json-fg-light);
+  }
+
+  .dark .fd-json-editor__code {
+    color: var(--fd-json-fg-dark);
+  }
+
+  .fd-json-editor__textarea::selection {
+    background: var(--fd-json-selection-light);
+  }
+
+  .fd-json-editor__error {
+    @apply border-t px-3 py-2 text-xs font-mono text-red-400 empty:hidden;
+    border-color: var(--fd-json-border-light);
+  }
+
+  .dark .fd-json-editor__error {
+    border-color: var(--fd-json-border-dark);
+  }
+
+  /* Token colors (Catppuccin Latte/Mocha) */
+  .tok-key {
+    color: #d20f39; /* red (latte) */
+  }
+  .dark .tok-key {
+    color: #f38ba8; /* red (mocha) */
+  }
+  .tok-string {
+    color: #40a02b; /* green (latte) */
+  }
+  .dark .tok-string {
+    color: #a6e3a1; /* green (mocha) */
+  }
+  .tok-number {
+    color: #fe640b; /* peach (latte) */
+  }
+  .dark .tok-number {
+    color: #fab387; /* peach (mocha) */
+  }
+  .tok-boolean {
+    color: #1e66f5; /* blue (latte) */
+  }
+  .dark .tok-boolean {
+    color: #89b4fa; /* blue (mocha) */
+  }
+
+  .fd-api-main table {
+    @apply text-sm;
+  }
+
+  .fd-api-main thead {
+    @apply sticky top-0 bg-background;
+  }
+
+  .fd-api-main tbody tr:nth-child(odd) {
+    @apply bg-muted/40;
+  }
+}

@@ -1,0 +1,415 @@
+---
+title: Getting Started
+description: Prerequisites and common setup steps for configuring Field Nation pre-built connectors.
+icon: Rocket
+---
+
+## Prerequisites
+
+### Field Nation Requirements
+
+<TypeTable
+  type={{
+    "Active Buyer Account": {
+      type: "Required",
+      description: "You must have an active buyer account in Field Nation. Only buyers have access to integration features.",
+      required: true
+    },
+    "Admin Access": {
+      type: "Required",
+      description: "Administrative access to Field Nation's integration settings to configure connectors.",
+      required: true
+    },
+    "Company ID": {
+      type: "Required",
+      description: "Your Field Nation Company ID (found in Company Settings > Company Profile).",
+      required: true
+    },
+    "Sandbox Access": {
+      type: "Recommended",
+      description: "Sandbox environment access for testing before production deployment.",
+      required: false
+    }
+  }}
+/>
+
+[How to find your Company ID →](/docs/getting-started/prerequisites)
+
+---
+
+### External Platform Requirements
+
+<Accordions type="multiple">
+  <Accordion title="Admin Access to External Platform">
+    You need administrative access in your external platform (Salesforce, ServiceNow, etc.) to:
+    - Create API credentials or OAuth applications
+    - Configure webhooks or outbound messages
+    - Set up automation rules (Flows, Business Rules, etc.)
+    - Grant API permissions to integration users
+  </Accordion>
+  
+  <Accordion title="API Credentials">
+    Depending on the platform, you'll need:
+    - **API Keys** - Unique identifiers for API access
+    - **OAuth Tokens** - For OAuth 2.0 authenticated platforms
+    - **Username & Password** - For Basic Authentication systems
+    - **Security Tokens** - Platform-specific security credentials
+    
+    These are typically generated in the external platform's API or integration settings.
+  </Accordion>
+  
+  <Accordion title="Network Access">
+    Ensure your external platform can:
+    - **Receive webhooks** from Field Nation's IP addresses
+    - **Make outbound API calls** to Field Nation's endpoints
+    - **Allow API access** (not blocked by firewalls or security policies)
+    
+    Some enterprise platforms require IP whitelisting or firewall rule adjustments.
+  </Accordion>
+  
+  <Accordion title="Object & Field Access">
+    The integration user must have:
+    - **Read access** to all fields you want to sync FROM the external system
+    - **Write access** to all fields you want to update IN the external system
+    - **API-enabled permissions** on custom objects and fields
+    - **Create/Update permissions** for the object types being synchronized
+  </Accordion>
+</Accordions>
+
+---
+
+## Common Setup Workflow
+
+All pre-built connectors follow a similar configuration pattern:
+
+<Steps>
+
+### Gather Credentials
+
+Collect required information from your external platform:
+- API credentials (keys, tokens, username/password)
+- Instance URLs or identifiers
+- Object names or IDs you want to integrate
+- Security tokens (if applicable)
+
+### Configure in Field Nation
+
+1. Navigate to Integration Settings in Field Nation
+2. Select your connector from available integrations
+3. Enter connection credentials
+4. Specify the external object to integrate with
+5. Configure optional settings (messaging, custom fields)
+6. Test connection and save
+
+### Configure External Platform
+
+1. Set up webhook or outbound message
+2. Configure automation rules (Flows, triggers, etc.)
+3. Map Field Nation's trigger URL as the destination
+4. Define conditions for when to send data to Field Nation
+5. Test the trigger
+
+### Map Fields
+
+1. Field Nation automatically discovers available fields
+2. Configure field mappings (source field → target field)
+3. Set transformation actions (sync, static, date convert, etc.)
+4. Add custom JSONNET transformations if needed
+5. Save field mappings
+
+### Test Integration
+
+1. Create a test record in your external system
+2. Trigger the automation (meet your Flow/rule conditions)
+3. Verify Field Nation work order is created
+4. Update the work order in Field Nation
+5. Confirm updates sync back to external system
+
+### Go Live
+
+1. Monitor first few synchronizations
+2. Review error logs for any issues
+3. Adjust field mappings if needed
+4. Document configuration for your team
+5. Set up alerting for integration errors
+
+</Steps>
+
+---
+
+## Integration Broker Access
+
+All pre-built connectors are configured through Field Nation's **Integration Broker** interface:
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+<Callout type="info">
+**First Time Setup**: If you don't see the Integrations section, contact [Field Nation Support](https://app.fieldnation.com/support-cases) to enable connector access for your account.
+</Callout>
+
+---
+
+## Understanding Field Mappings
+
+Field mappings define how data translates between systems. Each mapping consists of:
+
+### Mapping Components
+
+<TypeTable
+  type={{
+    "Source Field": {
+      type: "string",
+      description: "The field from the originating system (e.g., external system field name or Field Nation field name)",
+      required: true
+    },
+    "Target Field": {
+      type: "string",
+      description: "The field in the destination system where data will be written",
+      required: true
+    },
+    "Transformation Action": {
+      type: "enum",
+      description: "How to transform the data: Sync (direct copy), Set Static, Array Map, Range Map, Date Convert, Concat, Custom JSONNET",
+      required: true
+    },
+    "Default Value": {
+      type: "any",
+      description: "Value to use if source field is empty or null",
+      required: false
+    }
+  }}
+/>
+
+### Common Transformation Actions
+
+**Sync** - Direct field-to-field copy with no transformation
+
+**Set Static** - Always use a specific value (e.g., always set priority to "High")
+
+**Date Convert** - Transform date formats between systems
+
+**Concat** - Combine multiple fields into one (e.g., FirstName + LastName → FullName)
+
+**Array Map** - Transform array or list data
+
+**Range Map** - Map value ranges (e.g., 1-3 → Low, 4-7 → Medium, 8-10 → High)
+
+**Custom JSONNET** - Write custom transformation logic for complex scenarios
+
+[Learn more about field mappings →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Data Flow Patterns
+
+### Inbound: External System → Field Nation
+
+```mermaid
+graph LR
+    A[Record Created/Updated] --> B[Webhook Triggered]
+    B --> C[Integration Broker]
+    C --> D[Fetch Full Record]
+    D --> E[Apply Field Mappings]
+    E --> F[Create/Update Work Order]
+    F --> G[Log Success]
+```
+
+**Trigger**: Record change in external system  
+**Result**: Field Nation work order created or updated
+
+---
+
+### Outbound: Field Nation → External System
+
+```mermaid
+graph LR
+    A[Work Order Event] --> B[Integration Broker]
+    B --> C[Apply Reverse Mappings]
+    C --> D[Call External API]
+    D --> E[Update Record]
+    E --> F[Confirm Sync]
+```
+
+**Trigger**: Work order status change, assignment, completion, etc.  
+**Result**: External system record updated
+
+---
+
+## Authentication Methods
+
+Different platforms use different authentication approaches:
+
+<Tabs items={["Basic Auth", "OAuth 2.0", "API Keys", "SOAP/Token"]}>
+
+<Tab value="Basic Auth">
+
+**Used by**: Freshdesk, some custom REST APIs
+
+**Configuration**:
+- Username
+- Password
+- Optional: Security Token
+
+**Format**: `Authorization: Basic base64(username:password)`
+
+</Tab>
+
+<Tab value="OAuth 2.0">
+
+**Used by**: Salesforce, ServiceNow (optional)
+
+**Configuration**:
+- Client ID
+- Client Secret
+- Authorization URL
+- Token URL
+- Scopes
+
+**Flow**: Authorization Code or Client Credentials
+
+</Tab>
+
+<Tab value="API Keys">
+
+**Used by**: Quickbase, Smartsheet
+
+**Configuration**:
+- API Key or Application Token
+- Optional: API Secret
+
+**Format**: Custom header (e.g., `X-API-Key: your-key`)
+
+</Tab>
+
+<Tab value="SOAP/Token">
+
+**Used by**: NetSuite, Autotask
+
+**Configuration**:
+- Account ID
+- Integration Token
+- Consumer Key/Secret
+- Token Key/Secret
+
+**Format**: Platform-specific SOAP authentication
+
+</Tab>
+
+</Tabs>
+
+---
+
+## Best Practices
+
+### Before Configuration
+
+- ☐ Test in sandbox environment first
+- ☐ Document current workflow and requirements
+- ☐ Identify which fields need to sync
+- ☐ Plan for error handling and monitoring
+- ☐ Review external platform's API limits
+
+### During Configuration
+
+- ☐ Use descriptive names for field mappings
+- ☐ Start with minimal field set, expand later
+- ☐ Test each mapping individually
+- ☐ Document transformation logic
+- ☐ Keep track of credentials securely
+
+### After Configuration
+
+- ☐ Monitor first 24 hours closely
+- ☐ Set up error notifications
+- ☐ Create runbook for common issues
+- ☐ Train team on monitoring dashboards
+- ☐ Schedule regular health checks
+
+---
+
+## Common Pitfalls to Avoid
+
+<Accordions type="multiple">
+  <Accordion title="Insufficient Permissions">
+    **Problem**: Integration fails due to missing permissions
+    
+    **Solution**: Ensure integration user has full API access and permissions for all objects and fields being synchronized
+  </Accordion>
+  
+  <Accordion title="Incorrect Field Types">
+    **Problem**: Data fails to sync due to type mismatches
+    
+    **Solution**: Use appropriate transformation actions (Date Convert, Range Map) to match field types between systems
+  </Accordion>
+  
+  <Accordion title="Missing Required Fields">
+    **Problem**: Work order creation fails due to missing required data
+    
+    **Solution**: Either map all required fields or set static default values for fields not available in source system
+  </Accordion>
+  
+  <Accordion title="Webhook Not Triggering">
+    **Problem**: No data flows to Field Nation
+    
+    **Solution**: Verify webhook configuration, check firewall rules, confirm trigger conditions are met
+  </Accordion>
+  
+  <Accordion title="Authentication Expiration">
+    **Problem**: Integration stops working after some time
+    
+    **Solution**: Refresh OAuth tokens, verify credentials haven't been reset, check for password policy changes
+  </Accordion>
+</Accordions>
+
+---
+
+## Testing Your Configuration
+
+### Create Test Scenarios
+
+1. **Happy Path**: Standard work order creation and completion
+2. **Required Fields**: Ensure all required fields are populated
+3. **Optional Fields**: Verify optional fields sync correctly
+4. **Status Changes**: Test bidirectional status synchronization
+5. **Error Handling**: Intentionally trigger errors to verify error handling
+
+### Test Checklist
+
+- ☐ Work order created in Field Nation from external record
+- ☐ All mapped fields populated correctly
+- ☐ Status updates sync bidirectionally
+- ☐ Comments/messages sync (if enabled)
+- ☐ Error notifications received when sync fails
+- ☐ Retry logic works for temporary failures
+- ☐ Duplicate prevention works (same record not created twice)
+
+---
+
+## Getting Help
+
+### Connector-Specific Guides
+
+Each platform has detailed configuration instructions:
+
+<Cards>
+  <Card title="Salesforce" href="/docs/connectors/platforms/salesforce/overview">
+    Flows & Outbound Messages setup
+  </Card>
+  <Card title="ServiceNow" href="/docs/connectors/platforms/servicenow/overview">
+    Business Rules & REST Messages
+  </Card>
+  <Card title="REST Connector" href="/docs/connectors/platforms/rest-connector/overview">
+    OpenAPI spec configuration
+  </Card>
+</Cards>
+
+[View all platform guides →](/docs/connectors/introduction)
+
+### Support Resources
+
+- **Support Cases**: [app.fieldnation.com/support-cases](https://app.fieldnation.com/support-cases)
+- **Phone**: +1 877-573-4353 (24/7)
+- **Troubleshooting**: [Common issues and solutions](/docs/connectors/concepts/troubleshooting)
+
+---

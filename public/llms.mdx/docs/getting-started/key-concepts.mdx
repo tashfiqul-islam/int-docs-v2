@@ -1,0 +1,408 @@
+# Getting Started: undefined
+URL: /docs/getting-started/key-concepts
+Source: content/docs/getting-started/key-concepts.mdx
+
+
+
+---
+title: Key Concepts
+description: Essential terminology and concepts for Field Nation Integration
+icon: BookOpen
+---
+
+## Work Orders
+
+### Work Order
+A job or task that needs to be completed at a physical location. Every integration revolves around creating, managing, or responding to work orders.
+
+**Key Properties:**
+- Unique ID for tracking
+- Title and description
+- Service window (schedule)
+- Physical location
+- Pay structure
+- Status (draft, published, assigned, etc.)
+
+### Work Order Status
+Indicates the current stage of a work order in its lifecycle. Status changes trigger webhooks and determine available actions.
+
+**Common Statuses:**
+- `draft` - Not yet visible to providers
+- `published` - Visible on marketplace
+- `routed` - Sent to specific providers
+- `assigned` - Provider committed
+- `work_done` - Completed by provider
+- `approved` - Accepted by buyer
+- `paid` - Payment processed
+
+### Service Window
+The date and time range during which work can be performed. Service windows respect time zones and can be hours, days, or date ranges.
+
+**Modes:**
+- `hours` - Specific start and end times
+- `between` - Date range flexibility
+- `exact` - Precise appointment time
+
+---
+
+## Providers & Assignments
+
+### Provider
+An independent contractor who completes field service work. Providers have skills, certifications, ratings, and availability.
+
+**Provider Properties:**
+- User ID
+- Name and contact info
+- Rating (1-5 stars)
+- Completed jobs count
+- Skills and certifications
+
+### Assignment
+The relationship between a work order and a provider. When a provider is assigned, they're committed to completing the work.
+
+**Assignment Process:**
+1. Work order published or routed
+2. Provider requests or accepts
+3. Buyer confirms assignment
+4. Provider completes work
+
+### Routing
+Sending a work order directly to specific providers. Routed providers receive notifications and can accept or decline.
+
+**Routing Strategies:**
+- **Manual Routing** - Select specific providers
+- **Talent Pool Routing** - Route to provider groups
+- **Mass Routing** - Invite multiple providers
+
+### Talent Pool
+A group of preferred providers organized by skills, geography, or performance. Simplifies routing to trusted technicians.
+
+**Benefits:**
+- Pre-vetted providers
+- Faster assignment
+- Consistent quality
+- Tiered structures (A, B, C teams)
+
+---
+
+## Schedule & Time
+
+### UTC vs Local Time
+Field Nation stores all timestamps in UTC but also provides local times based on work order location.
+
+**Best Practices:**
+- Store UTC in your database
+- Display local time to users
+- Include timezone in API requests
+- Handle daylight saving changes
+
+### ETA (Estimated Time of Arrival)
+Provider's estimated arrival time, updated in real-time as they travel to the job site.
+
+### Check-In / Check-Out
+Timestamps when providers arrive at and leave the job site. Often includes GPS coordinates for verification.
+
+**Use Cases:**
+- Time tracking
+- Billing validation
+- Provider accountability
+- Job duration analytics
+
+---
+
+## Tasks & Deliverables
+
+### Task
+A specific action or requirement within a work order. Tasks form a checklist that providers must complete.
+
+**Task Types:**
+- Check-in
+- Check-out
+- Photos
+- Signatures
+- Custom requirements
+
+**Task Status:**
+- `incomplete` - Not yet done
+- `complete` - Provider finished
+- `not_required` - Skipped
+
+### Deliverable
+Files or data providers upload as proof of completion—photos, documents, signatures, or notes.
+
+**Common Deliverables:**
+- Before/after photos
+- Network diagrams
+- Signature captures
+- Completion forms
+- Serial number documentation
+
+---
+
+## Financial Concepts
+
+### Pay Structure
+How providers are compensated. Field Nation supports multiple payment models.
+
+**Pay Types:**
+- **Fixed** - Flat rate for the job
+- **Hourly** - Rate per hour worked
+- **Blended** - Combination of fixed and hourly
+- **Device** - Per-device pricing
+
+### Base Pay
+The primary compensation amount before any additional costs, bonuses, or expenses.
+
+### Expense
+Reimbursable costs providers incur while completing work—travel, materials, parking, etc.
+
+**Expense Categories:**
+- Travel
+- Mileage
+- Parking
+- Materials
+- Other
+
+### Bonus
+Additional payment offered to incentivize work acceptance or quality performance.
+
+**Bonus Scenarios:**
+- Rush jobs
+- After-hours work
+- Difficult locations
+- High-priority work
+
+### Penalty
+Deduction from pay due to performance issues—late arrival, incomplete work, policy violations.
+
+---
+
+## Integration Architecture
+
+### REST API
+Representational State Transfer API using HTTP methods (GET, POST, PUT, DELETE) to manage resources.
+
+**Characteristics:**
+- Stateless requests
+- JSON request/response
+- OAuth 2.0 authentication
+- RESTful resource URLs
+
+### Webhook
+HTTP callback that delivers real-time notifications when events occur on Field Nation.
+
+**Webhook Flow:**
+1. Event happens (e.g., work order assigned)
+2. Field Nation sends POST to your endpoint
+3. Your system processes the event
+4. You respond with 200 OK
+
+### Event
+Something that happens on the platform—work order created, provider assigned, task completed, etc.
+
+**Event Properties:**
+- Event name (e.g., `workorder.status.assigned`)
+- Timestamp
+- Triggering user
+- Full work order data
+
+### OAuth 2.0
+Industry-standard authentication protocol. Field Nation uses client credentials grant for machine-to-machine auth.
+
+**Auth Flow:**
+1. Exchange client ID + secret for access token
+2. Include token in API request headers
+3. Token expires after 1 hour
+4. Refresh with new authentication request
+
+---
+
+## Templates & Configuration
+
+### Template
+Pre-configured work order settings that streamline creation. Templates define standard tasks, custom fields, and requirements.
+
+**Template Benefits:**
+- Consistency across work orders
+- Reduced API payload size
+- Faster creation
+- Fewer errors
+
+### Project
+Organizational container for related work orders. Projects group similar work and apply consistent settings.
+
+**Project Uses:**
+- Multi-site rollouts
+- Ongoing maintenance programs
+- Customer-specific work
+- Budget tracking
+
+### Custom Field
+User-defined field that extends the work order data model with organization-specific information.
+
+**Custom Field Types:**
+- Text (single line)
+- Text area (multi-line)
+- Number
+- Date
+- Dropdown (picklist)
+- Checkbox
+
+---
+
+## Data & Transformation
+
+### Field Mapping
+Configuration that defines how data flows between your system and Field Nation. Maps your field names to Field Nation's schema.
+
+**Mapping Actions:**
+- **Sync** - Direct field-to-field copy
+- **Static** - Fixed value
+- **Array Map** - Lookup table (e.g., status codes)
+- **Custom** - Transformation logic
+
+### JSONNET
+Data templating language used in connectors for complex field transformations.
+
+**Use Cases:**
+- Conditional logic
+- Data aggregation
+- Format conversion
+- Calculated fields
+
+### Broker / Middleware
+Field Nation's integration layer that handles authentication, mapping, queuing, and retry logic for pre-built connectors.
+
+**Broker Functions:**
+- Manages API credentials
+- Transforms data between systems
+- Handles retry on failure
+- Logs all operations
+
+---
+
+## Error Handling
+
+### HTTP Status Codes
+Standard codes indicating request success or failure:
+
+- **200 OK** - Success
+- **201 Created** - Resource created
+- **400 Bad Request** - Invalid input
+- **401 Unauthorized** - Auth failure
+- **403 Forbidden** - Insufficient permissions
+- **404 Not Found** - Resource doesn't exist
+- **429 Too Many Requests** - Rate limit exceeded
+- **500 Internal Server Error** - Server error
+
+### Retry Logic
+Automated attempt to resend failed requests. Uses exponential backoff to avoid overwhelming systems.
+
+**Retry Pattern:**
+- Initial delay: 10 seconds
+- Double delay each attempt
+- Maximum 7 attempts
+- Give up after final attempt
+
+### Dead Letter Queue
+Storage for messages that failed all retry attempts. Allows manual review and recovery.
+
+---
+
+## Security
+
+### Access Token
+Short-lived credential (1 hour) that authorizes API requests. Obtained via OAuth 2.0.
+
+### Client ID & Secret
+Long-lived credentials that identify your application. Used to obtain access tokens.
+
+**Security:**
+- Never expose client secret in client-side code
+- Store securely (environment variables, key vault)
+- Rotate periodically
+- Don't commit to version control
+
+### Webhook Signature
+HMAC-SHA256 hash in the `x-fn-signature` header that verifies webhook authenticity.
+
+**Verification Process:**
+1. Extract signature from header
+2. Compute HMAC of request body using your secret
+3. Compare signatures with timing-safe comparison
+4. Reject if signatures don't match
+
+### IP Whitelisting
+Restricting webhook endpoint access to known Field Nation IP addresses.
+
+**Field Nation IPs:**
+- **Sandbox**: 44.225.211.232, 44.237.253.26
+- **Production**: 3.226.5.230, 34.198.172.230
+
+---
+
+## Monitoring & Observability
+
+### Delivery Log
+Record of webhook delivery attempts—successes, failures, retries, and payloads.
+
+**Log Retention:** 2 weeks
+
+### Rate Limit
+Maximum number of API requests allowed within a time window (typically 60/minute).
+
+**Rate Limit Headers:**
+- `X-Rate-Limit-Limit` - Total allowed
+- `X-Rate-Limit-Remaining` - Requests left
+- `X-Rate-Limit-Reset` - When limit resets
+
+### Idempotency
+Property where repeating an operation produces the same result. Important for safe retries.
+
+**Idempotent Operations:**
+- GET requests (reads)
+- PUT requests (full updates)
+- DELETE requests (deletions)
+
+**Non-Idempotent:**
+- POST requests (creates new resources)
+
+---
+
+## Glossary Quick Reference
+
+| Term | Definition |
+|------|------------|
+| **API** | Application Programming Interface - programmatic access to Field Nation |
+| **Buyer** | Company that posts work orders to Field Nation |
+| **Provider** | Technician who completes field service work |
+| **Work Order** | Job to be completed at a physical location |
+| **Assignment** | Provider committed to completing a work order |
+| **Routing** | Inviting specific providers to accept work |
+| **Service Window** | Date/time range when work can be performed |
+| **Deliverable** | File or data uploaded by provider as proof of completion |
+| **Template** | Pre-configured work order settings |
+| **Webhook** | Real-time event notification sent to your endpoint |
+| **OAuth** | Authentication protocol for API access |
+| **Sandbox** | Test environment for integration development |
+
+---
+
+## Visual Learning
+
+Understanding how concepts relate helps build better integrations:
+
+```mermaid
+graph TD
+    A[Work Order Created] --> B[Work Order Published]
+    B --> C[Provider Routed]
+    C --> D[Provider Assigned]
+    D --> E[Provider Checks In]
+    E --> F[Tasks Completed]
+    F --> G[Provider Checks Out]
+    G --> H[Work Done]
+    H --> I[Buyer Approves]
+    I --> J[Provider Paid]
+```
+
+---

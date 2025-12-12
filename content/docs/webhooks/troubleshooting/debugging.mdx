@@ -1,0 +1,523 @@
+---
+title: Debugging Webhooks
+description: Advanced debugging techniques, tools, and strategies for troubleshooting complex webhook integration issues.
+---
+
+## Debugging Tools
+
+### Request Inspectors
+
+Perfect for viewing raw webhook payloads during development:
+
+| Tool | URL | Features |
+|------|-----|----------|
+| **webhook.site** | [webhook.site](https://webhook.site) | No signup, custom responses, request history |
+| **RequestBin** | [requestbin.com](https://requestbin.com) | Public/private bins, expiring URLs |
+| **ngrok Inspector** | `http://127.0.0.1:4040` | Built-in with ngrok, real-time requests |
+
+### Local Debugging Server
+
+```javascript title="debug-webhook-server.js"
+const express = require('express');
+const crypto = require('crypto');
+const fs = require('fs');
+const app = express();
+
+// Raw body for signature verification
+app.use(express.raw({ type: 'application/json' }));
+
+// Detailed logging middleware
+app.use((req, res, next) => {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body ? req.body.toString() : null
+  };
+  
+  // Log to console
+  console.log('\n' + '='.repeat(80));
+  console.log('WEBHOOK REQUEST');
+  console.log('='.repeat(80));
+  console.log(JSON.stringify(logEntry, null, 2));
+  
+  // Log to file
+  fs.appendFileSync('webhook-debug.log', JSON.stringify(logEntry) + '\n');
+  
+  next();
+});
+
+// Webhook endpoint
+app.post('/webhooks/fieldnation', (req, res) => {
+  try {
+    // Extract headers
+    const signature = req.headers['x-fn-signature'];
+    const webhookId = req.headers['x-fn-webhook-id'];
+    const eventName = req.headers['x-fn-event-name'];
+    const deliveryId = req.headers['x-fn-delivery-id'];
+    const timestamp = req.headers['x-fn-timestamp'];
+    
+    console.log('\n📋 WEBHOOK HEADERS:');
+    console.log(`  Signature: ${signature}`);
+    console.log(`  Webhook ID: ${webhookId}`);
+    console.log(`  Event: ${eventName}`);
+    console.log(`  Delivery ID: ${deliveryId}`);
+    console.log(`  Timestamp: ${timestamp}`);
+    
+    // Verify signature
+    const isValid = verifySignature(
+      req.body,
+      signature,
+      process.env.WEBHOOK_SECRET
+    );
+    
+    console.log(`\n🔐 SIGNATURE VERIFICATION: ${isValid ? '✅ VALID' : '❌ INVALID'}`);
+    
+    if (!isValid) {
+      console.log('\n❌ SIGNATURE VERIFICATION FAILED');
+      console.log('Expected secret:', process.env.WEBHOOK_SECRET);
+      console.log('Received signature:', signature);
+      return res.status(401).send('Unauthorized');
+    }
+    
+    // Parse payload
+    const payload = JSON.parse(req.body.toString());
+    
+    console.log('\n📦 PARSED PAYLOAD:');
+    console.log(JSON.stringify(payload, null, 2).substring(0, 500) + '...');
+    
+    console.log('\n✅ WEBHOOK PROCESSED SUCCESSFULLY');
+    console.log('='.repeat(80) + '\n');
+    
+    res.status(200).send('OK');
+    
+  } catch (error) {
+    console.error('\n❌ ERROR PROCESSING WEBHOOK:');
+    console.error(error);
+    console.log('='.repeat(80) + '\n');
+    
+    res.status(500).send('Internal error');
+  }
+});
+
+function verifySignature(rawBody, signature, secret) {
+  if (!signature) return false;
+  
+  const [algorithm, hash] = signature.split('=');
+  const expectedHash = crypto
+    .createHmac(algorithm, secret)
+    .update(rawBody)
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedHash),
+    Buffer.from(hash)
+  );
+}
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    secret: process.env.WEBHOOK_SECRET ? 'configured' : 'missing'
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Debug webhook server running on port ${PORT}`);
+  console.log(`📝 Logs being written to: webhook-debug.log`);
+  console.log(`🔐 Webhook secret: ${process.env.WEBHOOK_SECRET || 'NOT SET'}`);
+  console.log(`\n⏳ Waiting for webhooks...\n`);
+});
+```
+
+**Run:**
+
+```bash
+export WEBHOOK_SECRET=your-webhook-secret
+node debug-webhook-server.js
+```
+
+---
+
+## Tracing Request Flow
+
+### End-to-End Trace
+
+```mermaid
+sequenceDiagram
+    participant FN as Field Nation
+    participant LB as Load Balancer
+    participant Proxy as Reverse Proxy
+    participant App as Your App
+    participant DB as Database
+    
+    FN->>LB: POST /webhooks
+    Note over FN,LB: Check: DNS resolution
+    
+    LB->>Proxy: Forward request
+    Note over LB,Proxy: Check: SSL termination
+    
+    Proxy->>App: Proxy pass
+    Note over Proxy,App: Check: Proxy headers
+    
+    App->>App: Verify signature
+    Note over App: Check: Secret match
+    
+    App->>App: Parse JSON
+    Note over App: Check: Valid JSON
+    
+    App->>DB: Check idempotency
+    Note over App,DB: Check: Event ID exists
+    
+    App->>FN: 200 OK
+    Note over App,FN: Response < 30s
+    
+    activate App
+    App->>App: Process async
+    deactivate App
+```
+
+### Add Trace IDs
+
+```javascript
+const { v4: uuidv4 } = require('uuid');
+
+app.post('/webhooks/fieldnation', (req, res) => {
+  const traceId = uuidv4();
+  const deliveryId = req.headers['x-fn-delivery-id'];
+  
+  console.log(`[${traceId}] Starting webhook processing`);
+  console.log(`[${traceId}] Delivery ID: ${deliveryId}`);
+  
+  try {
+    console.log(`[${traceId}] Verifying signature...`);
+    verifySignature(req);
+    
+    console.log(`[${traceId}] Parsing payload...`);
+    const payload = JSON.parse(req.body.toString());
+    
+    console.log(`[${traceId}] Event: ${payload.eventName}`);
+    console.log(`[${traceId}] Work Order: ${payload.workOrderId}`);
+    
+    console.log(`[${traceId}] Responding 200 OK`);
+    res.status(200).send('OK');
+    
+    console.log(`[${traceId}] Queuing for async processing`);
+    queue.add({ ...payload, traceId });
+    
+  } catch (error) {
+    console.error(`[${traceId}] Error: ${error.message}`);
+    res.status(500).send('Internal error');
+  }
+});
+```
+
+---
+
+## Network Debugging
+
+### Test with curl
+
+```bash
+# Basic test
+curl -X POST https://your-endpoint.com/webhooks \
+  -H "Content-Type: application/json" \
+  -d '{"test": "data"}' \
+  -v
+
+# With signature
+SECRET="your-secret"
+PAYLOAD='{"test":"data"}'
+SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
+
+curl -X POST https://your-endpoint.com/webhooks \
+  -H "Content-Type: application/json" \
+  -H "x-fn-signature: sha256=$SIGNATURE" \
+  -H "x-fn-webhook-id: wh_test" \
+  -H "x-fn-event-name: test.event" \
+  -H "x-fn-delivery-id: del_test" \
+  -d "$PAYLOAD" \
+  -v
+```
+
+### Check SSL/TLS
+
+```bash
+# Verify certificate
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
+
+# Check certificate expiry
+echo | openssl s_client -servername your-domain.com \
+  -connect your-domain.com:443 2>/dev/null | \
+  openssl x509 -noout -dates
+
+# Test from specific IP (simulate Field Nation)
+curl -X POST https://your-endpoint.com/webhooks \
+  --resolve your-domain.com:443:YOUR_SERVER_IP \
+  -H "Content-Type: application/json" \
+  -d '{"test": "data"}'
+```
+
+### Check DNS
+
+```bash
+# DNS lookup
+dig your-domain.com
+
+# Check propagation
+nslookup your-domain.com
+
+# Trace route
+traceroute your-domain.com
+```
+
+---
+
+## Signature Verification Debugging
+
+### Compare Hashes
+
+```javascript
+function debugSignatureVerification(rawBody, signature, secret) {
+  console.log('\n🔐 SIGNATURE VERIFICATION DEBUG');
+  console.log('='.repeat(50));
+  
+  // Parse signature
+  const [algorithm, providedHash] = signature.split('=');
+  console.log(`Algorithm: ${algorithm}`);
+  console.log(`Provided hash: ${providedHash}`);
+  
+  // Calculate expected hash
+  const expectedHash = crypto
+    .createHmac(algorithm, secret)
+    .update(rawBody)
+    .digest('hex');
+  console.log(`Expected hash: ${expectedHash}`);
+  
+  // Compare
+  const match = expectedHash === providedHash;
+  console.log(`\nMatch: ${match ? '✅ YES' : '❌ NO'}`);
+  
+  if (!match) {
+    console.log('\n❌ MISMATCH DETAILS:');
+    console.log(`Secret used: ${secret}`);
+    console.log(`Body length: ${rawBody.length} bytes`);
+    console.log(`Body preview: ${rawBody.toString().substring(0, 100)}...`);
+    
+    // Try common issues
+    console.log('\n🔍 TRYING COMMON ISSUES:');
+    
+    // Issue 1: Body already parsed
+    try {
+      const parsedBody = JSON.parse(rawBody.toString());
+      const hashFromParsed = crypto
+        .createHmac(algorithm, secret)
+        .update(JSON.stringify(parsedBody))
+        .digest('hex');
+      console.log(`Hash from re-stringified JSON: ${hashFromParsed}`);
+      console.log(`  Match: ${hashFromParsed === providedHash ? '✅' : '❌'}`);
+    } catch (e) {}
+    
+    // Issue 2: Different secret
+    const testSecrets = [
+      secret.toUpperCase(),
+      secret.toLowerCase(),
+      secret.trim()
+    ];
+    
+    testSecrets.forEach(testSecret => {
+      const testHash = crypto
+        .createHmac(algorithm, testSecret)
+        .update(rawBody)
+        .digest('hex');
+      if (testHash === providedHash) {
+        console.log(`  ✅ MATCH with modified secret: "${testSecret}"`);
+      }
+    });
+  }
+  
+  console.log('='.repeat(50) + '\n');
+  
+  return match;
+}
+```
+
+---
+
+## Payload Debugging
+
+### Inspect Payload Structure
+
+```javascript
+function debugPayload(payload) {
+  console.log('\n📦 PAYLOAD DEBUGGING');
+  console.log('='.repeat(50));
+  
+  // Type and size
+  console.log(`Type: ${typeof payload}`);
+  console.log(`Size: ${JSON.stringify(payload).length} bytes`);
+  
+  // Structure
+  console.log('\nStructure:');
+  console.log(`  eventId: ${payload.eventId}`);
+  console.log(`  eventName: ${payload.eventName}`);
+  console.log(`  workOrderId: ${payload.workOrderId}`);
+  console.log(`  timestamp: ${payload.timestamp}`);
+  console.log(`  data keys: ${Object.keys(payload.data || {}).join(', ')}`);
+  
+  // Validation
+  console.log('\nValidation:');
+  console.log(`  Has eventId: ${!!payload.eventId ? '✅' : '❌'}`);
+  console.log(`  Has eventName: ${!!payload.eventName ? '✅' : '❌'}`);
+  console.log(`  Has data: ${!!payload.data ? '✅' : '❌'}`);
+  console.log(`  Valid timestamp: ${isValidDate(payload.timestamp) ? '✅' : '❌'}`);
+  
+  // Content preview
+  console.log('\nFull payload:');
+  console.log(JSON.stringify(payload, null, 2));
+  
+  console.log('='.repeat(50) + '\n');
+}
+
+function isValidDate(dateString) {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date);
+}
+```
+
+---
+
+## Performance Debugging
+
+### Measure Processing Time
+
+```javascript
+async function processWebhookWithTiming(payload) {
+  const timings = {};
+  
+  const start = Date.now();
+  timings.start = start;
+  
+  // Signature verification
+  let checkpoint = Date.now();
+  await verifySignature(payload);
+  timings.signatureVerification = Date.now() - checkpoint;
+  
+  // Idempotency check
+  checkpoint = Date.now();
+  const isDuplicate = await checkIdempotency(payload.eventId);
+  timings.idempotencyCheck = Date.now() - checkpoint;
+  
+  if (isDuplicate) {
+    timings.total = Date.now() - start;
+    console.log('Timings:', timings);
+    return;
+  }
+  
+  // Parse and validate
+  checkpoint = Date.now();
+  validatePayload(payload);
+  timings.validation = Date.now() - checkpoint;
+  
+  // Process
+  checkpoint = Date.now();
+  await handleEvent(payload);
+  timings.processing = Date.now() - checkpoint;
+  
+  // Total
+  timings.total = Date.now() - start;
+  
+  console.log('\n⏱️  PERFORMANCE TIMINGS:');
+  console.log(`  Signature verification: ${timings.signatureVerification}ms`);
+  console.log(`  Idempotency check: ${timings.idempotencyCheck}ms`);
+  console.log(`  Validation: ${timings.validation}ms`);
+  console.log(`  Processing: ${timings.processing}ms`);
+  console.log(`  TOTAL: ${timings.total}ms`);
+  
+  if (timings.total > 5000) {
+    console.warn('⚠️  WARNING: Processing took > 5 seconds');
+  }
+  
+  return timings;
+}
+```
+
+---
+
+## Common Debug Scenarios
+
+### Scenario 1: Webhooks Work Locally, Fail in Production
+
+**Debug Steps:**
+
+```bash
+# 1. Check environment variables
+echo $WEBHOOK_SECRET
+
+# 2. Test connectivity from production
+curl -v https://your-production-endpoint.com/health
+
+# 3. Check production logs
+tail -f /var/log/your-app/webhook.log
+
+# 4. Compare environments
+diff local.env production.env
+```
+
+### Scenario 2: Intermittent Failures
+
+**Debug with Detailed Logging:**
+
+```javascript
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  level: 'debug',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'webhook-error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'webhook-debug.log' })
+  ]
+});
+
+app.post('/webhooks', async (req, res) => {
+  const context = {
+    deliveryId: req.headers['x-fn-delivery-id'],
+    timestamp: new Date().toISOString(),
+    ip: req.ip
+  };
+  
+  logger.debug('Webhook received', context);
+  
+  try {
+    logger.debug('Verifying signature', context);
+    await verifySignature(req);
+    
+    logger.debug('Parsing payload', context);
+    const payload = JSON.parse(req.body.toString());
+    
+    logger.debug('Processing event', { ...context, eventName: payload.eventName });
+    await processEvent(payload);
+    
+    logger.info('Webhook processed successfully', context);
+    res.status(200).send('OK');
+    
+  } catch (error) {
+    logger.error('Webhook processing failed', {
+      ...context,
+      error: error.message,
+      stack: error.stack
+    });
+    res.status(500).send('Internal error');
+  }
+});
+```
+
+---

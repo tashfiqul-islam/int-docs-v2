@@ -1,0 +1,6 @@
+{
+  "title": "API References",
+  "description": "Interactive API documentation and playground",
+  "icon": "CodeXml",
+  "pages": ["rest-api", "webhooks"]
+}

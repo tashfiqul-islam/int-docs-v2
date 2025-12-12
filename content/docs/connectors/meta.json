@@ -1,0 +1,8 @@
+{
+  "title": "Connectors",
+  "description": "Pre-built integrations",
+  "icon": "Plug",
+  "root": true,
+  "defaultOpen": true,
+  "pages": ["introduction", "getting-started", "concepts", "platforms"]
+}

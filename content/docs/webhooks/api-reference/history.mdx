@@ -1,0 +1,286 @@
+---
+title: History API
+description: Access webhook change history and audit trail. Track all modifications with user, timestamp, and change details.
+---
+
+## Get Webhook History
+
+Retrieve paginated change history for a specific webhook.
+
+### Request
+
+**GET** `/api/v1/webhooks/{webhookId}/history`
+
+**Query Parameters:**
+
+<TypeTable
+  type={{
+    "page": {
+      type: "number",
+      description: "Page number (starts at 1)",
+      required: false,
+      default: "1"
+    },
+    "perPage": {
+      type: "number",
+      description: "Items per page",
+      required: false,
+      default: "25"
+    },
+    "userId": {
+      type: "string",
+      description: "Filter by user who made changes",
+      required: false
+    },
+    "search": {
+      type: "string",
+      description: "Search by userId or action",
+      required: false
+    },
+    "sortBy": {
+      type: "string",
+      description: "Sort by: updatedAt, id, userId, action",
+      required: false,
+      default: "id"
+    },
+    "sortDirection": {
+      type: "string",
+      description: "ASC or DESC",
+      required: false,
+      default: "DESC"
+    }
+  }}
+/>
+
+### Example Requests
+
+<Tabs items={["All History", "By User", "Search Actions"]}>
+  <Tab value="All History">
+    ```bash
+    curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/history \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+  <Tab value="By User">
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/history?userId=456" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+  <Tab value="Search Actions">
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/history?search=status_changed" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Tab>
+</Tabs>
+
+### Response
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "count": 5,
+    "total": 5
+  },
+  "result": [
+    {
+      "id": 123,
+      "userId": 456,
+      "action": "status_changed",
+      "changes": {
+        "status": {
+          "from": "active",
+          "to": "inactive"
+        }
+      },
+      "createdAt": "2025-01-15T10:45:00Z",
+      "updatedAt": "2025-01-15T10:45:00Z"
+    },
+    {
+      "id": 122,
+      "userId": 456,
+      "action": "events_updated",
+      "changes": {
+        "events": {
+          "added": ["workorder.status.approved"],
+          "removed": ["workorder.status.draft"]
+        }
+      },
+      "createdAt": "2025-01-15T09:30:00Z",
+      "updatedAt": "2025-01-15T09:30:00Z"
+    },
+    {
+      "id": 121,
+      "userId": 456,
+      "action": "url_changed",
+      "changes": {
+        "url": {
+          "from": "https://old-endpoint.com/webhook",
+          "to": "https://new-endpoint.com/webhooks"
+        }
+      },
+      "createdAt": "2025-01-14T15:20:00Z",
+      "updatedAt": "2025-01-14T15:20:00Z"
+    },
+    {
+      "id": 120,
+      "userId": 456,
+      "action": "webhook_created",
+      "changes": {
+        "url": "https://new-endpoint.com/webhooks",
+        "events": ["workorder.status.published", "workorder.status.draft"],
+        "status": "active"
+      },
+      "createdAt": "2025-01-14T15:00:00Z",
+      "updatedAt": "2025-01-14T15:00:00Z"
+    }
+  ]
+}
+```
+
+![Webhook Change History](/docs/webhook-v3/webhook-update-history.png)
+
+---
+
+## Change Record Structure
+
+<TypeTable
+  type={{
+    "id": {
+      type: "number",
+      description: "Unique identifier for this change record",
+      required: true
+    },
+    "userId": {
+      type: "number",
+      description: "ID of user who made the change",
+      required: true
+    },
+    "action": {
+      type: "string",
+      description: "Type of action: created, updated, deleted, status_changed, events_updated, url_changed",
+      required: true
+    },
+    "changes": {
+      type: "object",
+      description: "Detailed change information with before/after values",
+      required: true
+    },
+    "createdAt": {
+      type: "string",
+      description: "Timestamp when change was made",
+      required: true
+    },
+    "updatedAt": {
+      type: "string",
+      description: "Timestamp when record was updated",
+      required: true
+    }
+  }}
+/>
+
+---
+
+## Common Action Types
+
+| Action | Description | Changes Object |
+|--------|-------------|----------------|
+| `webhook_created` | Webhook created | Initial configuration |
+| `status_changed` | Status modified | `{ status: { from, to } }` |
+| `url_changed` | URL updated | `{ url: { from, to } }` |
+| `events_updated` | Events modified | `{ events: { added: [], removed: [] } }` |
+| `webhook_updated` | General update | Modified fields |
+| `webhook_deleted` | Webhook deleted | Final configuration |
+
+---
+
+## Code Examples
+
+```javascript
+class WebhookAudit {
+  constructor(accessToken) {
+    this.accessToken = accessToken;
+    this.baseUrl = 'https://api-sandbox.fndev.net';
+  }
+  
+  async getHistory(webhookId, filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/${webhookId}/history?${params}`,
+      {
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+  
+  async getChangesByUser(webhookId, userId) {
+    return await this.getHistory(webhookId, { userId });
+  }
+  
+  async getRecentChanges(webhookId, hours = 24) {
+    const history = await this.getHistory(webhookId, {
+      sortBy: 'createdAt',
+      sortDirection: 'DESC'
+    });
+    
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+    
+    return history.result.filter(record =>
+      new Date(record.createdAt) >= since
+    );
+  }
+  
+  async generateAuditReport(webhookId) {
+    const history = await this.getHistory(webhookId);
+    
+    const report = {
+      webhookId,
+      totalChanges: history.metadata.total,
+      changes: history.result.map(record => ({
+        timestamp: record.createdAt,
+        user: record.userId,
+        action: record.action,
+        details: this.formatChanges(record.changes)
+      }))
+    };
+    
+    return report;
+  }
+  
+  formatChanges(changes) {
+    return Object.entries(changes).map(([key, value]) => {
+      if (value.from && value.to) {
+        return `${key}: ${value.from} → ${value.to}`;
+      }
+      if (value.added && value.removed) {
+        return `${key}: +${value.added.length} -${value.removed.length}`;
+      }
+      return `${key}: ${JSON.stringify(value)}`;
+    }).join(', ');
+  }
+}
+
+// Usage
+const audit = new WebhookAudit(accessToken);
+
+// Get full history
+const history = await audit.getHistory('wh_abc123');
+
+// Get changes by specific user
+const userChanges = await audit.getChangesByUser('wh_abc123', 456);
+
+// Get recent changes
+const recent = await audit.getRecentChanges('wh_abc123', 24);
+
+// Generate audit report
+const report = await audit.generateAuditReport('wh_abc123');
+console.log(`Webhook has ${report.totalChanges} changes`);
+report.changes.forEach(change => {
+  console.log(`  ${change.timestamp} - ${change.action} by user ${change.user}`);
+});
+```
+
+---

@@ -1,0 +1,332 @@
+# Connectors: undefined
+URL: /docs/connectors/concepts/events-and-sync
+Source: content/docs/connectors/concepts/events-and-sync.mdx
+
+
+
+---
+title: Events & Synchronization
+description: Understanding work order events that trigger connector synchronization and how to configure event-based data flows.
+---
+
+## Event-Driven Architecture
+
+When work orders change in Field Nation, events trigger outbound synchronization to external systems. When external records change, webhooks trigger inbound synchronization to Field Nation.
+
+```mermaid
+graph LR
+    FN[Field Nation] -->|Event Stream| BROKER[Integration Broker]
+    BROKER -->|Update| EXT[External System]
+    
+    EXT -->|Webhook| BROKER
+    BROKER -->|Create/Update| FN
+    
+    style BROKER fill:#f9f,stroke:#333,stroke-width:2px
+```
+
+---
+
+## Available Events
+
+Field Nation publishes events for key work order lifecycle milestones. Configure which events trigger synchronization for each connector.
+
+### Work Order Creation & Status
+
+---
+
+### Provider Assignment
+
+---
+
+### Work Execution
+
+---
+
+### Schedule & Timeline
+
+---
+
+### Updates & Changes
+
+---
+
+### Messages & Communication
+
+---
+
+### Financial Events
+
+---
+
+### Additional Events
+
+---
+
+## Configuring Event Triggers
+
+### Selecting Events
+
+In the Integration Broker UI, configure which events trigger synchronization:
+
+### Navigate to Event Configuration
+
+Go to your connector settings → Event Triggers section
+
+### Select Events
+
+Check the events you want to trigger outbound sync:
+- ✅ `FN_WO_ASSIGNED` - Sync when provider assigned
+- ✅ `FN_WO_DONE` - Sync when work completed
+- ✅ `FN_WO_APPROVED` - Sync when work approved
+
+### Configure Action
+
+For each event, specify the action:
+- **Update Record** - Update existing external record
+- **Create Record** - Create new external record (typically for messages/notes)
+- **Custom Script** - Run platform-specific logic
+
+### Save Configuration
+
+Test event triggers with sample work orders
+
+---
+
+### Common Event Configurations
+
+**Minimal Sync (Status Only)**
+- `FN_WO_ASSIGNED` - Provider assigned
+- `FN_WO_DONE` - Work completed
+- `FN_WO_APPROVED` - Work approved
+
+**Standard Sync (Status + Communication)**
+- All minimal sync events
+- `FN_WO_MESSAGE_ADDED` - Sync messages
+- `FN_WO_SCHEDULE_UPDATED` - Sync schedule changes
+- `FN_WO_CUSTOM_FIELD_VALUE_UPDATED` - Sync custom fields
+
+**Comprehensive Sync (Full Lifecycle)**
+- All standard sync events
+- `FN_WO_ON_MY_WAY` - Provider en route
+- `FN_WO_PROVIDER_CHECKED_IN` - Check-in tracking
+- `FN_WO_PROVIDER_CHECKED_OUT` - Check-out tracking
+- `FN_WO_PAYMENT_APPROVED` - Financial tracking
+- `FN_WO_ATTACHMENT_ADDED` - Document sync
+
+---
+
+## Synchronization Patterns
+
+### Inbound: External System → Field Nation
+
+External systems trigger synchronization via webhooks:
+
+```mermaid
+sequenceDiagram
+    participant Ext as External System
+    participant WH as Webhook/Flow
+    participant Broker as Integration Broker
+    participant FN as Field Nation
+    
+    Ext->>WH: Record Created/Updated
+    WH->>Broker: POST /integrations/trigger/{token}
+    Broker->>Ext: GET Full Record Data
+    Broker->>Broker: Apply Field Mappings
+    Broker->>FN: Create/Update Work Order
+    FN-->>Broker: Success
+    Broker->>Ext: Update Sync Status (optional)
+```
+
+**Triggers:**
+- Record created in external system
+- Record status changed
+- Record field updated (specific fields)
+- Manual "Sync to Field Nation" button
+
+---
+
+### Outbound: Field Nation → External System
+
+Field Nation events trigger synchronization:
+
+```mermaid
+sequenceDiagram
+    participant FN as Field Nation
+    participant EVT as Event Stream
+    participant Broker as Integration Broker
+    participant Ext as External System
+    
+    FN->>EVT: Work Order Event
+    EVT->>Broker: Event Notification
+    Broker->>Broker: Check Event Config
+    Broker->>Broker: Apply Field Mappings
+    Broker->>Ext: API Call (Update Record)
+    Ext-->>Broker: Success
+    Broker->>FN: Update Sync Status
+```
+
+**Triggers:**
+- Configured Field Nation events
+- Status changes
+- Custom field updates
+- Message additions
+
+---
+
+## Event Payloads
+
+Events include complete work order context:
+
+```json
+{
+  "event_type": "FN_WO_ASSIGNED",
+  "event_timestamp": "2025-01-15T14:30:00Z",
+  "workorder": {
+    "id": 12345678,
+    "title": "On-site Network Installation",
+    "status": {
+      "id": 2,
+      "name": "assigned"
+    },
+    "assignee": {
+      "user": {
+        "id": 987654,
+        "first_name": "John",
+        "last_name": "Technician",
+        "email": "john@example.com",
+        "phone": "+1-555-0100"
+      }
+    },
+    "schedule": {
+      "service_window": {
+        "start": {
+          "utc": "2025-01-20 09:00:00"
+        },
+        "end": {
+          "utc": "2025-01-20 12:00:00"
+        }
+      }
+    },
+    "pay": {
+      "type": "fixed",
+      "amount": 250.00
+    },
+    "custom_fields": [ /* ... */ ]
+  },
+  "correlation_id": "ext-record-456"
+}
+```
+
+---
+
+## Best Practices
+
+### Event Selection
+
+  
+    Begin with minimal sync (assigned, done, approved). Add more events after core sync is stable.
+    
+    **Phase 1**: Status changes only  
+    **Phase 2**: Add messages and schedule updates  
+    **Phase 3**: Add comprehensive tracking (check-in, expenses, etc.)
+  
+  
+  
+    Some events overlap. Choose the most specific event for your use case:
+    
+    - Use `FN_WO_STATUS_ROUTED` (once) instead of `FN_WO_ROUTED` (per provider) if you only need to know routing occurred
+    - Use `FN_WO_ASSIGNED` if you don't need separate confirmation tracking
+  
+  
+  
+    High-frequency events can overwhelm external APIs:
+    
+    - `FN_WO_MESSAGE_ADDED` - Can fire frequently
+    - `FN_WO_PROVIDER_CHECKED_IN/OUT` - Multiple per work order
+    - `FN_WO_UPDATED` - May fire for many field changes
+    
+    Ensure your external system can handle the volume or implement batching.
+  
+
+---
+
+### Synchronization Strategy
+
+**Bidirectional Consistency**
+- Map statuses bidirectionally (FN → External and External → FN)
+- Use correlation IDs to track related records
+- Handle sync conflicts (last-write-wins or manual resolution)
+
+**Idempotency**
+- Ensure same event processed multiple times produces same result
+- Check correlation ID before creating new records
+- Use upsert logic (create if not exists, update if exists)
+
+**Error Handling**
+- Configure retries for temporary failures
+- Set up dead letter queue monitoring
+- Alert on persistent sync failures
+
+---
+
+## Monitoring Event Sync
+
+### Integration Logs
+
+Track event processing in Integration Broker logs:
+
+- Event received timestamp
+- Field mappings applied
+- API call made to external system
+- Success/failure status
+- Error details (if failed)
+
+### Health Metrics
+
+Monitor key indicators:
+
+- **Event Processing Rate**: Events/minute
+- **Success Rate**: % successful syncs
+- **Average Latency**: Time from event to external update
+- **Error Rate**: % failed syncs
+- **Queue Depth**: Pending events in queue
+
+---
+
+## Troubleshooting Events
+
+  
+    **Check:**
+    - Event enabled in connector configuration
+    - Work order status actually changed to trigger event
+    - Integration not paused/disabled
+    - Event filters not excluding work order
+    
+    **Debug:**
+    Review Integration Broker logs for event received confirmation
+  
+  
+  
+    **Causes:**
+    - Some events naturally fire multiple times (ROUTED per provider, CHECK_IN per check-in)
+    - Retry logic if external API failed
+    - Webhook configured multiple times
+    
+    **Solution:**
+    Implement idempotency in external system using correlation ID
+  
+  
+  
+    **Check:**
+    - Field mappings configured for outbound sync
+    - External API credentials valid
+    - Correlation ID linking FN work order to external record
+    - External API not rate limiting
+    
+    **Debug:**
+    Check Integration Broker logs for API call details and response
+  
+
+[Complete troubleshooting guide →](/docs/connectors/concepts/troubleshooting)
+
+---

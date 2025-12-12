@@ -1,0 +1,463 @@
+# Resources: undefined
+URL: /docs/resources/error-codes
+Source: content/docs/resources/error-codes.mdx
+
+
+
+---
+title: Error Codes
+description: Complete reference for HTTP status codes, error messages, and troubleshooting guidance for Field Nation API and webhook errors.
+icon: CircleAlert
+---
+
+## HTTP Status Codes
+
+### Success Codes (2xx)
+
+**When you see these:** Your request was processed successfully. No action needed.
+
+---
+
+### Client Error Codes (4xx)
+
+These indicate problems with your request that need to be fixed before retrying.
+
+#### 400 Bad Request
+
+**Meaning:** The request is malformed or contains invalid parameters.
+
+**Common Causes:**
+- Invalid JSON syntax
+- Missing required fields
+- Invalid data types (string instead of number)
+- Malformed URLs or query parameters
+
+**Example Error Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "path": "/api/v1/webhooks"
+  },
+  "errors": [
+    {
+      "code": 400,
+      "message": "Invalid request: 'url' must be a valid HTTPS URL"
+    }
+  ],
+  "result": {}
+}
+```
+
+**Solution:**
+- Validate JSON structure before sending
+- Check all required fields are present
+- Verify data types match API specification
+- Review OpenAPI documentation for correct format
+
+---
+
+#### 401 Unauthorized
+
+**Meaning:** Authentication failed or access token is invalid/expired.
+
+**Common Causes:**
+- Missing `Authorization` header
+- Expired access token (tokens expire after 1 hour)
+- Invalid client credentials
+- Incorrect token format
+
+**Example Error Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z"
+  },
+  "errors": [
+    {
+      "code": 401,
+      "message": "Invalid or expired access token"
+    }
+  ],
+  "result": {}
+}
+```
+
+**Solution:**
+- Generate a new access token using OAuth 2.0
+- Ensure `Authorization: Bearer {token}` header is included
+- Implement token refresh logic before expiry
+- Verify client credentials are correct
+
+---
+
+#### 403 Forbidden
+
+**Meaning:** Authentication succeeded but you don't have permission for this resource.
+
+**Common Causes:**
+- Insufficient permissions for the requested operation
+- API user lacks required role or access level
+- Attempting to access another company's resources
+
+**Solution:**
+- Verify your API user has appropriate permissions
+- Contact Field Nation support to review access levels
+- Ensure you're accessing resources within your company
+
+---
+
+#### 404 Not Found
+
+**Meaning:** The requested resource doesn't exist.
+
+**Common Causes:**
+- Incorrect webhook ID, work order ID, or other identifier
+- Resource was deleted
+- Typo in endpoint URL
+- Using wrong environment (Sandbox vs Production)
+
+**Example:**
+
+```bash
+# Wrong webhook ID
+GET /api/v1/webhooks/wh_invalid
+# Returns 404
+
+# Correct
+GET /api/v1/webhooks/wh_abc123def456
+```
+
+**Solution:**
+- Verify resource IDs are correct
+- Check resource still exists
+- Review endpoint URL for typos
+- Confirm you're using the correct environment
+
+---
+
+#### 422 Unprocessable Entity
+
+**Meaning:** Request is well-formed but contains semantic errors or fails validation.
+
+**Common Causes:**
+- Invalid field values (e.g., invalid email format)
+- Business rule violations
+- Conflicting data
+- Unsupported event names
+
+**Example Error Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z"
+  },
+  "errors": [
+    {
+      "code": 422,
+      "message": "Validation failed: 'events' must contain at least one valid event name"
+    }
+  ],
+  "result": {}
+}
+```
+
+**Solution:**
+- Review validation error messages
+- Check field formats match requirements
+- Verify all referenced resources exist
+- Consult API documentation for field constraints
+
+---
+
+#### 429 Too Many Requests
+
+**Meaning:** You've exceeded the API rate limit.
+
+**Common Causes:**
+- Making too many requests too quickly
+- Not respecting rate limit headers
+- Burst traffic exceeding limits
+
+**Example Error Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z"
+  },
+  "errors": [
+    {
+      "code": 429,
+      "message": "Rate limit exceeded. Retry after 60 seconds."
+    }
+  ],
+  "result": {}
+}
+```
+
+**Response Headers:**
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1642252800
+```
+
+**Solution:**
+- Implement exponential backoff for retries
+- Check `X-RateLimit-*` headers to track usage
+- Wait until `X-RateLimit-Reset` timestamp before retrying
+- Reduce request frequency or implement request queuing
+
+---
+
+### Server Error Codes (5xx)
+
+These indicate problems on Field Nation's side. Implement retry logic for these errors.
+
+#### 500 Internal Server Error
+
+**Meaning:** An unexpected error occurred on Field Nation's servers.
+
+**Common Causes:**
+- Temporary server issues
+- Unhandled edge cases
+- Database connectivity problems
+
+**Solution:**
+- Retry the request after a short delay
+- Implement exponential backoff (wait 1s, 2s, 4s, 8s...)
+- If error persists, contact Field Nation support
+- Include request details in support case
+
+---
+
+#### 502 Bad Gateway
+
+**Meaning:** Field Nation's gateway received an invalid response from upstream server.
+
+**Common Causes:**
+- Temporary network issues
+- Service deployment in progress
+- Load balancer problems
+
+**Solution:**
+- Retry after a few seconds
+- Check [status.fieldnation.com](https://status.fieldnation.com) for incidents
+- If persistent, contact support
+
+---
+
+#### 503 Service Unavailable
+
+**Meaning:** Service is temporarily unavailable, usually due to maintenance or overload.
+
+**Common Causes:**
+- Scheduled maintenance
+- System overload
+- Service restart
+
+**Solution:**
+- Check `Retry-After` header if present
+- Wait and retry after a delay
+- Monitor [status.fieldnation.com](https://status.fieldnation.com)
+- If extended, contact support
+
+---
+
+#### 504 Gateway Timeout
+
+**Meaning:** Field Nation's gateway didn't receive a response in time.
+
+**Common Causes:**
+- Large payload processing
+- Slow database queries
+- Network latency
+
+**Solution:**
+- Retry the request
+- If creating/updating large resources, break into smaller operations
+- Contact support if consistently occurring
+
+---
+
+## Webhook-Specific Errors
+
+### Delivery Failures
+
+| Error | Cause | Retry? | Solution |
+|-------|-------|--------|----------|
+| **Connection Refused** | Endpoint server not running | Yes | Start your server, verify port, check firewall |
+| **DNS Resolution Failed** | Domain doesn't resolve | No | Fix DNS configuration, wait for propagation |
+| **SSL Certificate Error** | Invalid/expired certificate | No | Renew certificate, use valid CA-signed cert |
+| **Connection Timeout** | Endpoint too slow to respond | Yes | Optimize response time, use async processing |
+| **Signature Verification Failed** | Wrong secret or body modified | No | Use correct secret, verify with raw body |
+
+[Complete webhook troubleshooting →](/docs/webhooks/troubleshooting/delivery-failures)
+
+---
+
+## Integration-Specific Errors
+
+### Connector Errors
+
+**Authentication Failure:**
+```
+Error: OAuth token expired or invalid
+```
+
+**Solution:** Refresh connector authentication in Integration Broker settings.
+
+**Field Mapping Error:**
+```
+Error: Required field 'external_id' is missing
+```
+
+**Solution:** Update field mappings to include all required fields.
+
+**Data Type Mismatch:**
+```
+Error: Cannot convert 'text' to number for field 'priority'
+```
+
+**Solution:** Add data type conversion in field mapping or JSONNET transform.
+
+---
+
+## Error Handling Best Practices
+
+### Implement Retry Logic
+
+```javascript
+async function apiRequestWithRetry(url, options, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Success
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      // Client errors - don't retry
+      if (response.status >= 400 && response.status < 500) {
+        const error = await response.json();
+        throw new Error(`Client error: ${JSON.stringify(error.errors)}`);
+      }
+      
+      // Server errors - retry with backoff
+      if (response.status >= 500) {
+        if (attempt === maxRetries) {
+          throw new Error(`Max retries exceeded: ${response.status}`);
+        }
+        
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
+        await sleep(delay);
+        continue;
+      }
+      
+    } catch (error) {
+      if (attempt === maxRetries) throw error;
+      
+      const delay = Math.pow(2, attempt) * 1000;
+      await sleep(delay);
+    }
+  }
+}
+```
+
+### Log Errors with Context
+
+```javascript
+function logError(error, context) {
+  console.error('API Error:', {
+    timestamp: new Date().toISOString(),
+    error: error.message,
+    stack: error.stack,
+    statusCode: error.statusCode,
+    requestUrl: context.url,
+    requestMethod: context.method,
+    requestBody: context.body,
+    responseBody: context.response
+  });
+}
+```
+
+### Handle Different Error Types
+
+```javascript
+try {
+  const response = await createWebhook(config);
+} catch (error) {
+  if (error.statusCode === 400) {
+    // Validation error - fix request
+    console.error('Invalid request:', error.message);
+  } else if (error.statusCode === 401) {
+    // Auth error - refresh token
+    await refreshAccessToken();
+    return await createWebhook(config);
+  } else if (error.statusCode === 429) {
+    // Rate limit - wait and retry
+    await sleep(error.retryAfter * 1000);
+    return await createWebhook(config);
+  } else if (error.statusCode >= 500) {
+    // Server error - retry with backoff
+    return await retryWithBackoff(() => createWebhook(config));
+  }
+}
+```
+
+---
+
+## Debugging Tools
+
+### Check API Response
+
+```bash
+# Verbose curl output
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -v
+
+# Save response headers
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -D headers.txt
+
+# Follow redirects
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -L
+```
+
+### Validate JSON Payload
+
+```bash
+# Validate JSON syntax
+cat payload.json | jq .
+
+# Pretty print
+cat payload.json | jq '.'
+
+# Extract specific field
+cat payload.json | jq '.errors[0].message'
+```
+
+---
+
+## Getting Help
+
+If you encounter errors not covered here:
+
+1. **Check System Status**: [status.fieldnation.com](https://status.fieldnation.com)
+2. **Review Documentation**: Search for specific error messages
+3. **Contact Support**: Submit a case with error details
+
+[Support resources →](/docs/resources/support)
+
+---

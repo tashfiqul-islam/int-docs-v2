@@ -1,0 +1,6 @@
+{
+  "title": "NetSuite",
+  "description": "Integrate Field Nation with NetSuite ERP",
+  "icon": "DollarSign",
+  "pages": ["overview", "configuration", "workflow"]
+}

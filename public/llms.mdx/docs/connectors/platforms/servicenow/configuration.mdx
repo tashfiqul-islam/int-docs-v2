@@ -1,0 +1,403 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/servicenow/configuration
+Source: content/docs/connectors/platforms/servicenow/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the ServiceNow connector in Field Nation's Integration Broker to establish API connection and field mappings.
+---
+
+## Configuration Steps Overview
+
+###Access Integration Broker
+
+Navigate to Field Nation's Integration Broker interface
+
+### Select ServiceNow
+
+Choose ServiceNow connector from available integrations
+
+### Configure Connection
+
+Enter ServiceNow instance URL and authentication credentials
+
+### Select Table
+
+Specify which ServiceNow table to integrate (Incident, Case, etc.)
+
+### Refresh Fields
+
+Discover available fields from ServiceNow metadata
+
+### Configure Mappings
+
+Map fields between ServiceNow and Field Nation
+
+### Test & Save
+
+Validate configuration and save settings
+
+---
+
+## Step 1: Access Integration Broker
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+Select "ServiceNow" from the list of available connectors.
+
+---
+
+## Step 2: Basic Settings
+
+### Instance Name
+
+**Optional** - Descriptive name for this integration
+
+**Examples:**
+- "Production ServiceNow"
+- "ITSM Integration - NA"
+- "Dev Instance"
+
+**Use Case**: Helpful when managing multiple ServiceNow integrations.
+
+---
+
+### Instance URL
+
+**Required** - Your ServiceNow instance URL
+
+**Format:**
+```
+https://instance-name.service-now.com
+```
+
+**Examples:**
+- `https://dev12345.service-now.com` (developer instance)
+- `https://company.service-now.com` (production)
+- `https://companytest.service-now.com` (test instance)
+
+**Find Your Instance URL:**
+1. Log into ServiceNow
+2. Check browser address bar
+3. Copy full URL up to `.service-now.com`
+
+> **Do not include** trailing slashes or API paths. Just the base instance URL.
+
+---
+
+### Table Name
+
+**Required** - ServiceNow table API name for integration
+
+**Standard Tables:**
+- `incident` - IT Incidents
+- `case` - Customer Service Cases
+- `problem` - Problem Management
+- `sc_task` - Service Catalog Tasks
+
+**Custom Tables:**
+- `u_field_service_request` - Custom FSM table
+- `u_work_order` - Custom work order table
+
+**Format Rules:**
+- Use table name, not label
+- Standard tables: lowercase (`incident`)
+- Custom tables: Prefix with `u_` (`u_my_table`)
+
+**Field Access:**
+- All fields on the base table
+- Fields from directly related tables via reference fields
+
+---
+
+## Step 3: Authentication
+
+ServiceNow connector supports OAuth 2.0 or Basic Auth.
+
+### OAuth 2.0 (Recommended)
+
+### Create OAuth Application in ServiceNow
+
+1. Navigate to **System OAuth → Application Registry**
+2. Click **New** → **Create an OAuth API endpoint for external clients**
+3. Configure:
+   - **Name**: Field Nation Integration
+   - **Client ID**: Auto-generated (copy this)
+   - **Client Secret**: Auto-generated (copy this)
+   - **Redirect URL**: Leave blank (using Client Credentials)
+   - **Token Lifespan**: 3600 (1 hour)
+   - **Refresh Token Lifespan**: 86400 (24 hours)
+4. Save OAuth Application
+
+### Configure in Field Nation
+
+In Integration Broker, select **OAuth 2.0** and enter:
+
+**Client ID**: From ServiceNow OAuth app
+
+**Client Secret**: From ServiceNow OAuth app
+
+**Token URL**: `https://instance.service-now.com/oauth_token.do`
+
+**Grant Type**: `client_credentials`
+
+---
+
+### Basic Authentication
+
+### Create Integration User in ServiceNow
+
+1. Navigate to **User Administration → Users**
+2. Click **New**
+3. Configure:
+   - **User ID**: `integration.fieldnation`
+   - **First Name**: Field Nation
+   - **Last Name**: Integration
+   - **Email**: integration@company.com
+   - **Password**: Strong, unique password
+4. Assign Roles:
+   - `web_service_admin` or
+   - `rest_api_explorer`
+5. Save User
+
+### Configure in Field Nation
+
+In Integration Broker, select **Basic Auth** and enter:
+
+**Username**: ServiceNow user ID (e.g., `integration.fieldnation`)
+
+**Password**: User's password
+
+> [INFO] **Best Practice**: OAuth 2.0 is more secure and recommended for production. Basic Auth is simpler for testing/development environments.
+
+---
+
+## Step 4: Test Connection
+
+### Click "Test Connection"
+
+Button in configuration form
+
+### Integration Broker Validates
+
+- Authenticates with ServiceNow
+- Queries table metadata
+- Verifies permissions
+
+### Review Result
+
+**Success**: ✅ Green confirmation
+- Connection established
+- Authentication valid
+- Table accessible
+
+**Failure**: ❌ Error message
+- Check error details
+- Fix configuration
+- Retry
+
+### Common Authentication Errors
+
+  
+    **Cause**: Invalid OAuth credentials
+    
+    **Solution:**
+    1. Verify Client ID and Secret correct
+    2. Ensure OAuth app active in ServiceNow
+    3. Check Token URL matches instance
+    4. Regenerate credentials if needed
+  
+  
+  
+    **Cause**: Invalid username/password
+    
+    **Solution:**
+    1. Verify credentials correct
+    2. Check user active in ServiceNow
+    3. Ensure user has required roles
+    4. Test login to ServiceNow directly
+  
+  
+  
+    **Cause**: Insufficient permissions
+    
+    **Solution:**
+    1. Grant `web_service_admin` or `rest_api_explorer` role
+    2. Verify ACLs allow table access
+    3. Check field-level permissions
+    4. Review IP restrictions
+  
+  
+  
+    **Cause**: Table doesn't exist or name incorrect
+    
+    **Solution:**
+    1. Verify table name correct (case-sensitive)
+    2. Check table exists in ServiceNow
+    3. For custom tables, confirm `u_` prefix
+    4. Ensure table not in different scope/app
+  
+
+---
+
+## Step 5: Get Trigger URL
+
+Once authentication succeeds, Field Nation generates your unique trigger URL.
+
+**Format:**
+```
+https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
+```
+
+**Copy this URL** - You'll need it when configuring the REST Message in ServiceNow.
+
+> [INFO] **Security**: The client token authenticates incoming webhooks. Keep this URL secure.
+
+---
+
+## Step 6: Refresh Fields
+
+Discover available fields for mapping.
+
+### Click "Refresh Fields"
+
+Button in field mapping section
+
+### Broker Queries ServiceNow
+
+- Calls Table API metadata endpoint
+- Retrieves field definitions
+- Discovers related table fields
+
+### Fields Populate
+
+Dropdown menus fill with:
+- Standard fields (short_description, description, state)
+- Custom fields (u_custom_field)
+- Reference fields (assignment_group.name, location.city)
+- Choice values (for state, priority, etc.)
+
+---
+
+## Step 7: Configure Field Mappings
+
+Map data between ServiceNow and Field Nation.
+
+### Inbound (ServiceNow → Field Nation)
+
+**Example Mappings:**
+```
+ServiceNow Field              → FN Field                   Action
+─────────────────────────────────────────────────────────────────
+short_description            → title                      Sync
+description                  → description                Sync
+location.name                → location.company.name      Sync
+priority                     → priority                   Array Map
+state                        → status_id                  Array Map
+caller_id.email              → contact.email              Sync
+work_start                   → schedule.start             Date Convert
+```
+
+### Outbound (Field Nation → ServiceNow)
+
+**Example Mappings:**
+```
+FN Field                     → ServiceNow Field           Action
+─────────────────────────────────────────────────────────────────
+status.name                  → state                      Array Map
+assignee.user.name           → assigned_to.name           Sync
+completion_notes             → work_notes                 Sync
+completion_date              → resolved_at                Date Convert
+```
+
+### State/Status Mapping
+
+**ServiceNow States** (Incident):
+```
+1 = New
+2 = In Progress
+3 = On Hold
+4 = Resolved
+5 = Closed
+6 = Cancelled
+```
+
+**Field Nation Status IDs:**
+```
+1 = Draft
+2 = Assigned
+3 = Work Done
+4 = Approved
+5 = Paid
+```
+
+**Array Map Configuration:**
+```jsonnet
+{
+  "source": "state",
+  "target": "status_id",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "1", "value": "1" },  // New → Draft
+    { "compare": "2", "value": "2" },  // In Progress → Assigned
+    { "compare": "4", "value": "3" },  // Resolved → Work Done
+    { "compare": "5", "value": "4" }   // Closed → Approved
+  ],
+  "default": "1"
+}
+```
+
+[Complete field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 8: Save Configuration
+
+### Review Settings
+
+Verify all configuration:
+- ☐ Instance URL correct
+- ☐ Table name correct
+- ☐ Authentication successful
+- ☐ Fields refreshed
+- ☐ Inbound mappings configured
+- ☐ Outbound mappings configured
+
+### Save
+
+Click "Save" to persist configuration
+
+### Note Trigger URL
+
+Copy trigger URL for ServiceNow REST Message configuration
+
+---
+
+## Configuration Checklist
+
+### Field Nation Configuration
+- ☐ Instance name configured
+- ☐ Instance URL entered
+- ☐ Table name correct
+- ☐ Authentication method selected
+- ☐ Credentials entered
+- ☐ Connection tested successfully
+- ☐ Trigger URL copied
+- ☐ Fields refreshed
+- ☐ Inbound field mappings configured
+- ☐ Outbound field mappings configured
+- ☐ Configuration saved
+
+### ServiceNow Configuration (Next Steps)
+- ☐ REST Message created
+- ☐ Business Rule created
+- ☐ Business Rule conditions defined
+- ☐ Business Rule activated
+- ☐ Integration tested with sample record
+
+[ServiceNow workflow setup →](/docs/connectors/platforms/servicenow/workflow)
+
+---

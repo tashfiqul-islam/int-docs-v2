@@ -1,0 +1,552 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/rest-connector/configuration
+Source: content/docs/connectors/platforms/rest-connector/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the REST Connector by uploading your OpenAPI spec, selecting endpoints, and setting up authentication.
+---
+
+## Prerequisites
+
+Before starting, gather:
+
+- ☐ OpenAPI specification file (JSON or YAML)
+- ☐ API credentials (username and password for Basic Auth)
+- ☐ API base URL
+- ☐ Endpoint paths for:
+  - Record metadata (schema/fields)
+  - Record fetch (get by ID)
+  - Record create
+  - Record update
+  - Attachments upload (optional)
+- ☐ Admin access to Field Nation integrations
+
+---
+
+## Step 1: Access REST Connector
+
+Navigate to Field Nation's Integration Broker:
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+### Log In
+
+Use your Field Nation buyer account credentials
+
+### Select REST Connector
+
+Find "REST Connector" in the list of available connectors
+
+### Click Configure
+
+Open the REST Connector configuration form
+
+---
+
+## Step 2: Upload OpenAPI Specification
+
+The OpenAPI spec enables automatic endpoint discovery and field mapping.
+
+### Prepare Your Spec File
+
+**Supported Formats:**
+- OpenAPI 3.x (JSON or YAML)
+- OpenAPI 2.x / Swagger 2.0 (JSON or YAML)
+
+**Where to Get It:**
+- API documentation portal
+- `/swagger.json` or `/api-docs` endpoint
+- API provider's developer resources
+- Tools: Postman, Swagger UI, Stoplight
+
+**Validate Before Upload:**
+```bash
+# Using Swagger Editor (online or local)
+https://editor.swagger.io/
+
+# Or CLI tools
+swagger-cli validate openapi.json
+```
+
+---
+
+### Upload Process
+
+### Click "Upload OpenAPI Spec"
+
+In the REST Connector configuration form
+
+### Select File
+
+Choose your OpenAPI spec file (`.json` or `.yaml`/`.yml`)
+
+### Validate
+
+Integration Broker parses and validates the specification
+
+### Confirm Success
+
+Green confirmation message: "OpenAPI specification uploaded successfully"
+
+**What Happens:**
+- Broker parses spec to discover endpoints
+- Extracts request/response schemas
+- Populates endpoint dropdown menus
+- Enables field discovery
+
+---
+
+## Step 3: Configure Endpoints
+
+Select which API endpoints to use for each operation.
+
+### Record Metadata Endpoint
+
+**Purpose**: Get field definitions and schema information
+
+**Required**: Yes - enables field mapping UI
+
+**Example Endpoints:**
+- `GET /api/v1/tickets/metadata`
+- `GET /api/v1/schema/ticket`
+- `OPTIONS /api/v1/tickets` (if returns schema)
+
+**Configuration:**
+1. Click "Record Metadata" dropdown
+2. Select endpoint from list (populated from OpenAPI spec)
+3. Select HTTP method (usually `GET`)
+
+**Dropdown Contents:**
+- All endpoints from uploaded OpenAPI spec
+- Filtered to relevant operations
+- Shows path + method (e.g., `GET /api/v1/metadata`)
+
+---
+
+### Record Fetch Endpoint
+
+**Purpose**: Retrieve single record by ID
+
+**Required**: Yes - fetches data for inbound sync
+
+**Example Endpoints:**
+- `GET /api/v1/tickets/{id}`
+- `GET /api/v1/records/{ticket_id}`
+- `GET /api/v1/workorders/{wo_id}`
+
+**Configuration:**
+1. Click "Record Fetch" dropdown
+2. Select endpoint with ID parameter
+3. Method: `GET`
+
+**ID Parameter:**
+- Endpoint must accept ID parameter (path or query)
+- Example: `/tickets/{id}` or `/tickets?id={id}`
+- Broker substitutes actual ID at runtime
+
+---
+
+### Record Create Endpoint
+
+**Purpose**: Create new records in external system
+
+**Required**: Yes - core functionality
+
+**Example Endpoints:**
+- `POST /api/v1/tickets`
+- `POST /api/v1/workorders/create`
+- `PUT /api/v1/records` (if PUT creates)
+
+**Configuration:**
+1. Click "Record Create" dropdown
+2. Select creation endpoint
+3. Method: usually `POST` (sometimes `PUT`)
+
+**Request Body:**
+- Broker constructs body from field mappings
+- Format determined by OpenAPI spec (JSON, XML, etc.)
+- Uses schema defined in spec for validation
+
+---
+
+### Record Update Endpoint
+
+**Purpose**: Update existing records
+
+**Required**: Recommended (enables bidirectional sync)
+
+**Example Endpoints:**
+- `PUT /api/v1/tickets/{id}`
+- `PATCH /api/v1/tickets/{id}`
+- `POST /api/v1/tickets/{id}/update`
+
+**Configuration:**
+1. Click "Record Update" dropdown
+2. Select update endpoint
+3. Method: `PUT`, `PATCH`, or `POST`
+
+**PUT vs PATCH:**
+- `PUT`: Full record replacement
+- `PATCH`: Partial update (only changed fields)
+- Check your API's behavior - configure accordingly
+
+---
+
+### Attachments Upload Endpoint
+
+**Purpose**: Upload files/documents to records
+
+**Required**: Optional - only if file sync needed
+
+**Example Endpoints:**
+- `POST /api/v1/tickets/{id}/attachments`
+- `POST /api/v1/files/upload`
+- `PUT /api/v1/records/{id}/documents`
+
+**Configuration:**
+1. Click "Attachments Upload" dropdown
+2. Select file upload endpoint
+3. Method: usually `POST`
+
+**File Handling:**
+- Multipart/form-data or base64 encoding
+- Determined by OpenAPI spec
+- Broker handles encoding automatically
+
+---
+
+## Step 4: Set Authentication
+
+REST Connector supports **Basic Authentication** only.
+
+### Enter Credentials
+
+**Format**: `username:password`
+
+**Examples:**
+```
+api_user:secure_password_123
+integration@company.com:MyP@ssw0rd!
+client_12345:abc123xyz789
+```
+
+**Configuration:**
+1. Locate "Authentication" section
+2. Enter credentials in format: `username:password`
+3. Broker encodes automatically to `Authorization: Basic base64(username:password)`
+
+---
+
+### Security Best Practices
+
+  
+    Don't use personal account credentials.
+    
+    **Benefits:**
+    - Better audit trails
+    - Easier credential rotation
+    - Integration doesn't break if personal account deactivated
+    - Granular permission control
+  
+  
+  
+    Grant only required API access:
+    - Read: Metadata, record fetch
+    - Write: Record create, update
+    - Upload: Attachments (if needed)
+    
+    **Don't grant:**
+    - Admin privileges
+    - Delete permissions (unless required)
+    - Access to unrelated resources
+  
+  
+  
+    **Schedule:**
+    - Every 90 days (recommended)
+    - Immediately if compromise suspected
+    - When team member with access leaves
+    
+    **Process:**
+    1. Generate new credentials in external system
+    2. Update Field Nation configuration
+    3. Test connection
+    4. Deactivate old credentials
+  
+  
+  
+    Field Nation handles storage securely:
+    - Encrypted at rest (AES-256)
+    - Never logged or exposed in errors
+    - Transmitted over TLS 1.2+
+    
+    **Your responsibility:**
+    - Don't share credentials
+    - Use strong, unique passwords
+    - Document access in secure location
+  
+
+---
+
+## Step 5: Test Connection
+
+Verify REST Connector can communicate with your API.
+
+### Click "Test Connection"
+
+Button near authentication section
+
+### Broker Validates
+
+- Sends request to Record Metadata endpoint
+- Authenticates using provided credentials
+- Parses response
+
+### Review Result
+
+**Success**: ✅ Green confirmation
+- Connection successful
+- Endpoints reachable
+- Authentication valid
+
+**Failure**: ❌ Error message
+- Authentication failed: Check credentials
+- Endpoint not found: Verify URLs
+- Network error: Check firewall/VPN
+- SSL error: Verify certificate validity
+
+---
+
+### Common Connection Errors
+
+  
+    **Cause**: Invalid credentials
+    
+    **Solution:**
+    1. Verify username:password format correct
+    2. Check credentials valid in external system
+    3. Ensure API user has API access enabled
+    4. Test credentials with `curl`:
+    
+    ```bash
+    curl -u "username:password" \
+         https://your-api.com/api/v1/metadata
+    ```
+  
+  
+  
+    **Cause**: Endpoint doesn't exist or wrong URL
+    
+    **Solution:**
+    1. Verify endpoint paths in OpenAPI spec
+    2. Check API base URL correct
+    3. Ensure endpoint actually exists in external system
+    4. Test endpoint directly with API client (Postman)
+  
+  
+  
+    **Cause**: Cannot reach external API
+    
+    **Solution:**
+    1. Verify API is publicly accessible (or VPN configured)
+    2. Check firewall rules
+    3. Whitelist Field Nation IP addresses
+    4. Verify SSL certificate valid (not expired)
+    
+    [Field Nation IPs →](/docs/resources/environments)
+  
+  
+  
+    **Cause**: Invalid or self-signed SSL certificate
+    
+    **Solution:**
+    1. Use valid, CA-signed certificate
+    2. Update certificate if expired
+    3. Ensure certificate matches domain
+    4. For testing: Use non-production environment with valid cert
+  
+
+---
+
+## Step 6: Refresh Fields
+
+Discover available fields for mapping.
+
+### Click "Refresh Fields"
+
+Button in field mapping section
+
+### Broker Queries API
+
+- Calls Record Metadata endpoint
+- Retrieves field definitions
+- Parses schema from response
+
+### Fields Populate
+
+Available fields appear in dropdown menus:
+- Standard fields
+- Custom fields
+- Required vs optional
+- Data types
+
+**Field Discovery Includes:**
+- Field names and API keys
+- Data types (string, integer, boolean, etc.)
+- Required/optional status
+- Enum values for picklists
+- Nested object structures
+
+---
+
+## Step 7: Configure Field Mappings
+
+Map data between Field Nation and your external system.
+
+### Inbound Mappings (External → Field Nation)
+
+Map external system fields to Field Nation work order fields:
+
+**Example:**
+```
+External Field → Field Nation Field
+──────────────────────────────────
+ticket_title → title
+ticket_description → description
+priority_level → priority (with Array Map)
+customer_name → location.company.name
+scheduled_date → schedule.start (with Date Convert)
+```
+
+### Outbound Mappings (Field Nation → External)
+
+Map Field Nation fields to external system updates:
+
+**Example:**
+```
+Field Nation Field → External Field
+────────────────────────────────────
+status.name → ticket_status (with Array Map)
+assignee.user.email → technician_email
+completion_notes → resolution_notes
+approved_amount → final_cost
+```
+
+[Complete field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+### Field Mapping Actions
+
+Use standard transformation actions:
+
+**Sync**: Direct copy
+```jsonnet
+{
+  "source": "external_field",
+  "target": "fn_field",
+  "action": "sync"
+}
+```
+
+**Array Map**: Status mapping
+```jsonnet
+{
+  "source": "status",
+  "target": "fn_status",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "open", "value": "1" },
+    { "compare": "in_progress", "value": "2" },
+    { "compare": "completed", "value": "5" }
+  ]
+}
+```
+
+**Date Convert**: Date formatting
+```jsonnet
+{
+  "source": "scheduled_date",
+  "target": "schedule.start",
+  "action": "date_convert",
+  "input_format": "YYYY-MM-DD",
+  "output_format": "YYYY-MM-DD HH:mm:ss"
+}
+```
+
+[All transformation actions →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 8: Save & Test
+
+### Review Configuration
+
+Verify all settings:
+- ☐ OpenAPI spec uploaded
+- ☐ All required endpoints selected
+- ☐ Authentication configured
+- ☐ Connection test passed
+- ☐ Fields refreshed
+- ☐ Inbound mappings configured
+- ☐ Outbound mappings configured (if needed)
+
+### Save Configuration
+
+Click "Save" to persist settings
+
+### Test with Sample Data
+
+Create a test work order in Field Nation:
+1. Trigger should sync to external system
+2. Check Integration Broker logs
+3. Verify record created in external system
+4. Confirm field values correct
+
+### Monitor Initial Syncs
+
+Watch first few synchronizations:
+- Check for errors
+- Verify field mappings working
+- Adjust as needed
+
+---
+
+## Troubleshooting
+
+  
+    **Issue**: Dropdown menus empty or missing expected fields
+    
+    **Solution:**
+    1. Click "Refresh Fields" again
+    2. Check Record Metadata endpoint returns field schema
+    3. Verify OpenAPI spec includes response schemas
+    4. Test metadata endpoint directly with API client
+    5. Review Integration Broker logs for parsing errors
+  
+  
+  
+    **Issue**: No endpoints showing in dropdown menus
+    
+    **Solution:**
+    1. Re-upload OpenAPI spec (may have failed to parse)
+    2. Validate spec with Swagger Editor
+    3. Ensure spec includes all required endpoints
+    4. Check spec version supported (OpenAPI 2.x/3.x)
+  
+  
+  
+    **Issue**: Cannot save mappings
+    
+    **Solution:**
+    1. Ensure all required FN fields mapped
+    2. Check data type compatibility
+    3. Add default values for optional fields
+    4. Review error message for specific field
+  
+
+---

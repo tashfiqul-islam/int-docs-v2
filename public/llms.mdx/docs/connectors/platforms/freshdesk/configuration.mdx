@@ -1,0 +1,117 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/freshdesk/configuration
+Source: content/docs/connectors/platforms/freshdesk/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the Freshdesk connector in Field Nation with API key and field mappings.
+---
+
+## Prerequisites
+
+- ☐ Freshdesk API key
+- ☐ Freshdesk subdomain (e.g., `company.freshdesk.com`)
+- ☐ Admin access to Field Nation
+
+---
+
+## Step 1: Get Freshdesk API Key
+
+### Log into Freshdesk
+
+Use admin account
+
+### Navigate to Profile
+
+Click profile icon → Profile Settings
+
+### Copy API Key
+
+Right sidebar → "Your API Key"  
+Click to reveal and copy
+
+---
+
+## Step 2: Configure in Field Nation
+
+Access Integration Broker and select "Freshdesk"
+
+### Freshdesk Subdomain
+
+**Format:** `company` (from `company.freshdesk.com`)
+
+Example: If URL is `acme.freshdesk.com`, enter `acme`
+
+---
+
+### API Key
+
+Paste API key from Step 1
+
+**Authentication Format:**
+```
+Username: {your_api_key}
+Password: X
+```
+
+Field Nation handles formatting automatically.
+
+---
+
+## Step 3: Test Connection
+
+Click "Test Connection" → Verify success
+
+---
+
+## Step 4: Refresh Fields & Map
+
+Click "Refresh Fields" → Configure mappings:
+
+**Inbound:**
+```
+subject → title
+description → description
+status → status_id (Array Map)
+priority → priority (Array Map)
+requester.name → contact.name
+due_by → schedule.start (Date Convert)
+```
+
+**Outbound:**
+```
+status.name → status (Array Map)
+completion_notes → private_note
+```
+
+**Status Mapping:**
+```
+Freshdesk: Open, Pending, Resolved, Closed
+Field Nation: Draft, Assigned, Work Done, Approved
+```
+
+---
+
+## Step 5: Save & Get Trigger URL
+
+Save → Copy trigger URL for Freshdesk webhook
+
+---
+
+## Troubleshooting
+
+  
+    - Verify API key correct
+    - Check subdomain spelling
+    - Ensure API access enabled
+  
+  
+  
+    - Check API key permissions
+    - Verify custom fields accessible
+    - Try "Refresh Fields" again
+  
+
+---

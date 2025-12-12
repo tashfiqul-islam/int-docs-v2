@@ -1,0 +1,6 @@
+{
+  "title": "API Reference",
+  "description": "Complete API reference for webhook management endpoints",
+  "icon": "CodeXml",
+  "pages": ["overview", "webhooks", "events", "delivery-logs", "history"]
+}

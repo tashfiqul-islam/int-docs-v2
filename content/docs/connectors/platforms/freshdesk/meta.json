@@ -1,0 +1,6 @@
+{
+  "title": "Freshdesk",
+  "description": "Connect Field Nation with Freshdesk helpdesk",
+  "icon": "Ticket",
+  "pages": ["overview", "configuration", "workflow"]
+}

@@ -1,0 +1,6 @@
+{
+  "title": "REST Connector",
+  "description": "Universal OpenAPI-based integration connector",
+  "icon": "Code",
+  "pages": ["overview", "configuration", "workflow"]
+}

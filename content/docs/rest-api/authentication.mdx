@@ -1,0 +1,398 @@
+---
+title: Authentication
+description: OAuth 2.0 authentication for secure access to the Field Nation REST API.
+icon: Lock
+---
+
+The Field Nation REST API uses OAuth 2.0 for authentication. All API requests require a valid access token.
+
+## Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant App as Your Application
+    participant Auth as Auth Server
+    participant API as REST API
+    
+    App->>Auth: POST /oauth/token<br/>(client credentials)
+    Auth-->>App: access_token
+    App->>API: API Request<br/>?access_token=...
+    API-->>App: Response
+```
+
+---
+
+## Obtaining an Access Token
+
+### Endpoint
+
+```
+POST /authentication/api/oauth/token
+```
+
+**Base URL:**
+- Sandbox: `https://api-sandbox.fndev.net`
+- Production: `https://api.fieldnation.com`
+
+---
+
+### Request
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "grant_type": "client_credentials",
+  "client_id": "YOUR_CLIENT_ID",
+  "client_secret": "YOUR_CLIENT_SECRET",
+  "scope": "api"
+}
+```
+
+**Parameters:**
+
+<TypeTable
+  type={{
+    "grant_type": {
+      type: "string",
+      description: "OAuth grant type. Must be `client_credentials`",
+      required: true
+    },
+    "client_id": {
+      type: "string",
+      description: "Your API client ID provided by Field Nation",
+      required: true
+    },
+    "client_secret": {
+      type: "string",
+      description: "Your API client secret provided by Field Nation",
+      required: true
+    },
+    "scope": {
+      type: "string",
+      description: "API scope. Use `api` for full REST API access",
+      required: true
+    }
+  }}
+/>
+
+---
+
+### Response
+
+**Success (200 OK):**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+<TypeTable
+  type={{
+    "access_token": {
+      type: "string",
+      description: "JWT access token to use in API requests"
+    },
+    "token_type": {
+      type: "string",
+      description: "Token type, always `Bearer`"
+    },
+    "expires_in": {
+      type: "number",
+      description: "Token lifetime in seconds (typically 3600 = 1 hour)"
+    }
+  }}
+/>
+
+**Error (400/401):**
+```json
+{
+  "error": "invalid_client",
+  "error_description": "Client authentication failed"
+}
+```
+
+---
+
+## Using the Access Token
+
+Include the access token in all API requests as a **query parameter**:
+
+```
+GET /api/rest/v2/workorders?access_token=YOUR_ACCESS_TOKEN
+```
+
+### Example Requests
+
+<Tabs items={['curl', 'JavaScript', 'Python']}>
+  <Tab value="curl">
+```bash
+curl "https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token=eyJhbGci..."
+```
+  </Tab>
+  
+  <Tab value="JavaScript">
+```javascript
+const response = await fetch(
+  `https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token=${accessToken}`
+);
+
+const workOrders = await response.json();
+```
+  </Tab>
+  
+  <Tab value="Python">
+```python
+response = requests.get(
+    f'https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token={access_token}'
+)
+
+work_orders = response.json()
+```
+  </Tab>
+</Tabs>
+
+<Callout type="warn">
+**Security**: Keep your `client_secret` and `access_token` secure. Never expose them in client-side code or public repositories.
+</Callout>
+
+---
+
+## Token Expiration & Refresh
+
+### Token Lifetime
+
+Access tokens expire after **1 hour** (3600 seconds).
+
+### Detecting Expiration
+
+**401 Unauthorized Response:**
+```json
+{
+  "error": "invalid_token",
+  "error_description": "The access token expired"
+}
+```
+
+### Refresh Strategy
+
+When a token expires, request a new one:
+
+```javascript
+let accessToken = null;
+let tokenExpiry = null;
+
+async function getAccessToken() {
+  // Check if token exists and is not expired
+  if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+    return accessToken;
+  }
+  
+  // Request new token
+  const response = await fetch(
+    'https://api-sandbox.fndev.net/authentication/api/oauth/token',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'client_credentials',
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        scope: 'api'
+      })
+    }
+  );
+  
+  const data = await response.json();
+  accessToken = data.access_token;
+  tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000; // Refresh 1 min early
+  
+  return accessToken;
+}
+
+// Use in API calls
+async function listWorkOrders() {
+  const token = await getAccessToken();
+  const response = await fetch(
+    `https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token=${token}`
+  );
+  return response.json();
+}
+```
+
+---
+
+## Best Practices
+
+### Security
+
+✅ **Store credentials securely**
+- Use environment variables
+- Never commit to version control
+- Use secret management systems (AWS Secrets Manager, HashiCorp Vault)
+
+✅ **Implement token caching**
+- Cache tokens until expiry
+- Refresh proactively (before expiration)
+- Handle concurrent requests gracefully
+
+✅ **Use HTTPS only**
+- All API calls must use HTTPS
+- Never send tokens over HTTP
+
+---
+
+### Error Handling
+
+Implement robust error handling:
+
+```javascript
+async function makeAuthenticatedRequest(url, options = {}) {
+  try {
+    const token = await getAccessToken();
+    const response = await fetch(`${url}?access_token=${token}`, options);
+    
+    if (response.status === 401) {
+      // Token invalid or expired - force refresh
+      accessToken = null;
+      tokenExpiry = null;
+      
+      // Retry once with new token
+      const newToken = await getAccessToken();
+      const retryResponse = await fetch(`${url}?access_token=${newToken}`, options);
+      
+      if (!retryResponse.ok) {
+        throw new Error(`API Error: ${retryResponse.status}`);
+      }
+      
+      return retryResponse.json();
+    }
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API Error: ${error.error || response.statusText}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('API Request Failed:', error);
+    throw error;
+  }
+}
+```
+
+---
+
+### Rate Limiting
+
+Respect rate limits:
+- Implement exponential backoff for retries
+- Cache responses when appropriate
+- Batch requests when possible
+
+```javascript
+async function retryWithBackoff(fn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = Math.pow(2, i) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+// Usage
+const workOrders = await retryWithBackoff(() => listWorkOrders());
+```
+
+---
+
+## Getting Credentials
+
+### Sandbox Credentials
+
+Contact Field Nation support to request sandbox API credentials:
+- **Email**: [app.fieldnation.com/support-cases](https://app.fieldnation.com/support-cases)
+- **Phone**: +1 877-573-4353
+
+Provide:
+- Company name
+- Use case description
+- Expected API usage volume
+
+### Production Credentials
+
+Production API access requires:
+1. Active Field Nation buyer contract
+2. Completed integration testing in sandbox
+3. Approval from Field Nation integration team
+
+Contact support to begin production onboarding process.
+
+---
+
+## Common Authentication Errors
+
+<Accordions type="multiple">
+  <Accordion title="invalid_client">
+    **Cause**: Incorrect `client_id` or `client_secret`
+    
+    **Solution**:
+    - Verify credentials are correct
+    - Ensure no extra whitespace
+    - Check environment (sandbox vs production)
+  </Accordion>
+  
+  <Accordion title="invalid_grant">
+    **Cause**: Invalid `grant_type` or scope
+    
+    **Solution**:
+    - Use `grant_type: "client_credentials"`
+    - Use `scope: "api"`
+  </Accordion>
+  
+  <Accordion title="invalid_token">
+    **Cause**: Token expired or invalid
+    
+    **Solution**:
+    - Request new access token
+    - Check token not corrupted/truncated
+  </Accordion>
+</Accordions>
+
+---
+
+## Testing Authentication
+
+Test your authentication setup:
+
+<Steps>
+
+### Generate Token
+
+Use curl or Postman to request a token
+
+### Verify Token
+
+Check `expires_in` value
+
+### Make Test Request
+
+Call `/api/rest/v2/workorders` with token
+
+### Confirm Success
+
+200 OK response indicates authentication working
+
+</Steps>
+

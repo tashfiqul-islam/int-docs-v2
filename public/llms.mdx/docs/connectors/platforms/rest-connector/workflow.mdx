@@ -1,0 +1,545 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/rest-connector/workflow
+Source: content/docs/connectors/platforms/rest-connector/workflow.mdx
+
+
+
+---
+title: Workflow Setup
+description: End-to-end guide for setting up REST Connector integration from OpenAPI spec to production deployment.
+---
+
+## Workflow Overview
+
+```mermaid
+graph TD
+    A[Prepare OpenAPI Spec] --> B[Upload to Field Nation]
+    B --> C[Configure Endpoints]
+    C --> D[Set Authentication]
+    D --> E[Test Connection]
+    E --> F[Refresh Fields]
+    F --> G[Configure Mappings]
+    G --> H[Test Integration]
+    H --> I{Success?}
+    I -->|Yes| J[Deploy to Production]
+    I -->|No| K[Debug & Fix]
+    K --> H
+```
+
+---
+
+## Phase 1: Preparation
+
+### Gather API Documentation
+
+### Obtain OpenAPI Spec
+
+**Sources:**
+- API documentation portal (often `/docs`)
+- Developer resources section
+- API provider's GitHub repository
+- Generate from Postman collection
+- Export from API gateway
+
+**Direct URLs to Check:**
+```
+https://your-api.com/swagger.json
+https://your-api.com/api-docs
+https://your-api.com/openapi.yaml
+https://your-api.com/v1/openapi.json
+```
+
+### Validate Specification
+
+Use online or CLI tools:
+
+```bash
+# Swagger Editor (online)
+https://editor.swagger.io/
+
+# CLI Validation
+npm install -g swagger-cli
+swagger-cli validate openapi.json
+
+# Or using Docker
+docker run --rm -v $(pwd):/spec openapitools/openapi-generator-cli validate -i /spec/openapi.json
+```
+
+**Check For:**
+- ☐ Valid JSON/YAML syntax
+- ☐ All required endpoints defined
+- ☐ Request/response schemas present
+- ☐ Parameter definitions complete
+- ☐ Authentication schemes documented
+
+### Identify Required Endpoints
+
+Map your business flow to API endpoints:
+
+| Field Nation Event | External API Endpoint | Purpose |
+|--------------------|----------------------|---------|
+| Work order created | `POST /tickets` | Create record |
+| Work order updated | `PATCH /tickets/{id}` | Update record |
+| Need field schema | `GET /tickets/metadata` | Get fields |
+| Query record data | `GET /tickets/{id}` | Fetch record |
+| Attachment added | `POST /tickets/{id}/files` | Upload file |
+
+---
+
+### Prepare Test Credentials
+
+### Create API User
+
+In your external system:
+1. Create dedicated integration user
+2. Generate API credentials
+3. Grant minimum required permissions
+
+### Document Credentials
+
+Store securely:
+```
+Username: api_integration_user
+Password: [secure password]
+Format for Field Nation: username:password
+Base URL: https://api.example.com/v1
+```
+
+### Test Credentials
+
+Verify with `curl`:
+
+```bash
+# Test authentication
+curl -u "username:password" \
+     https://api.example.com/v1/metadata
+
+# Test endpoint access
+curl -u "username:password" \
+     https://api.example.com/v1/tickets
+
+# Test record creation (optional)
+curl -u "username:password" \
+     -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"title":"Test","description":"Integration test"}' \
+     https://api.example.com/v1/tickets
+```
+
+---
+
+## Phase 2: Field Nation Configuration
+
+### Upload & Configure
+
+### Access REST Connector
+
+Navigate to Integration Broker:
+- **Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)
+- **Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+Select "REST Connector"
+
+### Upload OpenAPI Spec
+
+1. Click "Upload OpenAPI Spec"
+2. Select your spec file (`.json` or `.yaml`)
+3. Wait for validation
+4. Confirm success message
+
+### Select Endpoints
+
+**Record Metadata:**
+- Select endpoint that returns field schema
+- Example: `GET /api/v1/metadata`
+
+**Record Fetch:**
+- Select endpoint to get single record by ID
+- Example: `GET /api/v1/tickets/{id}`
+
+**Record Create:**
+- Select endpoint to create new records
+- Example: `POST /api/v1/tickets`
+
+**Record Update:**
+- Select endpoint to update records
+- Example: `PATCH /api/v1/tickets/{id}`
+
+**Attachments Upload (optional):**
+- Select file upload endpoint
+- Example: `POST /api/v1/tickets/{id}/files`
+
+### Enter Authentication
+
+Format: `username:password`
+
+Example: `integration_user:securePass123!`
+
+### Test Connection
+
+Click "Test Connection" button
+- ✅ Success: Green confirmation
+- ❌ Failure: Review error, fix, retry
+
+---
+
+## Phase 3: Field Mapping
+
+### Discover & Map Fields
+
+### Refresh Fields
+
+1. Click "Refresh Fields" button
+2. Broker calls metadata endpoint
+3. Fields populate in dropdown menus
+
+### Map Inbound Fields
+
+**External System → Field Nation**
+
+Configure how external records become FN work orders:
+
+**Required Fields:**
+```
+External Field          → FN Field               Action
+──────────────────────────────────────────────────────────
+ticket_title           → title                  Sync
+ticket_description     → description            Sync
+customer_name          → location.company.name  Sync
+scheduled_date         → schedule.start         Date Convert
+priority_code          → priority               Array Map
+```
+
+**Optional Fields:**
+```
+contact_email          → contact.email          Sync
+service_address        → location.address1      Sync
+special_instructions   → instructions           Sync
+estimated_duration     → time_estimate          Sync
+```
+
+### Map Outbound Fields
+
+**Field Nation → External System**
+
+Configure how FN events update external records:
+
+**Status Updates:**
+```
+FN Field               → External Field         Action
+──────────────────────────────────────────────────────────
+status.name            → ticket_status          Array Map
+assignee.user.name     → technician_name        Sync
+completion_notes       → resolution             Sync
+completion_date        → completed_at           Date Convert
+```
+
+### Configure Transformations
+
+**Status Mapping (Array Map):**
+```jsonnet
+{
+  "source": "status_code",
+  "target": "priority",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "1", "value": "Low" },
+    { "compare": "2", "value": "Medium" },
+    { "compare": "3", "value": "High" },
+    { "compare": "4", "value": "Critical" }
+  ],
+  "default": "Medium"
+}
+```
+
+**Date Conversion:**
+```jsonnet
+{
+  "source": "created_date",
+  "target": "schedule.start",
+  "action": "date_convert",
+  "input_format": "YYYY-MM-DD",
+  "output_format": "YYYY-MM-DD HH:mm:ss",
+  "timezone_in": "UTC",
+  "timezone_out": "America/New_York"
+}
+```
+
+**Custom Logic (JSONNET):**
+```jsonnet
+{
+  "target": "custom_priority",
+  "action": "custom",
+  "script": |||
+    local status = $.util.lookup_field($.input, 'status', '');
+    local amount = $.util.lookup_field($.input, 'amount', 0);
+    
+    if status == 'urgent' && amount > 500 then
+      "P1-Critical"
+    else if status == 'urgent' then
+      "P2-High"
+    else if amount > 1000 then
+      "P2-High"
+    else
+      "P3-Normal"
+  |||
+}
+```
+
+### Save Mappings
+
+Click "Save" to persist field mapping configuration
+
+---
+
+## Phase 4: Testing
+
+### Test Scenarios
+
+### Create Test Record in Field Nation
+
+**Scenario 1: Basic Work Order Creation**
+
+1. Create simple work order in Field Nation
+2. Fill in all required fields
+3. Include fields mapped to external system
+4. Save work order
+
+**Expected Result:**
+- Integration Broker processes event
+- Calls external API create endpoint
+- Record created in external system
+- Correlation ID stored
+
+### Verify External System
+
+1. Log into external system
+2. Find newly created record
+3. Verify field values match:
+   - Title/subject
+   - Description
+   - Priority/status
+   - Customer/company info
+   - Scheduled date
+
+### Test Status Update (Outbound)
+
+**Scenario 2: Bidirectional Sync**
+
+1. Update work order status in Field Nation
+2. Add completion notes
+3. Save changes
+
+**Expected Result:**
+- Broker processes status change event
+- Calls external API update endpoint
+- External record status updated
+- Notes synced to external system
+
+### Test Inbound Sync (if configured)
+
+**Scenario 3: External → Field Nation**
+
+1. Update record in external system
+2. Trigger webhook (if configured)
+3. Check Field Nation for updated data
+
+**Expected Result:**
+- Webhook received by Broker
+- Field Nation work order updated
+- Field changes reflected
+
+### Test Edge Cases
+
+**Scenario 4: Error Handling**
+
+- Missing required fields
+- Invalid data types
+- Network failures
+- Authentication errors
+
+**Check:**
+- Errors logged properly
+- Retry logic works
+- Dead letter queue captures failures
+
+---
+
+### Review Integration Logs
+
+### Access Logs
+
+Field Nation → Integrations → Logs
+
+### Filter by Date/Time
+
+Set range covering your test period
+
+### Review Entries
+
+**Success Logs:**
+- Event received
+- API called successfully
+- Record created/updated
+- Response logged
+
+**Error Logs:**
+- Error type and message
+- Request details
+- Response details
+- Retry attempts
+
+### Common Issues
+
+**401 Unauthorized:**
+```
+Error: Authentication failed
+Solution: Verify credentials correct
+```
+
+**400 Bad Request:**
+```
+Error: Invalid field value for 'priority'
+Solution: Check Array Map values match API expectations
+```
+
+**404 Not Found:**
+```
+Error: Endpoint /api/v1/ticket not found
+Solution: Verify endpoint URL, check for typos
+```
+
+---
+
+## Phase 5: Production Deployment
+
+### Pre-Launch Checklist
+
+- ☐ All sandbox tests passed
+- ☐ Field mappings validated
+- ☐ Error handling tested
+- ☐ Team training complete
+- ☐ Documentation updated
+- ☐ Rollback plan prepared
+
+---
+
+### Deploy to Production
+
+### Recreate Configuration in Production
+
+If tested in sandbox:
+
+1. Access production Integration Broker
+2. Select REST Connector
+3. Upload same OpenAPI spec
+4. Configure same endpoints
+5. Update credentials (production API user)
+6. Test connection
+7. Refresh fields
+8. **Copy field mappings** from sandbox config
+9. Save configuration
+
+### Update External System Configuration
+
+If using webhooks:
+1. Update webhook URL to production Field Nation
+2. Verify IP whitelisting (production IPs)
+3. Test webhook delivery
+
+### Soft Launch
+
+**Start Small:**
+1. Enable for single team/department
+2. Monitor closely for first week
+3. Collect feedback
+4. Adjust configuration as needed
+
+### Full Rollout
+
+After successful soft launch:
+1. Enable for all teams
+2. Communicate to stakeholders
+3. Provide user training
+4. Set up monitoring/alerts
+
+---
+
+## Monitoring & Maintenance
+
+### Daily Monitoring
+
+- ☐ Check Integration Broker logs for errors
+- ☐ Review sync success rate
+- ☐ Monitor queue depth
+- ☐ Verify no authentication failures
+
+### Weekly Tasks
+
+- ☐ Review error patterns
+- ☐ Test sample synchronization
+- ☐ Check external API status
+- ☐ Verify field mappings still valid
+
+### Monthly Maintenance
+
+- ☐ Review and optimize field mappings
+- ☐ Update OpenAPI spec if API changed
+- ☐ Audit API user permissions
+- ☐ Test disaster recovery process
+
+### Quarterly Reviews
+
+- ☐ Rotate API credentials
+- ☐ Review integration architecture
+- ☐ Assess performance metrics
+- ☐ Plan enhancements
+
+---
+
+## Troubleshooting Common Issues
+
+  
+    **Check:**
+    1. Integration active and not paused
+    2. Field Nation events triggering
+    3. External API reachable
+    4. Credentials valid
+    5. No rate limiting
+    
+    **Debug:**
+    - Review Integration Broker logs
+    - Test API endpoints with `curl`
+    - Verify field mappings complete
+    - Check for validation errors
+  
+  
+  
+    **Check:**
+    1. Field mappings configured correctly
+    2. Data type transformations applied
+    3. Array Map values match API expectations
+    4. Date formats compatible
+    
+    **Fix:**
+    - Review and update field mappings
+    - Add transformations (Array Map, Date Convert)
+    - Use custom JSONNET for complex logic
+    - Test with sample data
+  
+  
+  
+    **Check:**
+    1. Credentials format: `username:password`
+    2. Password hasn't changed
+    3. API user still active
+    4. Permissions not revoked
+    
+    **Solution:**
+    - Generate new credentials
+    - Update Field Nation configuration
+    - Test connection
+    - Document new credentials securely
+  
+
+---

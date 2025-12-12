@@ -1,0 +1,599 @@
+---
+title: Quickstart
+description: Create your first webhook and receive Field Nation events in under 15 minutes. Step-by-step guide from setup to testing.
+icon: Rocket
+---
+
+## Overview
+
+By the end of this quickstart, you'll have:
+
+- ✅ A publicly accessible webhook endpoint
+- ✅ A webhook configured in Field Nation
+- ✅ Received and verified a real webhook event
+- ✅ Validated the HMAC-SHA256 signature
+
+**Estimated Time**: 10-15 minutes
+
+---
+
+## Step 1: Set Up Your Endpoint
+
+You need a publicly accessible HTTPS endpoint to receive webhooks. Choose your approach:
+
+<Tabs items={["Request Inspector (Fastest)", "ngrok (Local Development)", "Production Server"]}>
+  <Tab value="Request Inspector (Fastest)">
+    **Perfect for testing** - No code required!
+
+    ### Using webhook.site
+
+    1. Visit [webhook.site](https://webhook.site)
+    2. Copy your unique URL (e.g., `https://webhook.site/abc123...`)
+    3. Keep the tab open to see incoming requests
+
+    ```plaintext
+    Your Webhook URL:
+    https://webhook.site/abc-1234-def-5678
+    ```
+
+    <Callout type="info">
+    **Tip**: webhook.site automatically returns 200 OK and displays request details. Perfect for initial testing!
+    </Callout>
+  </Tab>
+  <Tab value="ngrok (Local Development)">
+    **Test with your local server**
+
+    ### Install ngrok
+
+    ```bash
+    # macOS (Homebrew)
+    brew install ngrok/ngrok/ngrok
+
+    # Or download from https://ngrok.com/download
+    ```
+
+    ### Start your local server
+
+    ```javascript title="server.js"
+    const express = require('express');
+    const app = express();
+
+    app.use(express.raw({ type: 'application/json' }));
+
+    app.post('/webhooks/fieldnation', (req, res) => {
+      console.log('Webhook received:', req.body.toString());
+      res.status(200).send('OK');
+    });
+
+    app.listen(3000, () => {
+      console.log('Webhook server running on port 3000');
+    });
+    ```
+
+    ### Expose with ngrok
+
+    ```bash
+    ngrok http 3000
+    ```
+
+    Copy the HTTPS forwarding URL:
+
+    ```plaintext
+    Forwarding: https://abc123.ngrok-free.app → localhost:3000
+    ```
+
+    Your webhook URL: `https://abc123.ngrok-free.app/webhooks/fieldnation`
+  </Tab>
+  <Tab value="Production Server">
+    **For production use**
+
+    ### Example Express.js Server
+
+    ```javascript title="webhook-server.js"
+    const express = require('express');
+    const crypto = require('crypto');
+    const app = express();
+
+    // Important: Use raw body for signature verification
+    app.use(express.raw({ type: 'application/json' }));
+
+    app.post('/webhooks/fieldnation', (req, res) => {
+      // Verify signature (see Security Guide)
+      const signature = req.headers['x-fn-signature'];
+      
+      // Process the event
+      const event = JSON.parse(req.body.toString());
+      console.log('Event received:', event.eventName);
+      
+      // Respond quickly (< 5 seconds)
+      res.status(200).send('OK');
+      
+      // Process asynchronously
+      processWebhookAsync(event);
+    });
+
+    function processWebhookAsync(event) {
+      // Your business logic here
+      // Update database, trigger workflows, etc.
+    }
+
+    app.listen(443, () => {
+      console.log('Production webhook server running');
+    });
+    ```
+
+    Deploy to your cloud provider (AWS, GCP, Azure, Heroku, etc.)
+  </Tab>
+</Tabs>
+
+---
+
+## Step 2: Get API Credentials
+
+You need an OAuth access token to create webhooks via API.
+
+<Steps>
+
+### Obtain Client Credentials
+
+If you don't have them yet:
+
+1. Navigate to [Field Nation Support](https://app.fieldnation.com/support-cases)
+2. Submit a case requesting API credentials
+3. Receive `client_id` and `client_secret`
+
+### Generate Access Token
+
+```bash title="Get OAuth Token"
+curl -X POST https://api-sandbox.fndev.net/authentication/api/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET"
+```
+
+Response:
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+<Callout type="warn">
+**Important**: Save your access token. It's valid for 1 hour. For production, implement token refresh logic.
+</Callout>
+
+</Steps>
+
+---
+
+## Step 3: Create Your Webhook
+
+Choose your preferred method:
+
+<Tabs items={["Web UI (Easier)", "REST API (Programmatic)"]}>
+  <Tab value="Web UI (Easier)">
+    ### Using the Webhooks Dashboard
+
+    <Steps>
+
+    ### Navigate to Dashboard
+
+    - **Sandbox**: [https://ui-sandbox.fndev.net/integrations/webhooks](https://ui-sandbox.fndev.net/integrations/webhooks)
+    - **Production**: [https://app.fieldnation.com/integrations/webhooks](https://app.fieldnation.com/integrations/webhooks)
+
+    ### Click "Create New"
+
+    ### Configure Basic Settings
+
+    - **URL**: Your endpoint from Step 1
+    - **HTTP Method**: POST (recommended)
+    - **Status**: Active
+
+    ### Select Events
+
+    For this quickstart, select:
+    - `workorder.created`
+    - `workorder.status.published`
+    - `workorder.status.assigned`
+
+    <Callout type="info">
+    **Tip**: Start with a few events, then expand once you're comfortable.
+    </Callout>
+
+    ### Save Webhook Configuration
+
+    Note your **Webhook ID** and **Secret** - you'll need these for signature verification.
+
+    </Steps>
+  </Tab>
+  <Tab value="REST API (Programmatic)">
+    ### Using the Webhooks API
+
+    ```bash title="Create Webhook"
+    curl -X POST https://api-sandbox.fndev.net/api/v1/webhooks \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://your-endpoint.com/webhooks",
+        "method": "post",
+        "status": "active",
+        "events": [
+          "workorder.created",
+          "workorder.status.published",
+          "workorder.status.assigned"
+        ],
+        "notificationEmail": "your-email@example.com"
+      }'
+    ```
+
+    **Response:**
+
+    ```json
+    {
+      "metadata": {
+        "timestamp": "2025-01-15T10:30:00Z"
+      },
+      "result": {
+        "id": 123,
+        "webhookId": "wh_abc123def456",
+        "url": "https://your-endpoint.com/webhooks",
+        "method": "post",
+        "status": "active",
+        "secret": "01999f51-5c66-4449-b441-6b4a053fee6a",
+        "events": [
+          "workorder.created",
+          "workorder.status.published",
+          "workorder.status.assigned"
+        ],
+        "createdAt": "2025-01-15T10:30:00Z"
+      }
+    }
+    ```
+
+    <Callout type="warn">
+    **Save the secret!** You'll use this to verify webhook signatures. It's only shown once during creation.
+    </Callout>
+  </Tab>
+</Tabs>
+
+---
+
+## Step 4: Trigger a Test Event
+
+Now let's create an event to trigger your webhook:
+
+<Steps>
+
+### Create a Work Order (Sandbox)
+
+Use the Field Nation sandbox UI or API to create a test work order:
+
+**Via Sandbox UI:**
+1. Login to [Sandbox](https://ui-sandbox.fndev.net)
+2. Navigate to Work Orders
+3. Click "Create Work Order"
+4. Fill in basic details and publish
+
+**Via REST API:**
+
+```bash
+curl -X POST https://api-sandbox.fndev.net/api/rest/v2/workorder \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Webhook Work Order",
+    "description": "Testing webhook delivery",
+    "schedule": {
+      "serviceWindow": {
+        "start": "2025-01-20T09:00:00Z",
+        "end": "2025-01-20T17:00:00Z"
+      }
+    }
+  }'
+```
+
+### Check Your Endpoint
+
+Within seconds, you should receive a `workorder.created` event:
+
+```json
+{
+  "eventName": "workorder.created",
+  "eventId": "evt_abc123",
+  "workOrderId": 12345,
+  "timestamp": "2025-01-15T10:35:00Z",
+  "data": {
+    "id": 12345,
+    "title": "Test Webhook Work Order",
+    "status": "draft",
+    // ... full work order details
+  }
+}
+```
+
+</Steps>
+
+---
+
+## Step 5: Verify Webhook Signature
+
+**Security critical!** Always verify that webhooks actually came from Field Nation:
+
+<Tabs items={["Node.js", "Python", "PHP", "Go"]}>
+  <Tab value="Node.js">
+    ```javascript
+    const crypto = require('crypto');
+
+    function verifyWebhookSignature(req, secret) {
+      // Get signature from header
+      const signature = req.headers['x-fn-signature'];
+      if (!signature) return false;
+
+      // Parse algorithm and hash
+      const [algorithm, requestHash] = signature.split('=');
+      
+      // Compute expected signature
+      const expectedHash = crypto
+        .createHmac(algorithm, secret)
+        .update(req.body) // Raw body buffer
+        .digest('hex');
+      
+      // Timing-safe comparison
+      return crypto.timingSafeEqual(
+        Buffer.from(expectedHash),
+        Buffer.from(requestHash)
+      );
+    }
+
+    // Usage
+    app.post('/webhooks/fieldnation', (req, res) => {
+      if (!verifyWebhookSignature(req, process.env.WEBHOOK_SECRET)) {
+        return res.status(401).send('Invalid signature');
+      }
+      
+      // Process the verified webhook
+      const event = JSON.parse(req.body.toString());
+      console.log('Verified event:', event.eventName);
+      
+      res.status(200).send('OK');
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    import hmac
+    import hashlib
+
+    def verify_webhook_signature(request, secret):
+        # Get signature from header
+        signature = request.headers.get('x-fn-signature')
+        if not signature:
+            return False
+        
+        # Parse algorithm and hash
+        algorithm, request_hash = signature.split('=')
+        
+        # Compute expected signature
+        expected_hash = hmac.new(
+            secret.encode(),
+            msg=request.body,
+            digestmod=algorithm
+        ).hexdigest()
+        
+        # Timing-safe comparison
+        return hmac.compare_digest(expected_hash, request_hash)
+
+    # Usage in Flask
+    @app.route('/webhooks/fieldnation', methods=['POST'])
+    def handle_webhook():
+        if not verify_webhook_signature(request, os.environ['WEBHOOK_SECRET']):
+            return 'Invalid signature', 401
+        
+        # Process the verified webhook
+        event = request.get_json()
+        print(f"Verified event: {event['eventName']}")
+        
+        return 'OK', 200
+    ```
+  </Tab>
+  <Tab value="PHP">
+    ```php
+    <?php
+    function verifyWebhookSignature($headers, $body, $secret) {
+        // Get signature from header
+        if (!isset($headers['x-fn-signature'])) {
+            return false;
+        }
+        
+        // Parse algorithm and hash
+        [$algorithm, $requestHash] = explode('=', $headers['x-fn-signature']);
+        
+        // Compute expected signature
+        $expectedHash = hash_hmac($algorithm, $body, $secret);
+        
+        // Timing-safe comparison
+        return hash_equals($expectedHash, $requestHash);
+    }
+
+    // Usage
+    $headers = getallheaders();
+    $body = file_get_contents('php://input');
+    $secret = getenv('WEBHOOK_SECRET');
+
+    if (!verifyWebhookSignature($headers, $body, $secret)) {
+        http_response_code(401);
+        die('Invalid signature');
+    }
+
+    // Process the verified webhook
+    $event = json_decode($body);
+    error_log("Verified event: " . $event->eventName);
+
+    http_response_code(200);
+    echo 'OK';
+    ?>
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    package main
+
+    import (
+        "crypto/hmac"
+        "crypto/sha256"
+        "encoding/hex"
+        "io"
+        "net/http"
+        "os"
+        "strings"
+    )
+
+    func verifyWebhookSignature(r *http.Request, body []byte, secret string) bool {
+        // Get signature from header
+        signature := r.Header.Get("x-fn-signature")
+        if signature == "" {
+            return false
+        }
+        
+        // Parse algorithm and hash
+        parts := strings.Split(signature, "=")
+        if len(parts) != 2 {
+            return false
+        }
+        algorithm, requestHash := parts[0], parts[1]
+        
+        // Compute expected signature (assuming SHA256)
+        h := hmac.New(sha256.New, []byte(secret))
+        h.Write(body)
+        expectedHash := hex.EncodeToString(h.Sum(nil))
+        
+        // Timing-safe comparison
+        return hmac.Equal([]byte(expectedHash), []byte(requestHash))
+    }
+
+    func handleWebhook(w http.ResponseWriter, r *http.Request) {
+        body, _ := io.ReadAll(r.Body)
+        secret := os.Getenv("WEBHOOK_SECRET")
+        
+        if !verifyWebhookSignature(r, body, secret) {
+            http.Error(w, "Invalid signature", http.StatusUnauthorized)
+            return
+        }
+        
+        // Process the verified webhook
+        // event := parseJSON(body)
+        
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("OK"))
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="warn">
+**Critical Security**: Always verify signatures in production. Without verification, anyone can send fake webhooks to your endpoint.
+</Callout>
+
+---
+
+## Step 6: Monitor Delivery
+
+Check that your webhook was delivered successfully:
+
+### Via Web UI
+
+1. Navigate to [Webhooks Dashboard](https://ui-sandbox.fndev.net/integrations/webhooks)
+2. Click on your webhook
+3. Go to "Delivery Logs" tab
+4. Verify delivery status is 200
+
+### Via API
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhookId=YOUR_WEBHOOK_ID" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T10:40:00Z",
+    "count": 1,
+    "total": 1
+  },
+  "result": [
+    {
+      "deliveryId": "del_xyz789",
+      "webhookId": "wh_abc123",
+      "eventName": "workorder.created",
+      "deliveryStatus": 200,
+      "deliveryAttempt": 1,
+      "createdAt": "2025-01-15T10:35:05Z"
+    }
+  ]
+}
+```
+
+---
+
+## Troubleshooting
+
+### Not Receiving Webhooks?
+
+<Accordions type="multiple">
+  <Accordion title="Check webhook status">
+    Ensure your webhook is **active**, not inactive or archived.
+    
+    ```bash
+    curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/YOUR_WEBHOOK_ID \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  </Accordion>
+  <Accordion title="Verify endpoint accessibility">
+    Test your endpoint is publicly accessible:
+    
+    ```bash
+    curl -X POST https://your-endpoint.com/webhooks \
+      -H "Content-Type: application/json" \
+      -d '{"test": "data"}'
+    ```
+    
+    Should return 200 OK.
+  </Accordion>
+  <Accordion title="Check delivery logs">
+    Look for failed deliveries and error messages:
+    
+    - **404 Not Found**: Check your URL path
+    - **SSL Error**: Verify HTTPS certificate is valid
+    - **Timeout**: Ensure response within 5 seconds
+  </Accordion>
+  <Accordion title="Review event subscription">
+    Confirm you're subscribed to the event you triggered:
+    
+    ```bash
+    # List subscribed events
+    curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/YOUR_WEBHOOK_ID \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      | jq '.result.events'
+    ```
+  </Accordion>
+</Accordions>
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| **401 Unauthorized** | Refresh your OAuth access token |
+| **Webhook auto-deactivated** | Fix endpoint errors, then reactivate |
+| **Receiving duplicates** | Implement idempotency using `eventId` |
+| **Signature verification fails** | Use raw body buffer, not parsed JSON |
+
+[Complete troubleshooting guide →](/docs/webhooks/troubleshooting/common-issues)
+
+---

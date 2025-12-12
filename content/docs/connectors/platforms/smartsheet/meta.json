@@ -1,0 +1,6 @@
+{
+  "title": "Smartsheet",
+  "description": "Connect Field Nation with Smartsheet projects",
+  "icon": "Sheet",
+  "pages": ["overview", "configuration", "workflow"]
+}
