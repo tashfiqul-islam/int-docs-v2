@@ -635,6 +635,7 @@ export function CommandPalette({
   } = useDocsSearch({
     type: "static",
     locale,
+    from: `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/search-index.json`,
   });
 
   const isControlled = controlledOpen !== undefined;

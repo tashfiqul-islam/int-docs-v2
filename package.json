@@ -6,7 +6,8 @@
     "prebuild": "fumadocs-mdx",
     "dev": "next dev",
     "generate:llm": "bun run scripts/generate-llm-files.ts",
-    "build": "bun run generate:llm && next build",
+    "generate:search": "bun run scripts/generate-search-index.ts",
+    "build": "bun run generate:llm && bun run generate:search && next build",
     "start": "next start",
     "lint": "ultracite check",
     "format": "ultracite fix",
@@ -27,7 +28,7 @@
     "clsx": "^2.1.1",
     "csstype": "^3.2.3",
     "fumadocs-core": "^16.2.5",
-    "fumadocs-mdx": "^14.1.0",
+    "fumadocs-mdx": "^14.1.1",
     "fumadocs-openapi": "^10.1.4",
     "fumadocs-twoslash": "^3.1.10",
     "fumadocs-ui": "^16.2.5",
@@ -47,7 +48,7 @@
     "tailwind-merge": "^3.4.0",
     "twoslash": "^0.3.4",
     "yaml": "^2.8.2",
-    "zod": "^4.2.0"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.9",
