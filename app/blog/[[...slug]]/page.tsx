@@ -7,8 +7,6 @@ import { blogPosts } from "@/lib/source";
 import blogBanner from "~/assets/blog-banner.png";
 import { BlogShareActions } from "~/components/blog-share-actions";
 
-export const runtime = "edge";
-
 type BlogPageData = {
   body: React.ComponentType<{
     components?: Record<string, React.ComponentType<Record<string, unknown>>>;
