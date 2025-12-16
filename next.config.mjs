@@ -23,7 +23,6 @@ const config = {
     "@takumi-rs/image-response",
     "typescript",
     "twoslash",
-    "shiki",
   ],
   // Note: rewrites() don't work with static export
   // .mdx files are served as static files from public/ directory

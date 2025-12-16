@@ -48,7 +48,9 @@ async function checkLinks() {
 }
 
 function getHeadings(page: InferPageType<typeof source>): string[] {
-  return (page.data.toc ?? []).map((item) => item.url.slice(1));
+  const toc =
+    "toc" in page.data ? (page.data.toc as Array<{ url: string }>) : [];
+  return toc.map((item: { url: string }) => item.url.slice(1));
 }
 
 function getDocsFiles(
@@ -57,7 +59,9 @@ function getDocsFiles(
   const promises = pages.map(
     async (page): Promise<FileObject> => ({
       path: page.absolutePath ?? page.url,
-      content: await page.data.getText("raw"),
+      content: await (
+        page.data as { getText: (type: string) => Promise<string> }
+      ).getText("raw"),
       url: page.url,
       data: page.data,
     })

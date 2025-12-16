@@ -1,0 +1,534 @@
+# Webhooks: undefined
+URL: /docs/webhooks/api-reference/events
+Source: content/docs/webhooks/api-reference/events.mdx
+
+
+
+---
+title: Events API
+description: List and discover available webhook events with filtering by model type. Programmatically retrieve all 33 webhook events.
+---
+
+## List Webhook Events
+
+Retrieve all available webhook events with their details.
+
+### Request
+
+**GET** `/api/v1/webhooks/events`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+
+**Query Parameters:**
+
+### Example Requests
+
+  
+    ```bash
+    curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/events \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/events?model=WorkOrder" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "query": {
+      "model": null
+    }
+  },
+  "result": [
+    {
+      "name": "workorder.created",
+      "label": "Work Order created",
+      "description": "Triggered when a work order is created.",
+      "model": "WorkOrder"
+    },
+    {
+      "name": "workorder.routed",
+      "label": "Work Order routed",
+      "description": "Triggered when a work order is routed to a provider.",
+      "model": "WorkOrder"
+    },
+    {
+      "name": "workorder.status.published",
+      "label": "Work Order status published",
+      "description": "Triggered when a work order status changes to published.",
+      "model": "WorkOrder"
+    },
+    {
+      "name": "workorder.status.assigned",
+      "label": "Work Order status assigned",
+      "description": "Triggered when a work order status changes to assigned.",
+      "model": "WorkOrder"
+    },
+    {
+      "name": "workorder.status.work_done",
+      "label": "Work Order status work done",
+      "description": "Triggered when a work order status changes to work done.",
+      "model": "WorkOrder"
+    }
+    // ... all 33 events
+  ]
+}
+```
+
+---
+
+## Event Object Structure
+
+Each event in the response includes:
+
+---
+
+## Complete Event List
+
+### Lifecycle Events (13 events)
+
+```json
+[
+  {
+    "name": "workorder.created",
+    "label": "Work Order created",
+    "description": "Triggered when a work order is created.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.routed",
+    "label": "Work Order routed",
+    "description": "Triggered when a work order is routed to a provider.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.requested",
+    "label": "Work Order requested",
+    "description": "Triggered when a work order is requested.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.declined",
+    "label": "Work Order declined",
+    "description": "Triggered when a work order is declined by a provider.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.undeclined",
+    "label": "Work Order undeclined",
+    "description": "Triggered when a work order is undeclined by a provider.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.task_completed",
+    "label": "Work Order task completed",
+    "description": "Triggered when a task on a work order is completed.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.task_incomplete",
+    "label": "Work Order task incomplete",
+    "description": "Triggered when a task on a work order is marked as incomplete.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.provider_upload",
+    "label": "Work Order provider upload",
+    "description": "Triggered when a provider uploads a document to a work order.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.message_posted",
+    "label": "Work Order message posted",
+    "description": "Triggered when a message is posted or replied to on a work order.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.custom_field_value_updated",
+    "label": "Work Order custom field value updated",
+    "description": "Triggered when a custom field value is updated on a work order.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.schedule_updated",
+    "label": "Work Order schedule updated",
+    "description": "Triggered when a schedule is updated on a work order.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.tag_added",
+    "label": "Work Order tag added",
+    "description": "Triggered when a tag is added to a work order.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.tag_removed",
+    "label": "Work Order tag removed",
+    "description": "Triggered when a tag is removed from a work order.",
+    "model": "WorkOrder"
+  }
+]
+```
+
+### Status Change Events (19 events)
+
+```json
+[
+  {
+    "name": "workorder.status.draft",
+    "label": "Work Order status draft",
+    "description": "Triggered when a work order status changes to draft.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.routed",
+    "label": "Work Order status routed",
+    "description": "Triggered when a work order status changes to routed.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.published",
+    "label": "Work Order status published",
+    "description": "Triggered when a work order status changes to published.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.confirmed",
+    "label": "Work Order status confirmed",
+    "description": "Triggered when a work order status changes to confirmed.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.assigned",
+    "label": "Work Order status assigned",
+    "description": "Triggered when a work order status changes to assigned.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.assigned_cancelled",
+    "label": "Work Order status assigned cancelled",
+    "description": "Triggered when a work order status changes to assigned cancelled.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.at_risk",
+    "label": "Work Order status at risk",
+    "description": "Triggered when a work order status changes to at risk.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.delayed",
+    "label": "Work Order status delayed",
+    "description": "Triggered when a work order status changes to delayed.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.on_my_way",
+    "label": "Work Order status on my way",
+    "description": "Triggered when a work order status changes to on my way.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.checked_in",
+    "label": "Work Order status checked in",
+    "description": "Triggered when a work order status changes to checked in.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.checked_out",
+    "label": "Work Order status checked out",
+    "description": "Triggered when a work order status changes to checked out.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.work_done",
+    "label": "Work Order status work done",
+    "description": "Triggered when a work order status changes to work done.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.approved",
+    "label": "Work Order status approved",
+    "description": "Triggered when a work order status changes to approved.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.paid",
+    "label": "Work Order status paid",
+    "description": "Triggered when a work order status changes to paid.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.cancelled",
+    "label": "Work Order status cancelled",
+    "description": "Triggered when a work order status changes to cancelled.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.deleted",
+    "label": "Work Order status deleted",
+    "description": "Triggered when a work order status changes to deleted.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.status.postponed",
+    "label": "Work Order status postponed",
+    "description": "Triggered when a work order status changes to postponed.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.problem_reported",
+    "label": "Work Order problem reported",
+    "description": "Triggered when a problem is reported or reopened on a work order.",
+    "model": "WorkOrder"
+  },
+  {
+    "name": "workorder.problem_resolved",
+    "label": "Work Order problem resolved",
+    "description": "Triggered when a problem is resolved on a work order.",
+    "model": "WorkOrder"
+  }
+]
+```
+
+### Additional Event
+
+```json
+{
+  "name": "workorder.part_updated",
+  "label": "Work Order part updated",
+  "description": "Triggered when parts/materials on a work order are updated.",
+  "model": "WorkOrder"
+}
+```
+
+---
+
+## Usage Examples
+
+### Dynamic Event Selection UI
+
+Build a dynamic event selector using the API:
+
+```javascript
+async function buildEventSelector() {
+  // Fetch available events
+  const response = await fetch(
+    'https://api-sandbox.fndev.net/api/v1/webhooks/events',
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  );
+  
+  const { result: events } = await response.json();
+  
+  // Group by category
+  const grouped = {
+    lifecycle: events.filter(e => !e.name.includes('status.')),
+    status: events.filter(e => e.name.includes('status.'))
+  };
+  
+  // Render UI
+  return {
+    lifecycleEvents: grouped.lifecycle.map(e => ({
+      value: e.name,
+      label: e.label,
+      description: e.description
+    })),
+    statusEvents: grouped.status.map(e => ({
+      value: e.name,
+      label: e.label,
+      description: e.description
+    }))
+  };
+}
+```
+
+### Validate Event Names
+
+Ensure event names are valid before creating webhooks:
+
+```javascript
+async function validateEvents(eventNames) {
+  // Get available events
+  const response = await fetch(
+    'https://api-sandbox.fndev.net/api/v1/webhooks/events',
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  );
+  
+  const { result: events } = await response.json();
+  const validEvents = new Set(events.map(e => e.name));
+  
+  // Check each event
+  const invalid = eventNames.filter(name => !validEvents.has(name));
+  
+  if (invalid.length > 0) {
+    throw new Error(`Invalid events: ${invalid.join(', ')}`);
+  }
+  
+  return true;
+}
+
+// Usage
+await validateEvents([
+  'workorder.status.published',
+  'workorder.status.assigned',
+  'invalid.event.name' // Will throw error
+]);
+```
+
+### Cache Events Locally
+
+Reduce API calls by caching event metadata:
+
+```javascript
+class EventCache {
+  constructor(accessToken) {
+    this.accessToken = accessToken;
+    this.cache = null;
+    this.cacheExpiry = null;
+  }
+  
+  async getEvents() {
+    // Return cache if valid (cache for 24 hours)
+    if (this.cache && this.cacheExpiry > Date.now()) {
+      return this.cache;
+    }
+    
+    // Fetch from API
+    const response = await fetch(
+      'https://api-sandbox.fndev.net/api/v1/webhooks/events',
+      {
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    
+    const { result } = await response.json();
+    
+    // Cache for 24 hours
+    this.cache = result;
+    this.cacheExpiry = Date.now() + (24 * 60 * 60 * 1000);
+    
+    return result;
+  }
+  
+  async getEventByName(eventName) {
+    const events = await this.getEvents();
+    return events.find(e => e.name === eventName);
+  }
+  
+  async getEventsByModel(model) {
+    const events = await this.getEvents();
+    return events.filter(e => e.model === model);
+  }
+}
+
+// Usage
+const cache = new EventCache(accessToken);
+
+// Get all events
+const allEvents = await cache.getEvents();
+
+// Get specific event
+const event = await cache.getEventByName('workorder.status.published');
+
+// Get by model
+const workOrderEvents = await cache.getEventsByModel('WorkOrder');
+```
+
+---
+
+## Best Practices
+
+### Always Fetch Latest Events
+
+Event list may change as Field Nation adds new events:
+
+```javascript
+// ❌ Don't hardcode events
+const events = [
+  'workorder.status.published',
+  'workorder.status.assigned'
+];
+
+// ✅ Do fetch from API
+const response = await fetch('/api/v1/webhooks/events');
+const { result: events } = await response.json();
+```
+
+### Validate Before Creating Webhooks
+
+```javascript
+async function createValidatedWebhook(config) {
+  // 1. Fetch valid events
+  const eventsResponse = await fetch(
+    'https://api-sandbox.fndev.net/api/v1/webhooks/events',
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  );
+  
+  const { result: validEvents } = await eventsResponse.json();
+  const validEventNames = new Set(validEvents.map(e => e.name));
+  
+  // 2. Validate config events
+  const invalid = config.events.filter(name => !validEventNames.has(name));
+  
+  if (invalid.length > 0) {
+    throw new Error(`Invalid events: ${invalid.join(', ')}`);
+  }
+  
+  // 3. Create webhook
+  const response = await fetch(
+    'https://api-sandbox.fndev.net/api/v1/webhooks',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(config)
+    }
+  );
+  
+  return await response.json();
+}
+```
+
+### Document Your Subscriptions
+
+```javascript
+async function documentWebhookEvents(webhookId) {
+  const webhook = await getWebhook(webhookId);
+  const allEvents = await getEvents();
+  
+  const subscribedEvents = webhook.result.events.map(eventName => {
+    const event = allEvents.find(e => e.name === eventName);
+    return {
+      name: eventName,
+      label: event?.label || 'Unknown',
+      description: event?.description || 'No description'
+    };
+  });
+  
+  console.log(`\nWebhook ${webhookId} subscribed to ${subscribedEvents.length} events:\n`);
+  subscribedEvents.forEach(event => {
+    console.log(`  • ${event.label}`);
+    console.log(`    ${event.description}`);
+  });
+}
+```
+
+---

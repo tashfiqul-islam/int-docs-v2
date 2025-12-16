@@ -37,6 +37,20 @@ export const apiReferences = defineDocs({
   },
 });
 
+export const blog = defineDocs({
+  dir: "content/blog",
+  docs: {
+    schema: frontmatterSchema.extend({
+      author: z.string().default("Field Nation"),
+      date: z
+        .string()
+        .or(z.date())
+        .transform((val) => new Date(val)),
+      tags: z.array(z.string()).optional(),
+    }),
+  },
+});
+
 export default defineConfig({
   plugins: [lastModified()],
   mdxOptions: {

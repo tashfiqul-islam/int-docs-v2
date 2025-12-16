@@ -135,10 +135,16 @@ export async function getLLMText(page: Page) {
   // Try to get processed markdown, fallback to raw if not available
   let processed: string;
   try {
-    processed = await page.data.getText("processed");
+    const dataWithGetText = page.data as {
+      getText: (type: string) => Promise<string>;
+    };
+    processed = await dataWithGetText.getText("processed");
   } catch {
     // Fallback to raw markdown if processed is not available (e.g., in build scripts)
-    processed = await page.data.getText("raw");
+    const dataWithGetText = page.data as {
+      getText: (type: string) => Promise<string>;
+    };
+    processed = await dataWithGetText.getText("raw");
   }
   const sourceUrl = getSourceUrl(page);
 

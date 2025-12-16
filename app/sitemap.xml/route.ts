@@ -1,6 +1,7 @@
 import { apiReferencesSource, source } from "@/lib/source";
 
-// Statically generate sitemap for static export
+// Required for static export
+export const dynamic = "force-static";
 export const revalidate = false;
 
 type ChangeFreq =
@@ -36,7 +37,10 @@ export function GET() {
     path: url,
     change: "weekly",
     priority: 0.7,
-    lastModified: data.lastModified ? new Date(data.lastModified) : undefined,
+    lastModified:
+      "lastModified" in data && data.lastModified
+        ? new Date(data.lastModified as string)
+        : undefined,
   }));
 
   const apiPages: PageEntry[] = apiReferencesSource
@@ -45,7 +49,10 @@ export function GET() {
       path: url,
       change: "weekly",
       priority: 0.75,
-      lastModified: data.lastModified ? new Date(data.lastModified) : undefined,
+      lastModified:
+        "lastModified" in data && data.lastModified
+          ? new Date(data.lastModified as string)
+          : undefined,
     }));
 
   const seen = new Set<string>();

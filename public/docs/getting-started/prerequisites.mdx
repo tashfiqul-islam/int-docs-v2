@@ -1,0 +1,209 @@
+# Getting Started: undefined
+URL: /docs/getting-started/prerequisites
+Source: content/docs/getting-started/prerequisites.mdx
+
+
+
+---
+title: Prerequisites
+description: Everything you need before building your Field Nation integration
+icon: CircleCheck
+---
+
+## Field Nation Requirements
+
+### Active Buyer Account
+
+You must have an active Buyer account on the Field Nation platform. Buyer accounts enable you to:
+
+- Post work orders to the marketplace
+- Route and assign work to providers
+- Access API credentials
+- Configure webhooks and integrations
+
+> [INFO] Don't have a Buyer account? [Sign up for Field Nation](https://www.fieldnation.com/signup) to get started.
+
+### Integration Contract
+
+Field Nation requires an integration contract before provisioning API access. This contract establishes:
+
+- **Scope of integration** - Which systems you're connecting
+- **Data access levels** - What information you can read/write
+- **Support commitment** - Program management assistance
+- **Sandbox access** - Development environment provisioning
+
+  
+    ### Contact Sales
+    
+    Reach out to your Field Nation sales representative or account manager to discuss your integration needs. If you don't have a contact, submit a request through the [Support Portal](https://support.fieldnation.com/s/).
+  
+  
+  
+    ### Kick-off Call
+    
+    Once your contract is in place, our integration program management team will schedule a kick-off call to understand your requirements and technical architecture.
+  
+  
+  
+    ### Sandbox Provisioning
+    
+    After the kick-off call, you'll receive:
+    - Sandbox environment credentials
+    - API client ID and secret
+    - Webhook access
+    - Documentation access
+  
+
+## Technical Requirements
+
+### Development Environment
+
+Ensure your development environment includes:
+
+- **Programming language** - Any language with HTTP/REST support (Node.js, Python, Java, C#, PHP, Ruby, Go)
+- **HTTPS capability** - For secure webhook endpoints
+- **OAuth 2.0 support** - For API authentication
+- **JSON parsing** - For request/response handling
+
+### System Requirements
+
+Your systems should be able to:
+
+- Make outbound HTTPS requests to Field Nation APIs
+- Receive inbound HTTPS requests (for webhooks)
+- Store API credentials securely
+- Handle JSON payloads up to 5MB
+- Process asynchronous operations
+
+### Network Requirements
+
+  
+    **Outbound Access Required:**
+    
+    - **Sandbox**: `https://api-sandbox.fndev.net`
+    - **Production**: `https://api.fieldnation.com`
+    
+    **Ports**: 443 (HTTPS)
+    
+    **IP Whitelisting**: Not required for outbound API calls
+  
+  
+  
+    **Inbound Access Required:**
+    
+    Your webhook endpoint must be accessible from Field Nation's IP addresses:
+    
+    **Sandbox IPs:**
+    ```
+    44.225.211.232
+    44.237.253.26
+    ```
+    
+    **Production IPs:**
+    ```
+    3.226.5.230
+    34.198.172.230
+    ```
+    
+    If your firewall requires IP whitelisting, add these addresses to your allowlist.
+  
+
+## Knowledge Requirements
+
+### Recommended Familiarity
+
+While we provide comprehensive documentation, having familiarity with these concepts will accelerate your integration development:
+
+- **REST API principles** - HTTP methods, status codes, headers
+- **OAuth 2.0 authentication** - Client credentials grant flow
+- **Webhook architecture** - Event-driven systems, HMAC signatures
+- **JSON data structures** - Parsing, serialization, nested objects
+- **Asynchronous programming** - Callbacks, promises, async/await
+
+### Field Service Domain Knowledge
+
+Understanding field service operations helps design better integrations:
+
+- **Work order lifecycle** - Draft, published, routed, assigned, completed, approved
+- **Provider management** - Routing, assignments, talent pools
+- **Service windows** - Scheduling, time zones, ETAs
+- **Task management** - Check-ins, check-outs, deliverables
+- **Pay structures** - Base pay, expenses, bonuses, penalties
+
+> **New to field service?** Review our [Platform Overview](/docs/getting-started/platform-overview) to understand the work order lifecycle before building your integration.
+
+## Optional But Recommended
+
+### Testing Tools
+
+These tools make integration development easier:
+
+- **[Postman](https://www.postman.com/)** or **[Insomnia](https://insomnia.rest/)** - API testing and collection management
+- **[ngrok](https://ngrok.com/)** or **[localtunnel](https://localtunnel.me/)** - Expose local webhooks for testing
+- **[Webhook.site](https://webhook.site/)** - Inspect webhook payloads
+- **[JSON Formatter](https://jsonformatter.org/)** - Validate and format JSON
+
+### Version Control
+
+Use Git or another version control system to:
+
+- Track changes to integration code
+- Collaborate with team members
+- Roll back to previous versions if needed
+- Document deployment history
+
+### Monitoring Tools
+
+Consider setting up monitoring for:
+
+- **API call volumes** - Track request rates and identify spikes
+- **Error rates** - Alert on authentication or validation failures
+- **Webhook delivery success** - Monitor notification reliability
+- **Response times** - Ensure performance meets SLAs
+
+## Company ID Location
+
+You'll need your Field Nation Company ID for API requests and support cases. Here's how to find it:
+
+  
+    Log in to the [Field Nation Platform](https://app.fieldnation.com)
+  
+  
+  
+    Click your user icon in the top right corner, then select **Company Settings**
+    
+    ![Company Settings](/docs/get-started/settings_company.png)
+  
+  
+  
+    Click **Company Profile**. Your company ID appears in the URL:
+    
+    ```
+    https://app.fieldnation.com/company/profile/12345
+                                                    ^^^^^
+                                              Your Company ID
+    ```
+    
+    ![Company Profile](/docs/get-started/company_profile.png)
+  
+
+> Keep your Company ID handy—you'll need it when requesting sandbox access, submitting support cases, and configuring certain integrations.
+
+## Ready to Build?
+
+Once you have:
+
+- ✅ An active Buyer account
+- ✅ Integration contract in place
+- ✅ Sandbox credentials received
+- ✅ Development environment set up
+- ✅ Company ID documented
+
+You're ready to proceed to [Choosing Your Approach](/docs/getting-started/choosing-your-approach) and build your first integration!
+
+## Need Help?
+
+If you're missing any prerequisites or have questions:
+
+- **Sales**: Contact your account manager for contract questions
+- **Technical**: Visit the [Support Portal](https://support.fieldnation.com/s/) or [submit a support case](https://app.fieldnation.com/support-cases)

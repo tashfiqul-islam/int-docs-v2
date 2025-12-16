@@ -1,0 +1,386 @@
+# Getting Started: undefined
+URL: /docs/getting-started/platform-overview
+Source: content/docs/getting-started/platform-overview.mdx
+
+
+
+---
+title: Platform Overview
+description: Understanding Field Nation's work order lifecycle and platform capabilities
+icon: LayoutDashboard
+---
+
+## The Work Order Lifecycle
+
+Every work order on Field Nation progresses through a well-defined lifecycle. Your integration will interact with work orders at various stages, so understanding this flow is essential.
+
+![Work Order Lifecycle](/docs/get-started/wo_lifecycle.png)
+
+### Lifecycle Stages Explained
+
+  
+    ### Draft
+    
+    Work orders begin in draft status. You can edit all details—title, description, schedule, location, pay, tasks—before publishing.
+    
+    **Integration Actions:**
+    - Create work orders via API
+    - Update any field
+    - Add attachments, tasks, custom fields
+    - Delete if no longer needed
+  
+  
+  
+    ### Published
+    
+    Publishing makes work orders visible on the marketplace. Providers can request to be assigned or you can route to specific providers.
+    
+    **Integration Actions:**
+    - Publish work orders
+    - Monitor for provider requests
+    - Route to preferred providers
+    - Respond to provider questions via messages
+  
+  
+  
+    ### Routed
+    
+    Work orders in routed status have been sent to one or more providers. Providers can accept or decline routing invitations.
+    
+    **Integration Actions:**
+    - Track which providers received routing
+    - Monitor acceptance/decline responses
+    - Route to additional providers if needed
+    - Cancel routing if circumstances change
+  
+  
+  
+    ### Assigned
+    
+    An assigned work order has a committed provider. The provider has accepted responsibility for completing the work.
+    
+    **Integration Actions:**
+    - Sync provider details to your system
+    - Monitor schedule confirmations
+    - Track "on my way" status
+    - Receive check-in notifications
+  
+  
+  
+    ### Work Done
+    
+    The provider marks work complete and uploads deliverables (photos, notes, signatures). Buyers review before approval.
+    
+    **Integration Actions:**
+    - Download deliverables
+    - Review completion notes
+    - Sync task completion status
+    - Flag issues if work is incomplete
+  
+  
+  
+    ### Approved
+    
+    Buyers approve completed work, confirming quality and deliverables meet requirements. This triggers payment processing.
+    
+    **Integration Actions:**
+    - Sync approval status
+    - Record completion time
+    - Close associated tickets
+    - Update billing systems
+  
+  
+  
+    ### Paid
+    
+    Field Nation processes payment to the provider. The work order lifecycle is complete.
+    
+    **Integration Actions:**
+    - Final status sync
+    - Archive work order data
+    - Generate completion reports
+    - Update financial records
+  
+
+> [INFO] Work orders can also be **Cancelled** at any stage or **Postponed** if work needs to be rescheduled indefinitely.
+
+---
+
+## Core Platform Concepts
+
+### Work Orders
+
+Work orders are the foundation of Field Nation. Each work order represents a specific job that needs to be completed at a physical location.
+
+**Key Components:**
+- **Title & Description** - What work needs to be done
+- **Schedule** - Service window (date/time range)
+- **Location** - Physical address where work occurs
+- **Pay** - Compensation structure (fixed, hourly, blended)
+- **Tasks** - Checklist items (check-in, photos, etc.)
+- **Custom Fields** - Your organization's specific data needs
+
+### Providers
+
+Providers are independent contractors who complete work orders. Field Nation has a marketplace of thousands of skilled technicians across various specialties.
+
+**Provider Management:**
+- **Talent Pools** - Groups of preferred providers
+- **Rating System** - Performance tracking
+- **Qualifications** - Skills and certifications
+- **Availability** - Real-time scheduling
+
+### Buyers
+
+Buyers post work orders to the marketplace. As a buyer, you can:
+
+- Create and manage work orders
+- Route to specific providers
+- Approve completed work
+- Manage payments
+- Access analytics and reporting
+
+### Templates & Projects
+
+**Templates** streamline work order creation by pre-configuring:
+- Standard tasks
+- Custom fields
+- Payment structures
+- Attachment requirements
+- Contact information
+
+**Projects** organize related work orders:
+- Group similar work
+- Apply consistent settings
+- Track progress across multiple orders
+- Manage provider teams
+
+> [INFO] Use templates and projects to reduce the data your integration needs to send. Reference a template ID instead of defining every task and custom field in each API call.
+
+---
+
+## Integration Architecture
+
+Field Nation offers three integration approaches, each suited for different use cases:
+
+  ![Field Nation Integration Architecture (light)](/docs/architecture-light.svg)
+
+  ![Field Nation Integration Architecture (dark)](/docs/architecture-dark.svg)
+
+The architecture diagram shows how external systems connect to Field Nation through different layers. Code-based integrations communicate directly with the Client API and Webhooks, while connector-based integrations flow through the Field Service Broker middleware.
+
+### REST API
+
+Full programmatic control over the platform. Create, read, update, and delete work orders, manage assignments, handle messages, and more.
+
+**Best For:**
+- Custom integrations
+- Complex workflows
+- Bi-directional synchronization
+- Automated operations
+
+**Capabilities:**
+- 150+ endpoints
+- Complete CRUD operations
+- Bulk operations
+- Advanced filtering
+
+[Explore REST API →](/docs/rest-api/introduction)
+
+### Webhooks
+
+Real-time event notifications delivered to your endpoint when things happen on Field Nation.
+
+**Best For:**
+- Event-driven architectures
+- Real-time updates
+- Status synchronization
+- Deliverable notifications
+
+**Features:**
+- 45+ event types
+- Configurable subscriptions
+- Signature verification
+- Retry logic with exponential backoff
+
+[Explore Webhooks →](/docs/webhooks/introduction)
+
+### Pre-built Connectors
+
+Out-of-the-box integrations with leading platforms require minimal code.
+
+**Best For:**
+- Standard workflows
+- Quick deployment
+- No-code/low-code scenarios
+- Proven integrations
+
+**Supported Platforms:**
+- Salesforce
+- ServiceNow
+- Autotask
+- ConnectWise
+- And 5 more platforms
+
+[Explore Connectors →](/docs/connectors/introduction)
+
+---
+
+## Environments
+
+Field Nation provides two environments for integration development and production use:
+
+  
+    ### Sandbox Environment
+    
+    A safe testing environment with full API parity to production.
+    
+    **Base URL:** `https://api-sandbox.fndev.net`
+    
+    **Features:**
+    - Separate from production data
+    - Test work orders and providers
+    - Full API functionality
+    - Webhook testing
+    - No real money transactions
+    
+    **Access:**
+    - Available after integration contract
+    - Provided during onboarding
+    - Separate credentials from production
+    
+    **Best Practices:**
+    - Test all workflows before production
+    - Use for UAT with stakeholders
+    - Validate error handling
+    - Test webhook signatures
+  
+  
+  
+    ### Production Environment
+    
+    Live environment with real work orders, providers, and transactions.
+    
+    **Base URL:** `https://api.fieldnation.com`
+    
+    **Features:**
+    - Real marketplace access
+    - Actual provider assignments
+    - Live payments
+    - Production support SLAs
+    
+    **Access:**
+    - Requires completed UAT
+    - Production credentials issued after approval
+    - Subject to rate limits
+    
+    **Best Practices:**
+    - Deploy only after thorough sandbox testing
+    - Implement monitoring and alerting
+    - Have rollback procedures ready
+    - Monitor error rates closely
+  
+
+---
+
+## Platform Capabilities
+
+### Work Order Management
+
+- **Create & Publish** - API-driven work order creation
+- **Bulk Operations** - Create multiple orders efficiently
+- **Templates** - Reuse configurations
+- **Custom Fields** - Extend data model
+- **Attachments** - Upload specs and requirements
+
+### Provider Management
+
+- **Routing** - Direct assignment to specific providers
+- **Talent Pools** - Manage preferred provider groups
+- **Qualifications** - Set skill requirements
+- **Performance Tracking** - Monitor provider metrics
+- **Communication** - Message providers directly
+
+### Schedule & Location
+
+- **Service Windows** - Define acceptable work times
+- **Time Zones** - Automatic timezone handling
+- **ETAs** - Provider estimated arrival
+- **On My Way** - Real-time provider tracking
+- **Check-in/Out** - Time logging with GPS
+
+### Tasks & Deliverables
+
+- **Task Lists** - Define required actions
+- **Photo Requirements** - Specify documentation needs
+- **Signatures** - Capture approvals
+- **Notes** - Provider completion summaries
+- **File Uploads** - Receive deliverables
+
+### Financial Management
+
+- **Pay Structures** - Fixed, hourly, or blended
+- **Expenses** - Track reimbursable costs
+- **Bonuses** - Incentive payments
+- **Penalties** - Performance-based deductions
+- **Invoicing** - Automated billing
+
+---
+
+## Rate Limits & Performance
+
+Field Nation implements rate limiting to ensure platform stability:
+
+- **Default Limit:** 60 requests per minute per company
+- **Burst Allowance:** Short bursts up to 100 requests
+- **Headers:** Rate limit info in response headers
+- **429 Status:** Returned when limits exceeded
+
+> Implement exponential backoff when you receive 429 responses. The `Retry-After` header indicates when to retry.
+
+**Best Practices:**
+- Cache frequently accessed data
+- Use bulk endpoints when available
+- Implement request queuing
+- Monitor rate limit headers
+
+---
+
+## Security & Compliance
+
+### Authentication
+- OAuth 2.0 Bearer tokens
+- Token expiration (1 hour)
+- Secure credential storage
+
+### Data Protection
+- HTTPS encryption (TLS 1.2+)
+- AES-256 credential encryption
+- Audit logging
+- IP whitelisting (webhooks)
+
+### Compliance
+- SOC 2 Type II certified
+- GDPR compliant
+- PCI DSS compliant (for payments)
+- Regular security audits
+
+---
+
+## Support & Resources
+
+### Getting Help
+
+- **Documentation:** Comprehensive guides and API reference
+- **Support Portal:** [support.fieldnation.com](https://support.fieldnation.com/s/)
+- **Developer Community:** Connect with other integrators
+- **Program Management:** Dedicated support during onboarding
+
+### Monitoring & Observability
+
+- **Webhook Logs:** 2-week retention
+- **API Response Codes:** Detailed error messages
+- **Status Page:** Platform health monitoring
+- **Email Alerts:** Webhook failure notifications
+
+---

@@ -1,0 +1,290 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/autotask/overview
+Source: content/docs/connectors/platforms/autotask/overview.mdx
+
+
+
+---
+title: Autotask Connector
+description: Integrate Datto Autotask PSA with Field Nation for automated field service dispatch from service tickets and work orders.
+---
+
+## Overview
+
+The Autotask connector enables seamless integration between Datto Autotask PSA and Field Nation:
+- **Ticket-based dispatch**: Automatically create work orders from Autotask Tickets
+- **SOAP API integration**: Secure authentication via token-based SOAP calls
+- **Bidirectional sync**: Status updates flow both directions
+- **Flexible triggers**: Configure based on ticket status, type, or custom fields
+- **UDF support**: Map User-Defined Fields between systems
+
+---
+
+## At a Glance
+
+  
+    API Integration Token + SOAP Credentials
+  
+  
+    Tickets, Service Calls, Projects
+  
+  
+    Webhooks + API Polling (configurable)
+  
+  
+    Bidirectional (create, update, notes)
+  
+
+---
+
+## How It Works
+
+### Configure Webhook
+
+Set up webhook in Autotask that triggers on ticket status changes or custom field updates
+
+### Webhook Notification
+
+Autotask sends ticket ID to Field Nation when trigger conditions met
+
+### Field Nation Fetches Data
+
+Integration Broker retrieves complete ticket data from Autotask SOAP API
+
+### Apply Mappings
+
+Broker transforms Autotask ticket data into Field Nation work order format
+
+### Create Work Order
+
+Work order created in Field Nation with correlation ID stored for bidirectional sync
+
+---
+
+## Common Use Cases
+
+### Dispatch from Service Ticket
+
+Automatically create Field Nation work order when Autotask Ticket requires on-site service
+
+```
+Ticket Status = "Dispatch to Field" 
+  → Webhook triggers 
+  → Field Nation Work Order Created
+```
+
+### Project-Based Dispatch
+
+Create work orders from Autotask Project tasks requiring field technicians
+
+```
+Project Task Type = "On-Site"
+AND Task Status = "Ready"
+  → Work order created
+  → Task updated with FN details
+```
+
+### Status Synchronization
+
+Reflect Field Nation work order completion back to Autotask Ticket
+
+```
+FN Work Order = "Completed"
+  → Integration Broker
+  → Autotask Ticket Status = "Complete - Customer Notified"
+  → Internal Notes updated
+```
+
+---
+
+## Architecture
+
+```mermaid
+sequenceDiagram
+    participant AT as Autotask
+    participant WH as Webhook
+    participant Broker as Integration Broker
+    participant FN as Field Nation
+    
+    AT->>WH: Ticket Status Changed
+    WH->>Broker: POST Trigger URL (Ticket ID)
+    Broker->>AT: SOAP API Call (Get Ticket)
+    AT-->>Broker: Ticket Data + UDFs
+    Broker->>Broker: Apply Field Mappings
+    Broker->>FN: Create/Update Work Order
+    FN-->>Broker: Success + WO ID
+    Broker->>AT: Update Ticket (optional)
+```
+
+---
+
+## Features
+
+### Field Mapping Capabilities
+
+- **Standard Fields**: Title, Description, Status, Priority, Due Date
+- **User-Defined Fields**: Access any UDF on Ticket entity
+- **Related Entities**: Account, Contact, Resource (assigned technician)
+- **Picklist Fields**: Map Autotask picklists to Field Nation enums
+- **Date/Time Fields**: Automatic timezone conversion
+
+### Supported Operations
+
+---
+
+## Prerequisites
+
+### Autotask Requirements
+
+  
+    - Autotask PSA license with API access enabled
+    - Admin or API-enabled user account
+    - SOAP API credentials generated
+    - Integration tracking identifier configured
+  
+  
+  
+    Generate in Autotask:
+    1. Navigate to Admin → Resources (Users)
+    2. Select API user
+    3. Generate API Integration Code
+    4. Generate API Security Token
+    5. Copy both for Field Nation configuration
+  
+  
+  
+    - Ability to configure Autotask webhooks
+    - Webhook endpoint URL from Field Nation
+    - Network access to send webhooks
+    - Optional: IP whitelisting for Field Nation
+  
+  
+  
+    API user must have:
+    - Read access to Ticket entity and all fields to sync
+    - Write access to fields for status/note updates
+    - Access to related entities (Account, Contact, Resource)
+    - Permission to view User-Defined Fields
+  
+
+### Field Nation Requirements
+
+- Active buyer account with admin access
+- Integration settings access
+- Sandbox environment (recommended for testing)
+
+[Complete prerequisites →](/docs/connectors/getting-started)
+
+---
+
+## Authentication
+
+Autotask connector uses **SOAP API with Token Authentication**:
+
+```
+Username: API user email
+Password: API user password
+Integration Code: {integration_code}
+Security Token: {security_token}
+```
+
+**Components:**
+- **Username**: Autotask user email with API access
+- **Password**: User's password
+- **Integration Code**: Generated tracking identifier
+- **Security Token**: API authentication token
+
+**Generate Credentials:**
+1. Log into Autotask as admin
+2. Admin → Resources (Users) → Select API user
+3. API Integration section → Generate Integration Code
+4. Generate Security Token (if not already generated)
+5. Copy all credentials for Field Nation configuration
+
+> **Security Best Practice**: Use dedicated API user (not personal account). Integration Code is unique per integration - generate new code for Field Nation.
+
+---
+
+## Data Flow Patterns
+
+### Inbound: Autotask → Field Nation
+
+**Trigger**: Webhook fired on ticket status change  
+**Action**: Webhook sends Ticket ID to Field Nation  
+**Result**: Field Nation work order created/updated
+
+**Example Webhook Triggers:**
+- Ticket Status = "Dispatch to Field"
+- Custom UDF "Send to FN" = Yes
+- Issue Type = "On-Site Required"
+- Queue = "Field Services"
+
+---
+
+### Outbound: Field Nation → Autotask
+
+**Trigger**: Field Nation work order event (completed, etc.)  
+**Action**: Integration Broker calls Autotask SOAP API  
+**Result**: Autotask Ticket updated with status/notes
+
+**Configurable Events:**
+- Work order assigned → Update Ticket Status
+- Work order completed → Add Internal Note with details
+- Provider checked in → Update custom UDF
+- Work order approved → Update Status to "Complete"
+
+---
+
+## Best Practices
+
+### Webhook Design
+
+- ✅ Use specific status values (not "any change")
+- ✅ Configure webhook for relevant ticket types only
+- ✅ Add safeguards to prevent duplicate triggers
+- ✅ Test in sandbox Autotask instance first
+- ✅ Monitor webhook delivery logs
+
+### Field Mappings
+
+- ✅ Map all required Field Nation fields
+- ✅ Use User-Defined Fields for custom data
+- ✅ Handle Autotask picklists with Array Map
+- ✅ Test timezone conversions for date fields
+- ✅ Document UDF IDs and purposes
+
+### Security
+
+- ✅ Use dedicated API user
+- ✅ Rotate Security Token periodically
+- ✅ Grant minimum required permissions
+- ✅ Monitor API usage limits
+- ✅ Enable IP whitelisting if policy requires
+
+---
+
+## Limitations & Considerations
+
+### API Limits
+
+Autotask enforces API call limits:
+- Varies by license type and contract
+- Monitor usage in Autotask Admin → API Usage
+
+Each work order sync consumes **2-3 API calls** (authentication + data retrieval + optional update).
+
+### SOAP API Complexity
+
+- SOAP-based (not REST) - more complex than modern APIs
+- XML payload parsing required
+- Field discovery may require manual configuration
+- Some fields may not be accessible via API
+
+### Related Entity Depth
+
+Can access:
+- ✅ Fields on Ticket entity
+- ✅ Fields from related Account, Contact, Resource
+- ❌ Grand-parent relationships (requires custom JSONNET)
+
+---

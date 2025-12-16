@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "fumadocs-ui/css/shadcn.css";
 @import "fumadocs-ui/css/solar.css";
 @import "fumadocs-ui/css/preset.css";
 @import "fumadocs-twoslash/twoslash.css";
@@ -37,22 +36,6 @@
   font-weight: 600;
   font-style: normal;
   font-display: swap;
-}
-
-/* Align layouts (nav, home, docs) to a wider max width */
-:root {
-  --fd-layout-width: 1440px;
-}
-
-@layer components {
-  /* Align nav container with layout width without breaking defaults */
-  #nd-nav {
-    @apply px-6;
-  }
-  #nd-nav > div {
-    @apply mx-auto w-full;
-    max-width: var(--fd-layout-width);
-  }
 }
 
 @font-face {
@@ -96,244 +79,192 @@
   font-display: swap;
 }
 
+/* Field Nation Theme Colors */
 :root {
-  --radius: 0.625rem;
-  --destructive: oklch(0.577 0.245 27.325);
-  --input: oklch(0.922 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-
+  --fd-layout-width: 1440px;
   --color-fd-primary: #f16a22;
   --color-fd-primary-foreground: white;
-}
 
-.dark {
-  --destructive: oklch(0.704 0.191 22.216);
-  --input: oklch(1 0 0 / 15%);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Spacing System (8px Grid) */
+  --spacing-xs: 0.5rem; /* 8px */
+  --spacing-sm: 1rem; /* 16px */
+  --spacing-md: 1.5rem; /* 24px */
+  --spacing-lg: 2rem; /* 32px */
+  --spacing-xl: 3rem; /* 48px */
+  --spacing-2xl: 4rem; /* 64px */
+
+  /* Card Gradients */
+  --card-gradient-light: linear-gradient(
+    to bottom right,
+    hsl(0, 0%, 100%),
+    hsl(0, 0%, 100%),
+    hsl(0, 0%, 98%)
+  );
+  --card-gradient-dark: linear-gradient(
+    to bottom right,
+    hsl(0, 0%, 12%),
+    hsl(0, 0%, 12%),
+    hsl(0, 0%, 16%)
+  );
 }
 
 @theme inline {
-  --color-background: var(--color-fd-background);
-  --color-foreground: var(--color-fd-foreground);
-  --color-card: var(--color-fd-card);
-  --color-card-foreground: var(--color-fd-card-foreground);
-  --color-popover: var(--color-fd-popover);
-  --color-popover-foreground: var(--color-fd-popover-foreground);
-  --color-primary: var(--color-fd-primary);
-  --color-primary-foreground: var(--color-fd-primary-foreground);
-  --color-secondary: var(--color-fd-secondary);
-  --color-secondary-foreground: var(--color-fd-secondary-foreground);
-  --color-muted: var(--color-fd-muted);
-  --color-muted-foreground: var(--color-fd-muted-foreground);
-  --color-accent: var(--color-fd-accent);
-  --color-accent-foreground: var(--color-fd-accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--color-fd-border);
-  --color-input: var(--input);
-  --color-ring: var(--color-fd-ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  /* Custom Fonts */
+  --default-mono-font-family: "JetBrains Mono";
+
+  /* Custom Animations */
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+  --animate-fade-in-up: fadeInUp 0.6s ease-out forwards;
+  --animate-fade-in-delay: fadeInDelay 0.8s ease-out forwards;
+  --animate-slide-in-right: slideInRight 0.6s ease-out forwards;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInDelay {
+    0% {
+      opacity: 0;
+    }
+    40% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(48px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes cell-ripple {
+    0% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0.4;
+    }
+  }
+
+  --animate-cell-ripple: cell-ripple var(--duration, 200ms) ease-out none 1
+    var(--delay, 0ms);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+}
+
+code,
+pre {
+  font-family: "JetBrains Mono", "Courier New", monospace;
+}
+
+/* View Transitions for Theme Switching */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
   }
-  html {
-    /* Slightly larger base font for roomier typography */
-    font-size: 1.05rem;
+
+  ::view-transition-old(root) {
+    z-index: 0;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-family:
-      "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      sans-serif;
+
+  ::view-transition-new(root) {
+    z-index: 1;
+    animation: reveal 0.4s ease-in-out forwards;
   }
-  code,
-  pre {
-    font-family: "JetBrains Mono", "Courier New", monospace;
+
+  @keyframes reveal {
+    from {
+      clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
+      opacity: 0.8;
+    }
+    to {
+      clip-path: circle(150% at var(--x, 50%) var(--y, 50%));
+      opacity: 1;
+    }
   }
 }
 
-@layer components {
-  .fd-api-shell {
-    @apply space-y-6;
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
+}
 
-  .fd-api-grid {
-    @apply gap-6;
-  }
+/* Animation Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
 
-  .fd-api-main {
-    @apply space-y-8;
-  }
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
 
-  .fd-api-main > * {
-    @apply scroll-m-28;
-  }
+.animate-fade-in-delay {
+  animation: fadeInDelay 0.8s ease-out forwards;
+}
 
-  .fd-api-rail {
-    @apply space-y-4 lg:sticky lg:top-[calc(var(--nav-height,64px)+1.25rem)] lg:self-start;
-  }
+.animate-fade-in-up-1 {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: 0.1s;
+  opacity: 0;
+}
 
-  .fd-api-playground {
-    @apply w-full;
-  }
+.animate-fade-in-up-2 {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: 0.2s;
+  opacity: 0;
+}
 
-  .fd-api-card {
-    @apply rounded-xl border bg-card/60 p-4 shadow-sm;
-  }
+.animate-fade-in-up-3 {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
 
-  .fd-api-card > :last-child {
-    @apply mb-0;
-  }
-
-  .fd-api-code pre {
-    @apply max-h-112 overflow-auto text-sm leading-relaxed;
-  }
-
-  .fd-api-code pre code {
-    @apply text-sm;
-  }
-
-  .fd-json-editor {
-    /* Catppuccin Latte (light) + Mocha (dark) */
-    --fd-json-bg-light: #eff1f5;
-    --fd-json-bg-dark: #1e1e2e;
-    --fd-json-fg-light: #4c4f69;
-    --fd-json-fg-dark: #cdd6f4;
-    --fd-json-border-light: #ccd0da;
-    --fd-json-border-dark: #313244;
-    --fd-json-selection: #45475a80;
-    --fd-json-selection-light: #8caaee45;
-    --fd-json-caret: #89b4fa;
-    @apply w-full overflow-hidden rounded-lg border shadow-sm transition-colors;
-    background: var(--fd-json-bg-light);
-    color: var(--fd-json-fg-light);
-    border-color: var(--fd-json-border-light);
-  }
-
-  .dark .fd-json-editor {
-    background: var(--fd-json-bg-dark);
-    color: var(--fd-json-fg-dark);
-    border-color: var(--fd-json-border-dark);
-  }
-
-  .fd-json-editor__textarea {
-    @apply block h-[260px] w-full resize-none bg-transparent p-3 text-sm font-mono leading-relaxed outline-none;
-    caret-color: var(--fd-json-caret);
-    tab-size: 2;
-    line-height: 1.5;
-    color: transparent;
-    background: transparent;
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    white-space: pre;
-    overflow: auto;
-  }
-
-  .fd-json-editor__scroller {
-    @apply relative h-[320px] overflow-hidden;
-  }
-
-  .fd-json-editor__code {
-    @apply absolute left-0 top-0 h-full w-full whitespace-pre wrap-break-word p-3 text-sm font-mono leading-relaxed pointer-events-none overflow-auto;
-    color: var(--fd-json-fg-light);
-  }
-
-  .dark .fd-json-editor__code {
-    color: var(--fd-json-fg-dark);
-  }
-
-  .fd-json-editor__textarea::selection {
-    background: var(--fd-json-selection-light);
-  }
-
-  .fd-json-editor__error {
-    @apply border-t px-3 py-2 text-xs font-mono text-red-400 empty:hidden;
-    border-color: var(--fd-json-border-light);
-  }
-
-  .dark .fd-json-editor__error {
-    border-color: var(--fd-json-border-dark);
-  }
-
-  /* Token colors (Catppuccin Latte/Mocha) */
-  .tok-key {
-    color: #d20f39; /* red (latte) */
-  }
-  .dark .tok-key {
-    color: #f38ba8; /* red (mocha) */
-  }
-  .tok-string {
-    color: #40a02b; /* green (latte) */
-  }
-  .dark .tok-string {
-    color: #a6e3a1; /* green (mocha) */
-  }
-  .tok-number {
-    color: #fe640b; /* peach (latte) */
-  }
-  .dark .tok-number {
-    color: #fab387; /* peach (mocha) */
-  }
-  .tok-boolean {
-    color: #1e66f5; /* blue (latte) */
-  }
-  .dark .tok-boolean {
-    color: #89b4fa; /* blue (mocha) */
-  }
-
-  .fd-api-main table {
-    @apply text-sm;
-  }
-
-  .fd-api-main thead {
-    @apply sticky top-0 bg-background;
-  }
-
-  .fd-api-main tbody tr:nth-child(odd) {
-    @apply bg-muted/40;
-  }
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
 }

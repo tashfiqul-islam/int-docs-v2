@@ -23,5 +23,7 @@ export const openapi = createOpenAPI({
       webhooks_v3: webhooks,
     };
   },
-  proxyUrl: "/api/proxy",
+  // No proxy - browser makes direct requests to the API
+  // Requires the Field Nation API to have proper CORS headers
+  // (api-sandbox.fndev.net already supports this)
 });

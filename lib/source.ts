@@ -1,4 +1,4 @@
-import { apiReferences, docs } from "fumadocs-mdx:collections/server";
+import { apiReferences, blog, docs } from "fumadocs-mdx:collections/server";
 import { type InferPageType, loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 import { openapiPlugin } from "fumadocs-openapi/server";
@@ -50,6 +50,12 @@ export const apiReferencesSource = loader({
   plugins: [lucideIconsPlugin(), openapiPlugin()],
 });
 
+// Blog posts loader
+export const blogPosts = loader({
+  source: blog.toFumadocsSource(),
+  baseUrl: "/blog",
+});
+
 // Helper function to get page image for API references
 export function getPageImage(page: InferPageType<typeof apiReferencesSource>) {
   const segments = [...page.slugs, "image.png"];
@@ -65,7 +71,10 @@ type AnyPage =
   | InferPageType<typeof apiReferencesSource>;
 
 export async function getLLMText(page: AnyPage) {
-  const processed = await page.data.getText("processed");
+  const dataWithGetText = page.data as {
+    getText: (type: string) => Promise<string>;
+  };
+  const processed = await dataWithGetText.getText("processed");
   return `# ${page.data.title} (${page.url})
 
 ${processed}`;

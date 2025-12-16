@@ -81,7 +81,7 @@ function Item({
         className={cn(
           keyVariants({
             deprecated,
-            className: "w-[25%] min-w-fit pe-2 font-medium",
+            className: "w-[25%] min-w-0 shrink-0 pe-2 font-medium",
           })
         )}
       >
@@ -90,15 +90,15 @@ function Item({
       </code>
       {typeDescriptionLink ? (
         <Link
-          className="w-[25%] pe-2 font-mono underline"
+          className="w-[25%] min-w-0 shrink-0 pe-2 font-mono underline"
           href={typeDescriptionLink}
         >
           {type}
         </Link>
       ) : (
-        <span className="w-[25%] pe-2 font-mono">{type}</span>
+        <span className="w-[25%] min-w-0 shrink-0 pe-2 font-mono">{type}</span>
       )}
-      <p className="@max-lg:hidden">{description}</p>
+      <p className="@max-lg:hidden w-[50%] min-w-0">{description}</p>
     </div>
   );
 }

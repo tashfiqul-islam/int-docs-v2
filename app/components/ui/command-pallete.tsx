@@ -250,7 +250,7 @@ function BackgroundEffects({
                 scale: [0.92, 1.08, 0.98],
               }
         }
-        className="-top-20 -translate-x-1/2 absolute left-1/2 h-64 w-64 rounded-full bg-brand/20 blur-[150px]"
+        className="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-brand/20 blur-[150px]"
         transition={
           shouldReduceMotion
             ? undefined

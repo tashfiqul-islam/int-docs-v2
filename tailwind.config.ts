@@ -11,6 +11,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
+          "var(--font-open-sans)",
           "Open Sans",
           "-apple-system",
           "BlinkMacSystemFont",

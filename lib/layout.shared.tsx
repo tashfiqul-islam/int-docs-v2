@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import { ExternalLinkIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { ThemeLogo } from "~/components/theme-logo";
 
 export function baseOptions(): BaseLayoutProps {
@@ -17,28 +17,32 @@ export function baseOptions(): BaseLayoutProps {
         text: "Documentation",
         url: "/docs/getting-started/introduction",
         active: "nested-url",
-        on: "nav", // Only show in navbar, not sidebar
+        on: "nav",
       },
       {
         text: "API References",
         url: "/api-references/rest-api/v2",
-        on: "nav", // Only show in navbar, not sidebar
+        on: "nav",
+      },
+      {
+        text: "Blog",
+        url: "/blog",
+        on: "nav",
       },
       {
         text: (
           <span className="inline-flex items-center gap-1.5">
             Dev Portal
-            <ExternalLinkIcon className="size-3.5" />
+            <ArrowUpRight className="size-3.5" />
           </span>
         ),
         url: "https://fieldnation.com",
         external: true,
-        on: "nav", // Only show in navbar, not sidebar
+        on: "nav",
       },
       {
         text: "For LLMs",
         type: "menu",
-        on: "nav", // Only show in navbar, not sidebar
         items: [
           {
             text: "llms.txt",

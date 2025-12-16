@@ -12,14 +12,14 @@ const NotFound = () => {
     <DocsLayout nav={base.nav} tree={emptyTree}>
       <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden px-4 py-16">
         <div
-          className="-z-10 pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 -z-10"
           style={{
             background:
               "radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-brand) var(--not-found-glow-opacity), transparent) 0%, transparent 70%)",
           }}
         >
           <div
-            className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-(--not-found-glow-size) w-(--not-found-glow-size) animate-pulse-glow rounded-full bg-brand"
+            className="absolute top-1/2 left-1/2 h-(--not-found-glow-size) w-(--not-found-glow-size) -translate-x-1/2 -translate-y-1/2 animate-pulse-glow rounded-full bg-brand"
             style={{
               background:
                 "radial-gradient(circle, color-mix(in srgb, var(--color-brand) calc(var(--not-found-glow-opacity) * 100%), transparent) 0%, transparent 70%)",
@@ -45,7 +45,7 @@ const NotFound = () => {
             </h1>
             <div className="absolute inset-0 animate-float">
               <div
-                className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-32 w-32 rounded-full opacity-20 blur-3xl"
+                className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-20 blur-3xl"
                 style={{
                   background:
                     "radial-gradient(circle, var(--color-brand), transparent)",

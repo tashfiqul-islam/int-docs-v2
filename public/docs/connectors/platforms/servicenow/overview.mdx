@@ -1,0 +1,292 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/servicenow/overview
+Source: content/docs/connectors/platforms/servicenow/overview.mdx
+
+
+
+---
+title: ServiceNow Connector
+description: Integrate ServiceNow ITSM with Field Nation for automated work order creation from Incidents, Cases, or custom tables.
+---
+
+## Overview
+
+The ServiceNow connector enables seamless integration between ServiceNow ITSM and Field Nation:
+- **Trigger-based creation**: Use Business Rules to automatically create work orders
+- **REST Message integration**: Secure webhook communication
+- **Bidirectional sync**: Status and notes flow both directions
+- **Flexible table support**: Works with Incident, Case, or custom tables
+- **Related field access**: Map fields from related tables
+
+---
+
+## At a Glance
+
+  
+    OAuth 2.0 or Basic Auth (username + password)
+  
+  
+    Incident, Case, Problem, or custom tables
+  
+  
+    Business Rules + REST Messages
+  
+  
+    Bidirectional (create, update, messages)
+  
+
+---
+
+## How It Works
+
+### Configure Business Rule
+
+Create Business Rule in ServiceNow that evaluates conditions (state change, assignment, etc.)
+
+### Call REST Message
+
+Business Rule invokes REST Message to send record sys_id to Field Nation trigger URL
+
+### Field Nation Fetches Data
+
+Integration Broker retrieves complete record data from ServiceNow API using configured credentials
+
+### Apply Mappings
+
+Broker applies field mappings and transformations to convert ServiceNow data into Field Nation work order format
+
+### Create Work Order
+
+Transformed data creates or updates Field Nation work order with correlation ID stored for bidirectional sync
+
+---
+
+## Common Use Cases
+
+### Dispatch from Incident
+
+Automatically create Field Nation work order when Incident requires on-site service
+
+```
+Incident State = "On-Site Required" 
+  → Business Rule triggers 
+  → REST Message 
+  → Field Nation Work Order Created
+```
+
+### Assignment-Based Triggering
+
+Dispatch when incident assigned to field service group
+
+```
+Assignment Group = "Field Services"
+  → Business Rule triggers
+  → Work order created
+  → Assignment updated with FN details
+```
+
+### Status Synchronization
+
+Reflect Field Nation work order status back to ServiceNow Incident
+
+```
+FN Work Order Status = "Completed"
+  → Integration Broker
+  → ServiceNow Incident State = "Resolved"
+  → Work Notes added with completion details
+```
+
+---
+
+## Architecture
+
+```mermaid
+sequenceDiagram
+    participant SN as ServiceNow
+    participant BR as Business Rule
+    participant RM as REST Message
+    participant Broker as Integration Broker
+    participant FN as Field Nation
+    
+    SN->>BR: Record Created/Updated
+    BR->>BR: Evaluate Conditions
+    BR->>RM: Execute REST Message
+    RM->>Broker: POST Trigger URL (sys_id)
+    Broker->>SN: GET Record Data (API)
+    SN-->>Broker: Full Record + Related Tables
+    Broker->>Broker: Apply Field Mappings
+    Broker->>FN: Create/Update Work Order
+    FN-->>Broker: Success + WO ID
+    Broker->>SN: Update Sync Status (optional)
+```
+
+---
+
+## Features
+
+### Field Mapping Capabilities
+
+- **Standard Fields**: Short Description, Description, State, Priority
+- **Custom Fields**: Access any custom field on base table
+- **Related Tables**: Map fields from Assignment Group, Location, Caller, etc.
+- **Reference Fields**: Access related record data (e.g., Location.Name)
+- **Choice Fields**: Map ServiceNow choices to Field Nation enums
+
+### Supported Operations
+
+---
+
+## Prerequisites
+
+### ServiceNow Requirements
+
+  
+    - Create and modify Business Rules
+    - Configure REST Messages
+    - Manage integration users and roles
+    - Access Studio or Update Sets
+  
+  
+  
+    - ServiceNow user with web_service_admin or rest_api_explorer role
+    - Read permissions on all fields to sync FROM ServiceNow
+    - Write permissions on all fields to sync TO ServiceNow
+    - Access to base table and related tables
+  
+  
+  
+    - Allow REST API access (not blocked by ACLs)
+    - Whitelist Field Nation IP addresses if using IP restrictions
+    - Enable "web_service_provider" plugin (usually enabled)
+  
+
+### Field Nation Requirements
+
+- Active buyer account with admin access
+- Integration settings access
+- Sandbox environment (recommended for testing)
+
+[Complete prerequisites →](/docs/connectors/getting-started)
+
+---
+
+## Authentication
+
+ServiceNow connector supports **OAuth 2.0** (recommended) or **Basic Auth**:
+
+### OAuth 2.0 (Recommended)
+
+```
+Grant Type: Client Credentials
+Token Endpoint: https://instance.service-now.com/oauth_token.do
+Client ID: {your_client_id}
+Client Secret: {your_client_secret}
+```
+
+**Benefits:**
+- More secure (no password storage)
+- Token rotation automatic
+- Better audit trails
+- Granular scope control
+
+### Basic Authentication
+
+```
+Username: integration.user
+Password: {secure_password}
+Format: Basic base64(username:password)
+```
+
+**When to Use:**
+- Quick setup for testing
+- Legacy ServiceNow instances
+- Simpler credential management
+
+> **Security Best Practice**: Use OAuth 2.0 in production. Create dedicated integration user instead of personal account for better security and audit trails.
+
+---
+
+## Data Flow Patterns
+
+### Inbound: ServiceNow → Field Nation
+
+**Trigger**: Business Rule evaluates conditions  
+**Action**: REST Message sends sys_id to Field Nation  
+**Result**: Field Nation work order created/updated
+
+**Example Business Rule Conditions:**
+- State = "On-Site Required"
+- Custom Field "Dispatch to FN" = true
+- Priority = "1-Critical" AND Category = "Hardware"
+- Assignment Group contains "Field"
+
+---
+
+### Outbound: Field Nation → ServiceNow
+
+**Trigger**: Field Nation work order event (assigned, completed, etc.)  
+**Action**: Integration Broker calls ServiceNow API  
+**Result**: ServiceNow Incident/record updated with status/work notes
+
+**Configurable Events:**
+- Work order assigned → Update Incident State
+- Work order completed → Add Work Notes with details
+- Provider checked in → Update custom field "Tech Arrived"
+- Work order approved → Update State to "Resolved"
+
+---
+
+## Best Practices
+
+### Business Rule Design
+
+- ✅ Use specific conditions (avoid "on any field update")
+- ✅ Run Business Rule "async" to prevent blocking
+- ✅ Add condition to prevent duplicate triggers
+- ✅ Test in sub-production instance first
+- ✅ Document Business Rule logic
+
+### Field Mappings
+
+- ✅ Map all required Field Nation fields
+- ✅ Use default values for optional fields
+- ✅ Handle Choice fields with Array Map
+- ✅ Test with various record states
+- ✅ Document mapping logic
+
+### Security
+
+- ✅ Use OAuth 2.0 in production
+- ✅ Use dedicated integration user
+- ✅ Grant minimum required roles
+- ✅ Monitor API usage and limits
+- ✅ Enable IP whitelisting if policy requires
+
+---
+
+## Limitations & Considerations
+
+### API Limits
+
+ServiceNow enforces API call limits based on license:
+- **Enterprise**: Varies by contract
+- **Professional**: Limited API calls/hour
+- **Developer instances**: 10K calls/24 hours
+
+Each work order sync consumes **2-3 API calls** (authentication + data retrieval + optional status update).
+
+[Monitor API usage in ServiceNow → System Diagnostics → Stats]
+
+### Related Table Depth
+
+The connector can access:
+- ✅ Fields on base table (Incident, Case, etc.)
+- ✅ Fields on directly related tables (Assignment Group, Location, Caller)
+- ❌ Grand-parent or distant relationships (requires custom JSONNET)
+
+**Example Access:**
+- ✅ `incident.location.name` - Direct reference
+- ✅ `incident.caller_id.email` - Direct relationship
+- ❌ `incident.location.parent.company.name` - Multiple levels (not automatic)
+
+---

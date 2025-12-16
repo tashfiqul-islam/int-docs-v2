@@ -1,0 +1,166 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/smartsheet/configuration
+Source: content/docs/connectors/platforms/smartsheet/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the Smartsheet connector in Field Nation with access token and column mappings.
+---
+
+## Prerequisites
+
+- ☐ Smartsheet Access Token
+- ☐ Sheet ID
+- ☐ Sheet admin access
+- ☐ Admin access to Field Nation
+
+---
+
+## Step 1: Generate Smartsheet Access Token
+
+### Log into Smartsheet
+
+Use admin or dedicated integration user
+
+### Navigate to API Settings
+
+Click profile icon → Apps & Integrations → API Access
+
+### Generate Token
+
+Click "Generate new access token"
+
+**Token Name**: `Field Nation Integration`
+
+**Copy token immediately** (shown once!)
+
+---
+
+## Step 2: Get Sheet ID
+
+### Open Your Sheet
+
+Navigate to the Smartsheet you want to integrate
+
+### Find Sheet ID
+
+**Method 1**: URL
+```
+https://app.smartsheet.com/sheets/{sheet_id}
+```
+
+**Method 2**: Sheet Properties
+File → Properties → Sheet ID
+
+Example: `1234567890123456`
+
+---
+
+## Step 3: Configure in Field Nation
+
+Access Integration Broker → Select "Smartsheet"
+
+### Access Token
+
+Paste access token from Step 1
+
+**Authentication:**
+```
+Bearer {your_access_token}
+```
+
+---
+
+### Sheet ID
+
+Enter Sheet ID from Step 2
+
+Example: `1234567890123456`
+
+---
+
+## Step 4: Test Connection
+
+Click "Test Connection"
+
+**Success** ✅: Token valid, sheet accessible
+
+**Failure** ❌: Check:
+
+  
+    - Verify token copied correctly
+    - Ensure token not revoked
+    - Check token user has sheet access
+  
+  
+  
+    - Verify Sheet ID correct
+    - Ensure sheet shared with token user
+    - Check sheet not deleted
+  
+  
+  
+    - Share sheet with integration user
+    - Grant "Admin" or "Editor" access
+    - Verify user can edit sheet
+  
+
+---
+
+## Step 5: Refresh Columns & Map
+
+Click "Refresh Columns" → Smartsheet API queries sheet schema
+
+**Inbound Mappings:**
+```
+Task Name → title
+Description → description
+Status → status_id (Array Map)
+Customer → location.company.name
+Due Date → schedule.start (Date Convert)
+```
+
+**Column Names**: Smartsheet uses column names (e.g., "Task Name", "Status")
+
+**Outbound Mappings:**
+```
+status.name → Status (Array Map)
+completion_notes → Notes
+completion_date → Completed Date (Date Convert)
+```
+
+**Status Mapping:**
+```
+Smartsheet: Not Started, In Progress, Complete
+Field Nation: Draft, Assigned, Work Done, Approved
+```
+
+[Field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 6: Save Configuration
+
+Review → Save → Copy trigger URL for webhook setup
+
+---
+
+## Troubleshooting
+
+  
+    - Verify token has sheet access
+    - Check Sheet ID correct
+    - Try "Refresh Columns" again
+    - Ensure sheet has columns
+  
+  
+  
+    - Check column names exact match
+    - Verify data type compatibility
+    - Use proper transformation actions
+    - Test with sample row
+  
+
+---

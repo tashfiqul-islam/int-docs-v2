@@ -87,10 +87,26 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
 
     const isDark = mounted && resolvedTheme === "dark";
     const openAILogo = isDark
-      ? "/ai-models/OpenAI_dark.svg"
-      : "/ai-models/OpenAI_light.svg";
+      ? "/logo/llm-icons/OpenAI_dark.svg"
+      : "/logo/llm-icons/OpenAI_light.svg";
+    const markdownLogo = isDark
+      ? "/logo/llm-icons/markdown_dark.svg"
+      : "/logo/llm-icons/markdown_light.svg";
 
     return [
+      {
+        title: "View as Markdown",
+        href: markdownUrl,
+        icon: (
+          <Image
+            alt="Markdown"
+            className="size-4"
+            height={16}
+            src={markdownLogo}
+            width={16}
+          />
+        ),
+      },
       {
         title: "Open in ChatGPT",
         href: `https://chatgpt.com/?${new URLSearchParams({
@@ -117,7 +133,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Gemini"
             className="size-4"
             height={16}
-            src="/ai-models/gemini.svg"
+            src="/llm_icons/gemini.svg"
             width={16}
           />
         ),
@@ -132,7 +148,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Claude"
             className="size-4"
             height={16}
-            src="/ai-models/claude-ai-icon.svg"
+            src="/llm_icons/claude-ai-icon.svg"
             width={16}
           />
         ),
@@ -147,7 +163,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Perplexity"
             className="size-4"
             height={16}
-            src="/ai-models/perplexity.svg"
+            src="/llm_icons/perplexity.svg"
             width={16}
           />
         ),

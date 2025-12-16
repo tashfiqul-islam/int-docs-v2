@@ -1,0 +1,534 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/servicenow/workflow
+Source: content/docs/connectors/platforms/servicenow/workflow.mdx
+
+
+
+---
+title: Workflow Setup
+description: Create ServiceNow Business Rules and REST Messages to automatically send work order data to Field Nation.
+---
+
+## Workflow Overview
+
+```mermaid
+graph LR
+    A[Record Created/Updated] --> B{Business Rule<br/>Evaluates}
+    B -->|Conditions Met| C[Execute REST Message]
+    C --> D[Field Nation Trigger URL]
+    D --> E[Work Order Created]
+    B -->|Conditions Not Met| F[No Action]
+```
+
+**Business Rule**: Monitors records and evaluates conditions  
+**REST Message**: Sends sys_id to Field Nation  
+**Field Nation**: Fetches full record data and creates work order
+
+---
+
+## Step 1: Create REST Message
+
+REST Messages define the HTTP request sent to Field Nation.
+
+### Navigate to REST Messages
+
+ServiceNow → System Web Services → Outbound → REST Message
+
+### Create New REST Message
+
+Click **New**
+
+**Name**: `Field Nation Integration`  
+**Endpoint**: Paste Field Nation trigger URL
+```
+https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
+```
+
+**Description**: Sends incident data to Field Nation for work order creation
+
+### Configure Authentication
+
+**Authentication**: None (authentication handled by client token in URL)
+
+### Save REST Message
+
+Click **Submit**
+
+---
+
+### Create HTTP Method
+
+### Open REST Message
+
+Find your "Field Nation Integration" REST Message → Open it
+
+### New HTTP Method
+
+Scroll to **HTTP Methods** related list → Click **New**
+
+**Name**: `SendToFieldNation`  
+**HTTP Method**: `POST`  
+**Endpoint**: Use parent endpoint (already set)
+
+### HTTP Request Tab
+
+**Content**: `application/json`
+
+**HTTP Request Body**:
+```json
+{
+  "sys_id": "${sys_id}",
+  "table": "${table}",
+  "timestamp": "${timestamp}"
+}
+```
+
+### HTTP Headers Tab
+
+Add header if needed:
+```
+Name: Content-Type
+Value: application/json
+```
+
+### Save HTTP Method
+
+Click **Submit**
+
+---
+
+### Test REST Message
+
+### Open HTTP Method
+
+Click on "SendToFieldNation" method
+
+### Set Test Variables
+
+In **Variable Substitutions** section:
+```
+sys_id: test_12345
+table: incident
+timestamp: 2025-01-15 10:30:00
+```
+
+### Click "Test"
+
+Button at bottom of form
+
+### Review Response
+
+**Success**: 200 OK response  
+**Failure**: Check error message, verify trigger URL
+
+---
+
+## Step 2: Create Business Rule
+
+Business Rules provide the automation logic to trigger REST Messages.
+
+### Navigate to Business Rules
+
+ServiceNow → System Definition → Business Rules
+
+### Create New Business Rule
+
+Click **New**
+
+### Basic Configuration
+
+**Name**: `Field Nation - Create Work Order`
+
+**Table**: Select your table (e.g., `incident`)
+
+**Active**: ✅ Checked
+
+**Advanced**: ✅ Checked (required for script)
+
+---
+
+### Configure When to Run
+
+**When**:
+- ☑ **After** (run after record saved)
+- ☐ Before (don't check)
+- ☐ Async (optional - prevents UI blocking)
+- ☐ Display (don't check)
+
+**When to run**:
+- ☑ **Insert** (new records)
+- ☑ **Update** (existing records)
+- ☐ Delete (usually not needed)
+- ☐ Query (don't check)
+
+---
+
+### Set Filter Conditions
+
+**Condition**:
+
+**Option 1: Checkbox Trigger**
+```
+Custom Field "Send to Field Nation" = true
+```
+
+**Option 2: State-Based Trigger**
+```
+State CHANGES TO On-Site Required
+```
+
+**Option 3: Assignment-Based Trigger**
+```
+Assignment Group CHANGES
+AND
+Assignment Group.Name CONTAINS Field
+```
+
+**Option 4: Combined Conditions**
+```
+State = On-Site Required
+AND
+Priority IN (1-Critical, 2-High)
+AND
+Assignment Group.Name = Field Services
+```
+
+---
+
+### Add Script
+
+**Advanced** tab → **Script** field:
+
+```javascript
+(function executeRule(current, previous /*null when async*/) {
+    
+    try {
+        // Get REST Message
+        var r = new sn_ws.RESTMessageV2('Field Nation Integration', 'SendToFieldNation');
+        
+        // Set parameters
+        r.setStringParameterNoEscape('sys_id', current.sys_id.toString());
+        r.setStringParameterNoEscape('table', current.getTableName());
+        r.setStringParameterNoEscape('timestamp', new GlideDateTime().toString());
+        
+        // Execute REST call
+        var response = r.execute();
+        var httpStatus = response.getStatusCode();
+        
+        // Log result
+        if (httpStatus == 200 || httpStatus == 201) {
+            gs.info('Field Nation: Successfully sent ' + current.getTableName() + ' ' + current.sys_id + ' to Field Nation');
+            
+            // Optional: Update field to indicate sync
+            // current.u_fn_sync_status = 'sent';
+            // current.update();
+        } else {
+            gs.error('Field Nation: Failed to send to Field Nation. Status: ' + httpStatus + ', Body: ' + response.getBody());
+        }
+        
+    } catch (ex) {
+        gs.error('Field Nation: Exception sending to Field Nation: ' + ex.message);
+    }
+    
+})(current, previous);
+```
+
+---
+
+### Advanced Options
+
+**Prevent Duplicate Sends**:
+
+Add condition to check if already sent:
+
+```javascript
+(function executeRule(current, previous) {
+    
+    // Skip if already sent
+    if (current.u_fn_sync_status == 'sent') {
+        gs.info('Field Nation: Record already sent, skipping');
+        return;
+    }
+    
+    try {
+        var r = new sn_ws.RESTMessageV2('Field Nation Integration', 'SendToFieldNation');
+        // ... rest of script
+        
+        // Mark as sent
+        current.u_fn_sync_status = 'sent';
+        current.setWorkflow(false); // Prevent recursive triggers
+        current.update();
+        
+    } catch (ex) {
+        gs.error('Field Nation: Exception: ' + ex.message);
+    }
+    
+})(current, previous);
+```
+
+### Save Business Rule
+
+Click **Submit**
+
+---
+
+## Step 3: Test Integration
+
+### Create Test Record
+
+1. Navigate to your table (e.g., Incidents)
+2. Click **New**
+3. Fill in required fields
+4. Set fields that meet Business Rule conditions
+5. Save record
+
+### Verify Business Rule Triggered
+
+Check **System Logs → System Log → All**:
+- Look for "Field Nation: Successfully sent..." message
+- Or error messages if failed
+
+### Check Field Nation
+
+1. Log into Field Nation
+2. Navigate to Work Orders
+3. Find newly created work order
+4. Verify field values match ServiceNow record
+
+### Test Status Update (Outbound)
+
+1. Update work order status in Field Nation
+2. Check ServiceNow record updates
+3. Verify Work Notes added
+
+---
+
+## Troubleshooting
+
+  
+    **Check:**
+    - ☐ Business Rule active
+    - ☐ Record meets filter conditions
+    - ☐ "When to run" settings correct (Insert/Update checked)
+    - ☐ Table matches Business Rule table
+    
+    **Debug:**
+    1. Add debug logging at start of script:
+    ```javascript
+    gs.info('Field Nation BR: Triggered for ' + current.sys_id);
+    ```
+    2. Check System Logs for debug message
+    3. Review filter conditions - test individually
+  
+  
+  
+    **Check:**
+    - ☐ Endpoint URL correct (from Field Nation)
+    - ☐ HTTP Method = POST
+    - ☐ sys_id being passed correctly
+    
+    **Debug:**
+    ```javascript
+    gs.info('Field Nation: Response Status: ' + httpStatus);
+    gs.info('Field Nation: Response Body: ' + response.getBody());
+    ```
+    
+    **Common Errors:**
+    - 404: Wrong trigger URL
+    - 401: Invalid client token
+    - 500: Field Nation processing error (check FN logs)
+  
+  
+  
+    **Check:**
+    - ☐ Field Nation configuration complete
+    - ☐ Credentials valid
+    - ☐ All required FN fields mapped
+    - ☐ Field mappings correct
+    
+    **Debug:**
+    1. Check Integration Broker logs in Field Nation
+    2. Look for incoming webhook
+    3. Review field mapping errors
+    4. Test with minimal field set first
+  
+  
+  
+    **Cause:** Business Rule triggering multiple times
+    
+    **Solutions:**
+    1. Add sync status field check (shown in Advanced Options above)
+    2. Use "Async" = false if timing issue
+    3. Add condition: "Changes" instead of just "="
+    4. Check for other Business Rules on same table
+  
+
+---
+
+## Advanced Configurations
+
+### Conditional Field Mapping
+
+Send different fields based on priority:
+
+```javascript
+(function executeRule(current, previous) {
+    var r = new sn_ws.RESTMessageV2('Field Nation Integration', 'SendToFieldNation');
+    
+    r.setStringParameterNoEscape('sys_id', current.sys_id.toString());
+    r.setStringParameterNoEscape('table', current.getTableName());
+    r.setStringParameterNoEscape('priority', current.priority.toString());
+    
+    // Add additional data for high priority
+    if (current.priority <= 2) {
+        r.setStringParameterNoEscape('urgent', 'true');
+        r.setStringParameterNoEscape('escalation_contact', current.caller_id.email.toString());
+    }
+    
+    var response = r.execute();
+    // ... handle response
+    
+})(current, previous);
+```
+
+---
+
+### Multiple Triggers for Different Scenarios
+
+**Business Rule 1**: High Priority Incidents
+```
+Priority = 1-Critical
+State = On-Site Required
+→ Immediate dispatch
+```
+
+**Business Rule 2**: Standard Incidents
+```
+State = On-Site Required
+Priority != 1-Critical
+→ Normal dispatch
+```
+
+**Business Rule 3**: Emergency After-Hours
+```
+Priority = 1-Critical
+Created During: After hours (use script)
+→ Emergency dispatch with special handling
+```
+
+---
+
+### Bidirectional Sync Setup
+
+To update ServiceNow when Field Nation changes:
+
+1. Field Nation sends webhook to ServiceNow
+2. Create Scripted REST API in ServiceNow
+3. Parse Field Nation webhook payload
+4. Update ServiceNow record using GlideRecord
+
+**Example Scripted REST API**:
+
+```javascript
+(function process(/*RESTAPIRequest*/ request, /*RESTAPIResponse*/ response) {
+    
+    var payload = request.body.data;
+    var fn_wo_id = payload.workorder_id;
+    var fn_status = payload.status;
+    var sys_id = payload.correlation_id; // ServiceNow sys_id
+    
+    var gr = new GlideRecord('incident');
+    if (gr.get(sys_id)) {
+        // Map FN status to ServiceNow state
+        if (fn_status == 'assigned') {
+            gr.state = 2; // In Progress
+        } else if (fn_status == 'work_done') {
+            gr.state = 4; // Resolved
+        }
+        
+        // Add work note
+        gr.work_notes = 'Field Nation work order ' + fn_wo_id + ' status: ' + fn_status;
+        gr.update();
+        
+        response.setStatus(200);
+        response.setBody({success: true});
+    } else {
+        response.setStatus(404);
+        response.setBody({error: 'Record not found'});
+    }
+    
+})(request, response);
+```
+
+---
+
+## Production Deployment
+
+### Pre-Launch Checklist
+
+- ☐ Tested in sub-production instance
+- ☐ All field mappings validated
+- ☐ Error handling tested
+- ☐ Business Rule conditions finalized
+- ☐ Team training completed
+- ☐ Documentation updated
+
+### Deployment via Update Set
+
+### Create Update Set
+
+1. Navigate to **System Update Sets → Local Update Sets**
+2. Click **New**
+3. Name: "Field Nation Integration"
+4. Capture changes:
+   - REST Message
+   - HTTP Method
+   - Business Rule
+   - Custom fields (if created)
+
+### Export Update Set
+
+1. Mark Update Set complete
+2. Export XML
+3. Save file securely
+
+### Import to Production
+
+1. Navigate to **Retrieved Update Sets**
+2. Click **Import Update Set from XML**
+3. Upload file
+4. Preview Update Set
+5. Resolve conflicts
+6. Commit Update Set
+
+### Update Field Nation Configuration
+
+Switch Field Nation from Sandbox to Production:
+- Update credentials (production ServiceNow)
+- Update instance URL
+- Test connection
+- Copy new trigger URL
+- Update REST Message endpoint in Production ServiceNow
+
+---
+
+## Monitoring & Maintenance
+
+### Regular Tasks
+
+**Daily:**
+- Check System Logs for errors
+- Monitor Business Rule execution count
+- Review failed REST Messages
+
+**Weekly:**
+- Test sample sync
+- Review field mappings
+- Check ServiceNow API usage
+
+**Monthly:**
+- Update credentials (if not OAuth)
+- Review and optimize Business Rule conditions
+- Audit integration usage
+
+---

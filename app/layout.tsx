@@ -1,11 +1,13 @@
 import { Provider } from "~/components/provider";
 import "./app.css";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 
-const inter = Inter({
+const openSans = Open_Sans({
   subsets: ["latin"],
+  variable: "--font-open-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -146,8 +148,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html className={inter.className} lang="en" suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col overflow-x-hidden">
+    <html
+      className={`${openSans.variable} ${openSans.className}`}
+      lang="en"
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-screen flex-col overflow-x-hidden font-sans">
         <Provider>{children}</Provider>
       </body>
     </html>

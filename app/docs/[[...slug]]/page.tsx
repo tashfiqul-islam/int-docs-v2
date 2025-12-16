@@ -21,7 +21,6 @@ import { getMDXComponents } from "@/mdx-components";
 import { LLMActions } from "~/components/llm-actions";
 import { TypeTable } from "~/components/type-table";
 import { Accordion, Accordions } from "~/components/ui/accordion";
-import { Separator } from "~/components/ui/separator";
 
 export default async function Page({
   params,
@@ -42,11 +41,21 @@ export default async function Page({
     notFound();
   }
 
-  const MDX = page.data.body;
+  const pageData = page.data as {
+    body: React.ComponentType<{
+      components?: Record<string, React.ComponentType>;
+    }>;
+    lastModified?: string;
+    toc?: Array<{ url: string; title: string; depth: number }>;
+    title: string;
+    description?: string;
+    index?: boolean;
+  };
+  const MDX = pageData.body;
   const frontmatter = page.data;
 
-  const lastUpdateProps = page.data.lastModified
-    ? { lastUpdate: new Date(page.data.lastModified) }
+  const lastUpdateProps = pageData.lastModified
+    ? { lastUpdate: new Date(pageData.lastModified) }
     : {};
 
   return (
@@ -61,33 +70,37 @@ export default async function Page({
       tableOfContent={{
         style: "clerk",
       }}
-      toc={page.data.toc}
+      toc={pageData.toc}
     >
       <DocsTitle>{frontmatter.title}</DocsTitle>
-      <DocsDescription>{frontmatter.description}</DocsDescription>
-      <div className="mt-0 mb-4 flex items-center justify-start">
+      <DocsDescription className="!mb-2">
+        {frontmatter.description}
+      </DocsDescription>
+      <div className="w-fit">
         <LLMActions markdownUrl={`/llms${page.url}.txt`} />
       </div>
-      <Separator className="mt-0 mb-6" />
+      <hr className="mt-4 border-fd-border" />
       <DocsBody>
         <MDX
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-            ...Twoslash,
-            Hand,
-            BookOpen,
-            ArrowBigRight,
-            Shovel,
-            DocsCategory,
-            Tabs,
-            Tab,
-            Accordion,
-            Accordions,
-            TypeTable,
-          })}
+          components={
+            getMDXComponents({
+              // this allows you to link to other pages with relative file paths
+              a: createRelativeLink(source, page),
+              ...Twoslash,
+              Hand,
+              BookOpen,
+              ArrowBigRight,
+              Shovel,
+              DocsCategory,
+              Tabs,
+              Tab,
+              Accordion,
+              Accordions,
+              TypeTable,
+            }) as Record<string, React.ComponentType<Record<string, unknown>>>
+          }
         />
-        {frontmatter.index ? (
+        {pageData.index ? (
           <DocsCategory tree={source.pageTree as PageTreeRoot} url={page.url} />
         ) : null}
       </DocsBody>
