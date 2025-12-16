@@ -77,7 +77,9 @@ export default async function Page({
         {frontmatter.description}
       </DocsDescription>
       <div className="w-fit">
-        <LLMActions markdownUrl={`/llms${page.url}.txt`} />
+        <LLMActions
+          markdownUrl={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/llms${page.url}.txt`}
+        />
       </div>
       <hr className="mt-4 border-fd-border" />
       <DocsBody>

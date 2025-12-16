@@ -3,16 +3,26 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import autotask from "~/assets/connectors/autotask.svg";
+import connectwise from "~/assets/connectors/connectwise.svg";
+import freshdesk from "~/assets/connectors/freshdesk.svg";
+import ifs from "~/assets/connectors/ifs.svg";
+import netsuite from "~/assets/connectors/netsuite.svg";
+import quickbase from "~/assets/connectors/quickbase.svg";
+import salesforce from "~/assets/connectors/salesforce.svg";
+import serviceNow from "~/assets/connectors/service-now.svg";
+import smartsheet from "~/assets/connectors/smartsheet.svg";
+
 const connectors = [
-  { name: "Salesforce", logo: "/connectors/salesforce.svg" },
-  { name: "ServiceNow", logo: "/connectors/service-now.svg" },
-  { name: "ConnectWise", logo: "/connectors/connectwise.svg" },
-  { name: "Autotask", logo: "/connectors/autotask.svg" },
-  { name: "Freshdesk", logo: "/connectors/freshdesk.svg" },
-  { name: "IFS", logo: "/connectors/ifs.svg" },
-  { name: "NetSuite", logo: "/connectors/netsuite.svg" },
-  { name: "Quickbase", logo: "/connectors/quickbase.svg" },
-  { name: "Smartsheet", logo: "/connectors/smartsheet.svg" },
+  { name: "Salesforce", logo: salesforce },
+  { name: "ServiceNow", logo: serviceNow },
+  { name: "ConnectWise", logo: connectwise },
+  { name: "Autotask", logo: autotask },
+  { name: "Freshdesk", logo: freshdesk },
+  { name: "IFS", logo: ifs },
+  { name: "NetSuite", logo: netsuite },
+  { name: "Quickbase", logo: quickbase },
+  { name: "Smartsheet", logo: smartsheet },
 ] as const;
 
 export function ConnectorsShowcase() {
