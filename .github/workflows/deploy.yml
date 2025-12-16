@@ -58,6 +58,7 @@ jobs:
           bun-version: latest
 
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
 
       - name: Restore cache
@@ -76,6 +77,11 @@ jobs:
 
       - name: Build with Next.js
         run: NEXT_EXPORT=true bun run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - name: Create .nojekyll file
+        run: touch ./out/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

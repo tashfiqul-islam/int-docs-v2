@@ -7,6 +7,8 @@ const config = {
   reactStrictMode: true,
   // Enable static export only when explicitly requested
   output: isExport ? "export" : undefined,
+  // Base path for GitHub Pages
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
   images: {
     qualities: [100, 75],
     // Required for static export - use unoptimized images
