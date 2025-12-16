@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import logoDark from "~/assets/dark/logo_dark.png";
+import logoLight from "~/assets/light/logo_light.png";
 
 /**
  * Theme-aware logo component that switches between light and dark logos
@@ -24,7 +26,7 @@ export function ThemeLogo({ className }: { className?: string }) {
   }
 
   const isDark = resolvedTheme === "dark";
-  const logoSrc = isDark ? "/dark/logo_dark.png" : "/light/logo_light.png";
+  const logoSrc = isDark ? logoDark : logoLight;
 
   return (
     <Image

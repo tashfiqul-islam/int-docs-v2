@@ -1,10 +1,17 @@
 import type { MetadataRoute } from "next";
 
+import android192 from "~/assets/light/android-chrome-192x192.png";
+import android512 from "~/assets/light/android-chrome-512x512.png";
+import appleTouch from "~/assets/light/apple-touch-icon.png";
+import favicon from "~/assets/light/favicon.ico";
+import favicon16 from "~/assets/light/favicon-16x16.png";
+import favicon32 from "~/assets/light/favicon-32x32.png";
+
 // Required for static export
 export const dynamic = "force-static";
 export const revalidate = false;
 
-const SITE_URL =
+const _SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://developers.fieldnation.com";
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -24,32 +31,32 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     icons: [
       {
-        src: `${SITE_URL}/light/android-chrome-192x192.png`,
+        src: android192.src,
         sizes: "192x192",
         type: "image/png",
       },
       {
-        src: `${SITE_URL}/light/android-chrome-512x512.png`,
+        src: android512.src,
         sizes: "512x512",
         type: "image/png",
       },
       {
-        src: `${SITE_URL}/light/apple-touch-icon.png`,
+        src: appleTouch.src,
         sizes: "180x180",
         type: "image/png",
       },
       {
-        src: `${SITE_URL}/light/favicon-32x32.png`,
+        src: favicon32.src,
         sizes: "32x32",
         type: "image/png",
       },
       {
-        src: `${SITE_URL}/light/favicon-16x16.png`,
+        src: favicon16.src,
         sizes: "16x16",
         type: "image/png",
       },
       {
-        src: `${SITE_URL}/light/favicon.ico`,
+        src: favicon.src,
         sizes: "48x48",
         type: "image/x-icon",
       },

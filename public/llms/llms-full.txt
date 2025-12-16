@@ -17918,6 +17918,1575 @@ Each platform has unique considerations:
 ---
 
 ### undefined
+URL: /docs/connectors/platforms/autotask/configuration
+
+# Connectors: undefined
+URL: /docs/connectors/platforms/autotask/configuration
+Source: content/docs/connectors/platforms/autotask/configuration.mdx
+
+---
+title: Configuration
+description: Configure the Autotask connector in Field Nation's Integration Broker with SOAP API credentials and field mappings.
+---
+
+## Prerequisites Checklist
+
+Before starting, gather:
+
+- ☐ Autotask username (API user email)
+- ☐ Autotask password
+- ☐ Integration Code (generated in Autotask)
+- ☐ Security Token (generated in Autotask)
+- ☐ Autotask instance URL
+- ☐ Admin access to Field Nation integrations
+
+---
+
+## Step 1: Generate Autotask API Credentials
+
+### Log into Autotask
+
+Use admin account
+
+### Navigate to API User
+
+Admin → Resources (Users) → Select API user (or create new)
+
+### Generate Integration Code
+
+**API Integration** section → Click "Generate API Integration Code"
+
+**Copy the code** - You'll need this for Field Nation
+
+### Generate Security Token
+
+Same section → "Generate API Security Token" (if not already exists)
+
+**Copy the token** - Required for authentication
+
+### Note User Credentials
+
+- Username (email): API user's email address
+- Password: User's password
+
+> [INFO] **Integration Code**: Unique per integration. Generate new code for Field Nation (don't reuse from other integrations).
+
+---
+
+## Step 2: Access Integration Broker
+
+Navigate to Field Nation's Integration Broker:
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+Select "Autotask" from available connectors
+
+---
+
+## Step 3: Basic Settings
+
+### Instance Name
+
+**Optional** - Descriptive name for this integration
+
+**Examples:**
+- "Production Autotask"
+- "Autotask PSA - Main"
+- "Datto PSA Sandbox"
+
+---
+
+### Instance URL
+
+**Required** - Your Autotask instance URL
+
+**Format:**
+```
+https://webservices{X}.autotask.net/atservices/1.6/atws.asmx
+```
+
+Where `{X}` is your zone number (1-20)
+
+**Find Your Zone:**
+1. Log into Autotask
+2. Check browser URL: `https://ww{X}.autotask.net`
+3. Use that zone number in API URL
+
+**Examples:**
+- Zone 5: `https://webservices5.autotask.net/atservices/1.6/atws.asmx`
+- Zone 12: `https://webservices12.autotask.net/atservices/1.6/atws.asmx`
+
+---
+
+### Entity Type
+
+**Required** - Autotask entity to integrate
+
+**Supported:**
+- `Ticket` - Service tickets (most common)
+- `ServiceCall` - Service call records
+- `Project` - Project tasks requiring field work
+
+**Format**: Use exact entity name (case-sensitive)
+
+---
+
+## Step 4: Authentication
+
+Enter SOAP API credentials:
+
+**Username**  
+API user's email address  
+Example: `integration@company.com`
+
+**Password**  
+User's Autotask password
+
+**Integration Code**  
+Generated tracking identifier from Step 1
+
+**Security Token**  
+API authentication token from Step 1
+
+---
+
+## Step 5: Test Connection
+
+### Click "Test Connection"
+
+Button in configuration form
+
+### Broker Validates
+
+- Authenticates with Autotask SOAP API
+- Queries entity metadata
+- Verifies permissions
+
+### Review Result
+
+**Success**: ✅ Green confirmation
+- Connection established
+- Authentication valid
+- Entity accessible
+
+**Failure**: ❌ Error message
+- Check credentials
+- Verify zone number correct
+- Ensure API user has permissions
+
+### Common Authentication Errors
+
+  
+    **Error**: Authentication failed
+    
+    **Causes:**
+    - Wrong username or password
+    - Integration Code incorrect
+    - Security Token expired or wrong
+    
+    **Solution:**
+    1. Verify credentials in Autotask
+    2. Regenerate Integration Code if needed
+    3. Regenerate Security Token if expired
+    4. Test login to Autotask web interface
+  
+  
+  
+    **Error**: Cannot reach endpoint
+    
+    **Cause:** Incorrect zone in API URL
+    
+    **Solution:**
+    1. Log into Autotask
+    2. Check URL: `ww{X}.autotask.net`
+    3. Update API URL to match zone
+  
+  
+  
+    **Error**: User does not have API access
+    
+    **Solution:**
+    1. In Autotask Admin → Resources (Users)
+    2. Select API user
+    3. Security tab → Enable "API User"
+    4. Security Level → Grant "API User (system)"
+  
+  
+  
+    **Error**: Entity type not accessible
+    
+    **Solution:**
+    1. Verify entity name spelling (case-sensitive)
+    2. Ensure API user has read access to entity
+    3. Check entity exists in your Autotask instance
+  
+
+---
+
+## Step 6: Get Trigger URL
+
+Once authentication succeeds, Field Nation generates unique trigger URL:
+
+**Format:**
+```
+https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
+```
+
+**Copy this URL** - You'll configure it in Autotask webhook
+
+> [INFO] **Security**: Client token authenticates incoming webhooks. Keep URL secure.
+
+---
+
+## Step 7: Refresh Fields
+
+Discover available fields for mapping:
+
+### Click "Refresh Fields"
+
+Button in field mapping section
+
+### Broker Queries Autotask
+
+- Calls SOAP API GetFieldInfo
+- Retrieves field definitions for entity
+- Discovers User-Defined Fields
+
+### Fields Populate
+
+Dropdowns fill with:
+- Standard fields (title, description, status)
+- User-Defined Fields (UDF)
+- Related entity fields (account, contact)
+- Picklist values
+
+---
+
+## Step 8: Configure Field Mappings
+
+Map data between Autotask and Field Nation:
+
+### Inbound (Autotask → Field Nation)
+
+**Example Mappings:**
+```
+Autotask Field                → FN Field                   Action
+──────────────────────────────────────────────────────────────────
+Title                        → title                      Sync
+Description                  → description                Sync
+AccountName                  → location.company.name      Sync
+Status                       → status_id                  Array Map
+Priority                     → priority                   Array Map
+DueDateTime                  → schedule.start             Date Convert
+AssignedResource.Email       → contact.email              Sync
+UDF_TicketNumber            → custom_field_123           Sync
+```
+
+### Outbound (Field Nation → Autotask)
+
+**Example Mappings:**
+```
+FN Field                     → Autotask Field             Action
+──────────────────────────────────────────────────────────────────
+status.name                  → Status                     Array Map
+assignee.user.name           → UDF_Technician            Sync
+completion_notes             → Resolution                 Sync
+completion_date              → CompletedDate              Date Convert
+```
+
+### Status Mapping
+
+**Autotask Status Values:**
+- Varies by configuration
+- Common: New, In Progress, Complete, Closed
+
+**Field Nation Status IDs:**
+```
+1 = Draft
+2 = Assigned
+3 = Work Done
+4 = Approved
+5 = Paid
+```
+
+**Array Map Configuration:**
+```jsonnet
+{
+  "source": "Status",
+  "target": "status_id",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "New", "value": "1" },
+    { "compare": "In Progress", "value": "2" },
+    { "compare": "Complete", "value": "3" },
+    { "compare": "Closed", "value": "4" }
+  ],
+  "default": "1"
+}
+```
+
+[Complete field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 9: Save Configuration
+
+### Review Settings
+
+Verify:
+- ☐ Instance URL correct (zone number)
+- ☐ Entity type correct
+- ☐ Authentication successful
+- ☐ Fields refreshed
+- ☐ Inbound mappings configured
+- ☐ Outbound mappings configured
+
+### Save
+
+Click "Save" to persist configuration
+
+### Note Trigger URL
+
+Copy trigger URL for Autotask webhook setup
+
+---
+
+## Configuration Checklist
+
+### Field Nation Configuration
+- ☐ Instance name configured
+- ☐ Instance URL with correct zone
+- ☐ Entity type specified
+- ☐ Credentials entered (username, password, integration code, token)
+- ☐ Connection tested successfully
+- ☐ Trigger URL copied
+- ☐ Fields refreshed
+- ☐ Inbound field mappings configured
+- ☐ Outbound field mappings configured
+- ☐ Configuration saved
+
+### Autotask Configuration (Next Steps)
+- ☐ Webhook configured
+- ☐ Trigger conditions defined
+- ☐ Webhook tested with sample ticket
+
+[Autotask workflow setup →](/docs/connectors/platforms/autotask/workflow)
+
+---
+
+## Troubleshooting
+
+  
+    **Issue**: Expected fields not in dropdown
+    
+    **Solution:**
+    1. Click "Refresh Fields" again
+    2. Verify API user has field-level read permissions
+    3. For UDFs, ensure they're defined on entity
+    4. Check field API names in Autotask Admin
+  
+  
+  
+    **Issue**: Integration stops working
+    
+    **Solution:**
+    1. Check if Security Token regenerated
+    2. Verify API user still active
+    3. Test credentials in Autotask
+    4. Reconnect in Field Nation
+  
+  
+  
+    **Issue**: Cannot save mappings
+    
+    **Solution:**
+    1. Ensure all required FN fields mapped
+    2. Check data type compatibility
+    3. Add default values for optional fields
+    4. Review error messages for specific issues
+  
+
+---
+
+---
+
+### undefined
+URL: /docs/connectors/platforms/autotask/overview
+
+# Connectors: undefined
+URL: /docs/connectors/platforms/autotask/overview
+Source: content/docs/connectors/platforms/autotask/overview.mdx
+
+---
+title: Autotask Connector
+description: Integrate Datto Autotask PSA with Field Nation for automated field service dispatch from service tickets and work orders.
+---
+
+## Overview
+
+The Autotask connector enables seamless integration between Datto Autotask PSA and Field Nation:
+- **Ticket-based dispatch**: Automatically create work orders from Autotask Tickets
+- **SOAP API integration**: Secure authentication via token-based SOAP calls
+- **Bidirectional sync**: Status updates flow both directions
+- **Flexible triggers**: Configure based on ticket status, type, or custom fields
+- **UDF support**: Map User-Defined Fields between systems
+
+---
+
+## At a Glance
+
+  
+    API Integration Token + SOAP Credentials
+  
+  
+    Tickets, Service Calls, Projects
+  
+  
+    Webhooks + API Polling (configurable)
+  
+  
+    Bidirectional (create, update, notes)
+  
+
+---
+
+## How It Works
+
+### Configure Webhook
+
+Set up webhook in Autotask that triggers on ticket status changes or custom field updates
+
+### Webhook Notification
+
+Autotask sends ticket ID to Field Nation when trigger conditions met
+
+### Field Nation Fetches Data
+
+Integration Broker retrieves complete ticket data from Autotask SOAP API
+
+### Apply Mappings
+
+Broker transforms Autotask ticket data into Field Nation work order format
+
+### Create Work Order
+
+Work order created in Field Nation with correlation ID stored for bidirectional sync
+
+---
+
+## Common Use Cases
+
+### Dispatch from Service Ticket
+
+Automatically create Field Nation work order when Autotask Ticket requires on-site service
+
+```
+Ticket Status = "Dispatch to Field" 
+  → Webhook triggers 
+  → Field Nation Work Order Created
+```
+
+### Project-Based Dispatch
+
+Create work orders from Autotask Project tasks requiring field technicians
+
+```
+Project Task Type = "On-Site"
+AND Task Status = "Ready"
+  → Work order created
+  → Task updated with FN details
+```
+
+### Status Synchronization
+
+Reflect Field Nation work order completion back to Autotask Ticket
+
+```
+FN Work Order = "Completed"
+  → Integration Broker
+  → Autotask Ticket Status = "Complete - Customer Notified"
+  → Internal Notes updated
+```
+
+---
+
+## Architecture
+
+```mermaid
+sequenceDiagram
+    participant AT as Autotask
+    participant WH as Webhook
+    participant Broker as Integration Broker
+    participant FN as Field Nation
+    
+    AT->>WH: Ticket Status Changed
+    WH->>Broker: POST Trigger URL (Ticket ID)
+    Broker->>AT: SOAP API Call (Get Ticket)
+    AT-->>Broker: Ticket Data + UDFs
+    Broker->>Broker: Apply Field Mappings
+    Broker->>FN: Create/Update Work Order
+    FN-->>Broker: Success + WO ID
+    Broker->>AT: Update Ticket (optional)
+```
+
+---
+
+## Features
+
+### Field Mapping Capabilities
+
+- **Standard Fields**: Title, Description, Status, Priority, Due Date
+- **User-Defined Fields**: Access any UDF on Ticket entity
+- **Related Entities**: Account, Contact, Resource (assigned technician)
+- **Picklist Fields**: Map Autotask picklists to Field Nation enums
+- **Date/Time Fields**: Automatic timezone conversion
+
+### Supported Operations
+
+---
+
+## Prerequisites
+
+### Autotask Requirements
+
+  
+    - Autotask PSA license with API access enabled
+    - Admin or API-enabled user account
+    - SOAP API credentials generated
+    - Integration tracking identifier configured
+  
+  
+  
+    Generate in Autotask:
+    1. Navigate to Admin → Resources (Users)
+    2. Select API user
+    3. Generate API Integration Code
+    4. Generate API Security Token
+    5. Copy both for Field Nation configuration
+  
+  
+  
+    - Ability to configure Autotask webhooks
+    - Webhook endpoint URL from Field Nation
+    - Network access to send webhooks
+    - Optional: IP whitelisting for Field Nation
+  
+  
+  
+    API user must have:
+    - Read access to Ticket entity and all fields to sync
+    - Write access to fields for status/note updates
+    - Access to related entities (Account, Contact, Resource)
+    - Permission to view User-Defined Fields
+  
+
+### Field Nation Requirements
+
+- Active buyer account with admin access
+- Integration settings access
+- Sandbox environment (recommended for testing)
+
+[Complete prerequisites →](/docs/connectors/getting-started)
+
+---
+
+## Authentication
+
+Autotask connector uses **SOAP API with Token Authentication**:
+
+```
+Username: API user email
+Password: API user password
+Integration Code: {integration_code}
+Security Token: {security_token}
+```
+
+**Components:**
+- **Username**: Autotask user email with API access
+- **Password**: User's password
+- **Integration Code**: Generated tracking identifier
+- **Security Token**: API authentication token
+
+**Generate Credentials:**
+1. Log into Autotask as admin
+2. Admin → Resources (Users) → Select API user
+3. API Integration section → Generate Integration Code
+4. Generate Security Token (if not already generated)
+5. Copy all credentials for Field Nation configuration
+
+> **Security Best Practice**: Use dedicated API user (not personal account). Integration Code is unique per integration - generate new code for Field Nation.
+
+---
+
+## Data Flow Patterns
+
+### Inbound: Autotask → Field Nation
+
+**Trigger**: Webhook fired on ticket status change  
+**Action**: Webhook sends Ticket ID to Field Nation  
+**Result**: Field Nation work order created/updated
+
+**Example Webhook Triggers:**
+- Ticket Status = "Dispatch to Field"
+- Custom UDF "Send to FN" = Yes
+- Issue Type = "On-Site Required"
+- Queue = "Field Services"
+
+---
+
+### Outbound: Field Nation → Autotask
+
+**Trigger**: Field Nation work order event (completed, etc.)  
+**Action**: Integration Broker calls Autotask SOAP API  
+**Result**: Autotask Ticket updated with status/notes
+
+**Configurable Events:**
+- Work order assigned → Update Ticket Status
+- Work order completed → Add Internal Note with details
+- Provider checked in → Update custom UDF
+- Work order approved → Update Status to "Complete"
+
+---
+
+## Best Practices
+
+### Webhook Design
+
+- ✅ Use specific status values (not "any change")
+- ✅ Configure webhook for relevant ticket types only
+- ✅ Add safeguards to prevent duplicate triggers
+- ✅ Test in sandbox Autotask instance first
+- ✅ Monitor webhook delivery logs
+
+### Field Mappings
+
+- ✅ Map all required Field Nation fields
+- ✅ Use User-Defined Fields for custom data
+- ✅ Handle Autotask picklists with Array Map
+- ✅ Test timezone conversions for date fields
+- ✅ Document UDF IDs and purposes
+
+### Security
+
+- ✅ Use dedicated API user
+- ✅ Rotate Security Token periodically
+- ✅ Grant minimum required permissions
+- ✅ Monitor API usage limits
+- ✅ Enable IP whitelisting if policy requires
+
+---
+
+## Limitations & Considerations
+
+### API Limits
+
+Autotask enforces API call limits:
+- Varies by license type and contract
+- Monitor usage in Autotask Admin → API Usage
+
+Each work order sync consumes **2-3 API calls** (authentication + data retrieval + optional update).
+
+### SOAP API Complexity
+
+- SOAP-based (not REST) - more complex than modern APIs
+- XML payload parsing required
+- Field discovery may require manual configuration
+- Some fields may not be accessible via API
+
+### Related Entity Depth
+
+Can access:
+- ✅ Fields on Ticket entity
+- ✅ Fields from related Account, Contact, Resource
+- ❌ Grand-parent relationships (requires custom JSONNET)
+
+---
+
+---
+
+### undefined
+URL: /docs/connectors/platforms/autotask/workflow
+
+# Connectors: undefined
+URL: /docs/connectors/platforms/autotask/workflow
+Source: content/docs/connectors/platforms/autotask/workflow.mdx
+
+---
+title: Workflow Setup
+description: Configure Autotask webhooks to automatically send ticket data to Field Nation when trigger conditions are met.
+---
+
+## Prerequisites
+
+- ☐ Completed [Field Nation configuration](/docs/connectors/platforms/autotask/configuration)
+- ☐ Field Nation trigger URL copied
+- ☐ Autotask admin access
+- ☐ Webhook configuration permissions
+
+---
+
+## Workflow Overview
+
+```mermaid
+graph LR
+    A[Ticket Created/Updated] --> B{Webhook<br/>Conditions Met?}
+    B -->|Yes| C[Send to Field Nation]
+    C --> D[Work Order Created]
+    B -->|No| E[No Action]
+```
+
+**Webhook**: Monitors tickets and evaluates conditions  
+**Trigger URL**: Destination for webhook notifications  
+**Field Nation**: Fetches ticket data and creates work order
+
+---
+
+## Step 1: Configure Webhook in Autotask
+
+### Navigate to Webhooks
+
+Autotask → Admin → Webhooks
+
+### Create New Webhook
+
+Click **"New Webhook"** or **"Add Webhook"**
+
+### Configure Webhook Settings
+
+**Name**: `Field Nation Integration`
+
+**Entity**: Select entity type (e.g., `Ticket`)
+
+**Webhook URL**: Paste Field Nation trigger URL
+```
+https://api.fieldnation.com/integrations/trigger/{YOUR_CLIENT_TOKEN}
+```
+
+**HTTP Method**: `POST`
+
+**Content Type**: `application/json`
+
+---
+
+## Step 2: Define Trigger Conditions
+
+Configure when webhook fires:
+
+### Event Types
+
+Select events that should trigger:
+- ☑ **Create** - New tickets
+- ☑ **Update** - Ticket changes
+- ☐ **Delete** - Usually not needed
+
+---
+
+### Filter Conditions
+
+**Option 1: Status-Based**
+```
+Status = "Dispatch to Field"
+```
+
+**Option 2: Custom Field**
+```
+UDF "Send to Field Nation" = Yes
+```
+
+**Option 3: Queue-Based**
+```
+Queue Name = "Field Services"
+AND Priority IN (Critical, High)
+```
+
+**Option 4: Issue Type**
+```
+Issue Type = "On-Site Required"
+AND Status != "Cancelled"
+```
+
+---
+
+### Webhook Payload
+
+Configure what data to send:
+
+**Minimal Payload (Recommended):**
+```json
+{
+  "ticketId": "{TicketID}",
+  "entityType": "Ticket",
+  "action": "{Action}"
+}
+```
+
+Field Nation will fetch complete ticket data via SOAP API.
+
+**Why minimal?**
+- Reduces payload size
+- Ensures latest data (fetched at processing time)
+- Prevents stale data issues
+
+---
+
+## Step 3: Test Webhook
+
+### Create Test Ticket
+
+1. Navigate to Autotask Tickets
+2. Create new ticket
+3. Fill required fields
+4. Set conditions to trigger webhook
+5. Save ticket
+
+### Verify Webhook Fired
+
+Check Autotask Admin → Webhooks → Delivery Log:
+- Look for webhook execution
+- Verify 200 OK response
+- Check payload sent
+
+### Verify in Field Nation
+
+1. Log into Field Nation
+2. Navigate to Work Orders
+3. Find newly created work order
+4. Verify field values correct
+
+---
+
+## Troubleshooting
+
+  
+    **Check:**
+    - ☐ Webhook active/enabled
+    - ☐ Ticket meets filter conditions
+    - ☐ Event types selected correctly
+    - ☐ Webhook URL correct
+    
+    **Debug:**
+    - Check Autotask webhook delivery log
+    - Test with simple ticket (minimal fields)
+    - Review filter conditions (test individually)
+  
+  
+  
+    **Check:**
+    - ☐ Field Nation configuration complete
+    - ☐ Credentials valid
+    - ☐ All required FN fields mapped
+    - ☐ SOAP API accessible from Field Nation
+    
+    **Debug:**
+    1. Check Integration Broker logs in Field Nation
+    2. Look for incoming webhook
+    3. Review SOAP API call results
+    4. Check field mapping errors
+  
+  
+  
+    **Cause:** Webhook triggering multiple times
+    
+    **Solutions:**
+    1. Add sync status UDF to Autotask Ticket
+    2. Update UDF after first send (prevent re-trigger)
+    3. Use "Create" event only (not "Update")
+    4. Add filter: UDF "Synced to FN" != Yes
+  
+  
+  
+    **Check:**
+    - ☐ Field mappings configured correctly
+    - ☐ Data types compatible
+    - ☐ Picklist values mapped (Array Map)
+    - ☐ Date formats compatible
+    
+    **Solution:**
+    - Review Field Nation field mappings
+    - Test with minimal data first
+    - Add transformations as needed
+  
+
+---
+
+## Advanced Configurations
+
+### Prevent Duplicate Sends
+
+Add tracking UDF to Autotask Tickets:
+
+### Create UDF
+
+Autotask → Admin → User Defined Fields → Ticket
+
+**Field Name**: "FN Sync Status"  
+**Type**: Text or Picklist  
+**Values**: Not Sent, Sent, Synced
+
+### Update Webhook Filter
+
+Add condition:
+```
+FN Sync Status != "Sent"
+AND FN Sync Status != "Synced"
+```
+
+### Update After Sync
+
+Configure outbound mapping to set:
+```
+FN Sync Status = "Sent" (after successful creation)
+```
+
+---
+
+### Multiple Webhooks for Different Scenarios
+
+**Webhook 1**: Urgent Tickets
+```
+Priority = Critical
+Status = New
+→ Immediate dispatch
+```
+
+**Webhook 2**: Standard Tickets
+```
+Status = "Dispatch to Field"
+Priority != Critical
+→ Normal dispatch
+```
+
+**Webhook 3**: Project Tasks
+```
+Entity = Project
+Task Type = "On-Site"
+→ Project-based dispatch
+```
+
+---
+
+### Bidirectional Sync
+
+Update Autotask when Field Nation changes:
+
+**Field Nation Event** → **Autotask Action**
+
+- Work order assigned → Update Ticket Status
+- Work order completed → Add Internal Note
+- Completion approved → Update Status to "Complete"
+
+Configured in Field Nation's event trigger settings.
+
+---
+
+## Production Deployment
+
+### Pre-Launch Checklist
+
+- ☐ Tested in Autotask sandbox
+- ☐ All field mappings validated
+- ☐ Error handling tested
+- ☐ Webhook conditions finalized
+- ☐ Team training completed
+- ☐ Documentation updated
+
+### Launch Steps
+
+### Export Webhook Config
+
+Save webhook configuration details
+
+### Configure Production
+
+1. Access production Autotask
+2. Create webhook (same settings)
+3. Update Field Nation to production
+4. Test with sample ticket
+
+### Monitor Closely
+
+Watch first few synchronizations:
+- Check webhook delivery log
+- Review work order data
+- Verify bidirectional sync
+
+---
+
+## Monitoring & Maintenance
+
+### Regular Tasks
+
+**Daily:**
+- Check webhook delivery log for errors
+- Monitor work order creation rate
+- Review failed webhooks
+
+**Weekly:**
+- Test sample synchronization
+- Review field mappings
+- Check Autotask API usage
+
+**Monthly:**
+- Rotate Security Token (Field Nation config)
+- Review and optimize webhook conditions
+- Audit integration usage
+
+---
+
+---
+
+### undefined
+URL: /docs/connectors/platforms/connectwise/configuration
+
+# Connectors: undefined
+URL: /docs/connectors/platforms/connectwise/configuration
+Source: content/docs/connectors/platforms/connectwise/configuration.mdx
+
+---
+title: Configuration
+description: Configure the ConnectWise connector in Field Nation with REST API keys and field mappings.
+---
+
+## Prerequisites Checklist
+
+- ☐ ConnectWise Company ID
+- ☐ Public Key (generated in ConnectWise)
+- ☐ Private Key (generated in ConnectWise)
+- ☐ Member ID (API member)
+- ☐ ConnectWise instance URL
+- ☐ Admin access to Field Nation integrations
+
+---
+
+## Step 1: Generate ConnectWise API Keys
+
+### Log into ConnectWise
+
+Use admin account
+
+### Navigate to API Member
+
+System → Members → Select API member (or create new dedicated member)
+
+### Generate API Keys
+
+**API Keys** tab → Click "Generate New Key Pair"
+
+**Copy immediately:**
+- Company ID
+- Public Key
+- Private Key
+
+> **Important**: Private Key shown ONCE. Save securely immediately.
+
+### Note Member ID
+
+Copy Member ID from member profile (needed for authentication)
+
+---
+
+## Step 2: Access Integration Broker
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+Select "ConnectWise" connector
+
+---
+
+## Step 3: Configure Connection
+
+### Instance URL
+
+**Format:**
+```
+https://api-{region}.myconnectwise.net/v4_6_release/apis/3.0
+```
+
+**Regions:**
+- `na` - North America
+- `eu` - Europe
+- `au` - Australia
+- `staging` - Staging environment
+
+**Example:** `https://api-na.myconnectwise.net/v4_6_release/apis/3.0`
+
+---
+
+### Authentication Credentials
+
+**Company ID**: Your ConnectWise company identifier
+
+**Public Key**: API public key from Step 1
+
+**Private Key**: API private key from Step 1
+
+**Member ID**: API member's ID for impersonation
+
+**Client ID** (optional): `FieldNationIntegration`
+
+---
+
+### Entity Configuration
+
+**Table**: `service/tickets` (most common)
+
+Other options:
+- `project/tickets`
+- `sales/opportunities`
+
+---
+
+## Step 4: Test Connection
+
+Click "Test Connection" → Verify success
+
+**Common Errors:**
+
+  
+    **Solution:**
+    - Regenerate keys in ConnectWise
+    - Ensure Private Key copied correctly
+    - Check Company ID matches
+  
+  
+  
+    **Solution:**
+    - Grant API member access to Service Desk
+    - Enable "Read" and "Write" permissions
+    - Check security role assignments
+  
+
+---
+
+## Step 5: Refresh Fields & Configure Mappings
+
+Click "Refresh Fields" → Map fields:
+
+**Inbound:**
+```
+summary → title
+initialDescription → description
+status.name → status_id (Array Map)
+priority.name → priority (Array Map)
+company.name → location.company.name
+```
+
+**Outbound:**
+```
+status.name → status (Array Map)
+completion_notes → internalAnalysis
+```
+
+[Field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 6: Save & Get Trigger URL
+
+Save configuration → Copy trigger URL for ConnectWise callback setup
+
+---
+
+---
+
+### undefined
+URL: /docs/connectors/platforms/connectwise/overview
+
+# Connectors: undefined
+URL: /docs/connectors/platforms/connectwise/overview
+Source: content/docs/connectors/platforms/connectwise/overview.mdx
+
+---
+title: ConnectWise Connector
+description: Integrate ConnectWise Manage with Field Nation for automated field service dispatch from service tickets and project tasks.
+---
+
+## Overview
+
+The ConnectWise connector enables seamless integration between ConnectWise Manage and Field Nation:
+- **Service ticket dispatch**: Automatically create work orders from ConnectWise Service Tickets
+- **REST API integration**: Modern API with member impersonation
+- **Callback-based triggers**: Real-time notifications via callbacks
+- **Bidirectional sync**: Status and notes flow both directions
+- **Custom fields support**: Map ConnectWise custom fields
+
+---
+
+## At a Glance
+
+  
+    API Keys (Company ID + Public/Private Key + Member ID)
+  
+  
+    Service Tickets, Project Tickets, Opportunities
+  
+  
+    Callbacks (webhooks) + API polling
+  
+  
+    Bidirectional (create, update, notes)
+  
+
+---
+
+## How It Works
+
+### Configure Callback
+
+Set up callback in ConnectWise that triggers on ticket status changes
+
+### Callback Notification
+
+ConnectWise sends ticket ID to Field Nation when conditions met
+
+### Field Nation Fetches Data
+
+Integration Broker retrieves complete ticket data from ConnectWise REST API
+
+### Apply Mappings
+
+Broker transforms ConnectWise data into Field Nation work order format
+
+### Create Work Order
+
+Work order created with correlation ID stored for bidirectional sync
+
+---
+
+## Common Use Cases
+
+### Dispatch from Service Ticket
+
+Automatically create Field Nation work order when Service Ticket requires on-site technician
+
+```
+Service Ticket Status = "Dispatch"
+AND Board = "Field Services"
+  → Callback triggers
+  → Field Nation Work Order Created
+```
+
+### Project-Based Dispatch
+
+Create work orders from ConnectWise Project tickets
+
+```
+Project Ticket Type = "On-Site"
+AND Status = "Scheduled"
+  → Work order created
+  → Project ticket updated
+```
+
+### Status Synchronization
+
+Reflect Field Nation completion back to ConnectWise
+
+```
+FN Work Order = "Completed"
+  → Integration Broker
+  → CW Ticket Status = "Completed"
+  → Internal Note added
+```
+
+---
+
+## Architecture
+
+```mermaid
+sequenceDiagram
+    participant CW as ConnectWise
+    participant CB as Callback
+    participant Broker as Integration Broker
+    participant FN as Field Nation
+    
+    CW->>CB: Ticket Status Changed
+    CB->>Broker: POST Trigger URL (Ticket ID)
+    Broker->>CW: GET /service/tickets/{id}
+    CW-->>Broker: Ticket Data
+    Broker->>Broker: Apply Field Mappings
+    Broker->>FN: Create/Update Work Order
+    FN-->>Broker: Success + WO ID
+    Broker->>CW: POST /service/tickets/{id}/notes
+```
+
+---
+
+## Features
+
+### Field Mapping Capabilities
+
+- **Standard Fields**: Summary, Initial Description, Status, Priority, Date Resolved
+- **Custom Fields**: Access any custom field on Service Ticket
+- **Related Objects**: Company, Contact, Member (resource), Board
+- **Service Location**: Site address information
+- **Time Entries**: Integration with ConnectWise time tracking
+
+### Supported Operations
+
+---
+
+## Prerequisites
+
+### ConnectWise Requirements
+
+  
+    - ConnectWise Manage license with API access
+    - Admin or API-enabled member account
+    - API keys generated (Public + Private)
+    - Member impersonation configured
+  
+  
+  
+    Generate in ConnectWise:
+    1. System → Members → Select API member
+    2. API Keys tab → Generate New Keys
+    3. Copy Company ID, Public Key, Private Key
+    4. Note Member ID for impersonation
+  
+  
+  
+    - Ability to configure ConnectWise callbacks
+    - Callback endpoint URL from Field Nation
+    - Network access to send callbacks
+    - Optional: IP whitelisting for Field Nation
+  
+  
+  
+    API member must have:
+    - Read access to Service Tickets and all fields
+    - Write access for status/note updates
+    - Access to related objects (Company, Contact, Site)
+    - Permission to view custom fields
+  
+
+### Field Nation Requirements
+
+- Active buyer account with admin access
+- Integration settings access
+- Sandbox environment (recommended for testing)
+
+[Complete prerequisites →](/docs/connectors/getting-started)
+
+---
+
+## Authentication
+
+ConnectWise connector uses **API Key Authentication** with member impersonation:
+
+```
+Company ID: {company_id}
+Public Key: {public_key}
+Private Key: {private_key}
+Member ID: {member_id}
+Client ID: Field Nation Integration
+```
+
+**Components:**
+- **Company ID**: Your ConnectWise company identifier
+- **Public Key**: API public key (generated)
+- **Private Key**: API private key (generated, keep secure)
+- **Member ID**: API member's ID for impersonation
+- **Client ID**: Integration identifier (optional)
+
+**Authentication Header Format:**
+```
+Authorization: Basic base64(CompanyID+PublicKey+PrivateKey:MemberID)
+Client-Id: FieldNationIntegration
+```
+
+> **Security Best Practice**: Use dedicated API member (not personal account). Store Private Key securely - it's equivalent to a password.
+
+---
+
+## Data Flow Patterns
+
+### Inbound: ConnectWise → Field Nation
+
+**Trigger**: Callback fired on ticket status/board change  
+**Action**: Callback sends Ticket ID to Field Nation  
+**Result**: Field Nation work order created/updated
+
+**Example Callback Triggers:**
+- Ticket Status changed to "Dispatch"
+- Board changed to "Field Services"
+- Custom field "Send to FN" = true
+- Priority set to "Priority 1"
+
+---
+
+### Outbound: Field Nation → ConnectWise
+
+**Trigger**: Field Nation work order event  
+**Action**: Integration Broker calls ConnectWise REST API  
+**Result**: ConnectWise ticket updated with status/notes
+
+**Configurable Events:**
+- Work order assigned → Update ticket status
+- Work order completed → Add internal note
+- Provider checked in → Update custom field
+- Work order approved → Update status to "Completed"
+
+---
+
+## Best Practices
+
+### Callback Design
+
+- ✅ Use specific status/board values
+- ✅ Configure for relevant ticket types only
+- ✅ Add safeguards to prevent duplicates
+- ✅ Test in staging ConnectWise instance
+- ✅ Monitor callback delivery logs
+
+### Field Mappings
+
+- ✅ Map all required Field Nation fields
+- ✅ Use custom fields for additional data
+- ✅ Handle ConnectWise status boards correctly
+- ✅ Test service location address mapping
+- ✅ Document custom field IDs
+
+### Security
+
+- ✅ Use dedicated API member
+- ✅ Rotate API keys annually
+- ✅ Grant minimum required permissions
+- ✅ Monitor API usage in ConnectWise
+- ✅ Enable IP whitelisting if required
+
+---
+
+## Limitations & Considerations
+
+### API Limits
+
+ConnectWise enforces rate limits:
+- Typically 1,000 requests per 5 minutes
+- Monitor via System → API Usage
+
+Each work order sync consumes **2-3 API calls**.
+
+### REST API Versioning
+
+- ConnectWise API versions periodically
+- Test after ConnectWise upgrades
+- Review release notes for breaking changes
+
+### Related Object Depth
+
+Can access:
+- ✅ Fields on Service Ticket
+- ✅ Fields from Company, Contact, Board, Site
+- ❌ Deep nested relationships (custom JSONNET needed)
+
+---
+
+---
+
+### undefined
+URL: /docs/connectors/platforms/connectwise/workflow
+
+# Connectors: undefined
+URL: /docs/connectors/platforms/connectwise/workflow
+Source: content/docs/connectors/platforms/connectwise/workflow.mdx
+
+---
+title: Workflow Setup
+description: Configure ConnectWise callbacks to automatically send service ticket data to Field Nation.
+---
+
+## Prerequisites
+
+- ☐ [Field Nation configuration complete](/docs/connectors/platforms/connectwise/configuration)
+- ☐ Trigger URL copied
+- ☐ ConnectWise admin access
+
+---
+
+## Configure Callback in ConnectWise
+
+### Navigate to Callbacks
+
+System → Setup Tables → Callbacks
+
+### Create New Callback
+
+Click "+" to add new callback
+
+### Configure Callback
+
+**Description**: `Field Nation Integration`
+
+**URL**: Paste Field Nation trigger URL
+
+**Object Type**: `Service Ticket`
+
+**Level**: `Owner Level` or `All Levels`
+
+**Trigger Events:**
+- ☑ Added
+- ☑ Changed
+- ☐ Deleted (optional)
+
+**Inactive Members**: Unchecked
+
+---
+
+## Define Trigger Conditions
+
+**Option 1: Status-Based**
+```
+Status changed to "Dispatch"
+```
+
+**Option 2: Board-Based**
+```
+Board = "Field Services"
+```
+
+**Option 3: Custom Field**
+```
+Custom Field "Send to FN" = true
+```
+
+Use ConnectWise workflow rules or automation to set these conditions.
+
+---
+
+## Test Integration
+
+1. Create test service ticket
+2. Update to trigger callback conditions
+3. Verify webhook fires (System → Callback Log)
+4. Check Field Nation for work order
+
+---
+
+## Troubleshooting
+
+  
+    Check:
+    - Callback active
+    - Trigger events selected
+    - Level permissions correct
+    - URL accessible
+  
+  
+  
+    Check:
+    - Field Nation credentials valid
+    - All required fields mapped
+    - Callback log for errors
+    - Integration Broker logs
+  
+
+---
+
+---
+
+### undefined
 URL: /docs/connectors/platforms/freshdesk/configuration
 
 # Connectors: undefined
@@ -19008,556 +20577,6 @@ Watch script execution logs for first week
 ### Optimize
 
 Adjust conditions, improve performance, reduce API calls
-
----
-
----
-
-### undefined
-URL: /docs/connectors/platforms/connectwise/configuration
-
-# Connectors: undefined
-URL: /docs/connectors/platforms/connectwise/configuration
-Source: content/docs/connectors/platforms/connectwise/configuration.mdx
-
----
-title: Configuration
-description: Configure the ConnectWise connector in Field Nation with REST API keys and field mappings.
----
-
-## Prerequisites Checklist
-
-- ☐ ConnectWise Company ID
-- ☐ Public Key (generated in ConnectWise)
-- ☐ Private Key (generated in ConnectWise)
-- ☐ Member ID (API member)
-- ☐ ConnectWise instance URL
-- ☐ Admin access to Field Nation integrations
-
----
-
-## Step 1: Generate ConnectWise API Keys
-
-### Log into ConnectWise
-
-Use admin account
-
-### Navigate to API Member
-
-System → Members → Select API member (or create new dedicated member)
-
-### Generate API Keys
-
-**API Keys** tab → Click "Generate New Key Pair"
-
-**Copy immediately:**
-- Company ID
-- Public Key
-- Private Key
-
-> **Important**: Private Key shown ONCE. Save securely immediately.
-
-### Note Member ID
-
-Copy Member ID from member profile (needed for authentication)
-
----
-
-## Step 2: Access Integration Broker
-
-**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
-**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
-
-Select "ConnectWise" connector
-
----
-
-## Step 3: Configure Connection
-
-### Instance URL
-
-**Format:**
-```
-https://api-{region}.myconnectwise.net/v4_6_release/apis/3.0
-```
-
-**Regions:**
-- `na` - North America
-- `eu` - Europe
-- `au` - Australia
-- `staging` - Staging environment
-
-**Example:** `https://api-na.myconnectwise.net/v4_6_release/apis/3.0`
-
----
-
-### Authentication Credentials
-
-**Company ID**: Your ConnectWise company identifier
-
-**Public Key**: API public key from Step 1
-
-**Private Key**: API private key from Step 1
-
-**Member ID**: API member's ID for impersonation
-
-**Client ID** (optional): `FieldNationIntegration`
-
----
-
-### Entity Configuration
-
-**Table**: `service/tickets` (most common)
-
-Other options:
-- `project/tickets`
-- `sales/opportunities`
-
----
-
-## Step 4: Test Connection
-
-Click "Test Connection" → Verify success
-
-**Common Errors:**
-
-  
-    **Solution:**
-    - Regenerate keys in ConnectWise
-    - Ensure Private Key copied correctly
-    - Check Company ID matches
-  
-  
-  
-    **Solution:**
-    - Grant API member access to Service Desk
-    - Enable "Read" and "Write" permissions
-    - Check security role assignments
-  
-
----
-
-## Step 5: Refresh Fields & Configure Mappings
-
-Click "Refresh Fields" → Map fields:
-
-**Inbound:**
-```
-summary → title
-initialDescription → description
-status.name → status_id (Array Map)
-priority.name → priority (Array Map)
-company.name → location.company.name
-```
-
-**Outbound:**
-```
-status.name → status (Array Map)
-completion_notes → internalAnalysis
-```
-
-[Field mapping guide →](/docs/connectors/concepts/field-mappings)
-
----
-
-## Step 6: Save & Get Trigger URL
-
-Save configuration → Copy trigger URL for ConnectWise callback setup
-
----
-
----
-
-### undefined
-URL: /docs/connectors/platforms/connectwise/overview
-
-# Connectors: undefined
-URL: /docs/connectors/platforms/connectwise/overview
-Source: content/docs/connectors/platforms/connectwise/overview.mdx
-
----
-title: ConnectWise Connector
-description: Integrate ConnectWise Manage with Field Nation for automated field service dispatch from service tickets and project tasks.
----
-
-## Overview
-
-The ConnectWise connector enables seamless integration between ConnectWise Manage and Field Nation:
-- **Service ticket dispatch**: Automatically create work orders from ConnectWise Service Tickets
-- **REST API integration**: Modern API with member impersonation
-- **Callback-based triggers**: Real-time notifications via callbacks
-- **Bidirectional sync**: Status and notes flow both directions
-- **Custom fields support**: Map ConnectWise custom fields
-
----
-
-## At a Glance
-
-  
-    API Keys (Company ID + Public/Private Key + Member ID)
-  
-  
-    Service Tickets, Project Tickets, Opportunities
-  
-  
-    Callbacks (webhooks) + API polling
-  
-  
-    Bidirectional (create, update, notes)
-  
-
----
-
-## How It Works
-
-### Configure Callback
-
-Set up callback in ConnectWise that triggers on ticket status changes
-
-### Callback Notification
-
-ConnectWise sends ticket ID to Field Nation when conditions met
-
-### Field Nation Fetches Data
-
-Integration Broker retrieves complete ticket data from ConnectWise REST API
-
-### Apply Mappings
-
-Broker transforms ConnectWise data into Field Nation work order format
-
-### Create Work Order
-
-Work order created with correlation ID stored for bidirectional sync
-
----
-
-## Common Use Cases
-
-### Dispatch from Service Ticket
-
-Automatically create Field Nation work order when Service Ticket requires on-site technician
-
-```
-Service Ticket Status = "Dispatch"
-AND Board = "Field Services"
-  → Callback triggers
-  → Field Nation Work Order Created
-```
-
-### Project-Based Dispatch
-
-Create work orders from ConnectWise Project tickets
-
-```
-Project Ticket Type = "On-Site"
-AND Status = "Scheduled"
-  → Work order created
-  → Project ticket updated
-```
-
-### Status Synchronization
-
-Reflect Field Nation completion back to ConnectWise
-
-```
-FN Work Order = "Completed"
-  → Integration Broker
-  → CW Ticket Status = "Completed"
-  → Internal Note added
-```
-
----
-
-## Architecture
-
-```mermaid
-sequenceDiagram
-    participant CW as ConnectWise
-    participant CB as Callback
-    participant Broker as Integration Broker
-    participant FN as Field Nation
-    
-    CW->>CB: Ticket Status Changed
-    CB->>Broker: POST Trigger URL (Ticket ID)
-    Broker->>CW: GET /service/tickets/{id}
-    CW-->>Broker: Ticket Data
-    Broker->>Broker: Apply Field Mappings
-    Broker->>FN: Create/Update Work Order
-    FN-->>Broker: Success + WO ID
-    Broker->>CW: POST /service/tickets/{id}/notes
-```
-
----
-
-## Features
-
-### Field Mapping Capabilities
-
-- **Standard Fields**: Summary, Initial Description, Status, Priority, Date Resolved
-- **Custom Fields**: Access any custom field on Service Ticket
-- **Related Objects**: Company, Contact, Member (resource), Board
-- **Service Location**: Site address information
-- **Time Entries**: Integration with ConnectWise time tracking
-
-### Supported Operations
-
----
-
-## Prerequisites
-
-### ConnectWise Requirements
-
-  
-    - ConnectWise Manage license with API access
-    - Admin or API-enabled member account
-    - API keys generated (Public + Private)
-    - Member impersonation configured
-  
-  
-  
-    Generate in ConnectWise:
-    1. System → Members → Select API member
-    2. API Keys tab → Generate New Keys
-    3. Copy Company ID, Public Key, Private Key
-    4. Note Member ID for impersonation
-  
-  
-  
-    - Ability to configure ConnectWise callbacks
-    - Callback endpoint URL from Field Nation
-    - Network access to send callbacks
-    - Optional: IP whitelisting for Field Nation
-  
-  
-  
-    API member must have:
-    - Read access to Service Tickets and all fields
-    - Write access for status/note updates
-    - Access to related objects (Company, Contact, Site)
-    - Permission to view custom fields
-  
-
-### Field Nation Requirements
-
-- Active buyer account with admin access
-- Integration settings access
-- Sandbox environment (recommended for testing)
-
-[Complete prerequisites →](/docs/connectors/getting-started)
-
----
-
-## Authentication
-
-ConnectWise connector uses **API Key Authentication** with member impersonation:
-
-```
-Company ID: {company_id}
-Public Key: {public_key}
-Private Key: {private_key}
-Member ID: {member_id}
-Client ID: Field Nation Integration
-```
-
-**Components:**
-- **Company ID**: Your ConnectWise company identifier
-- **Public Key**: API public key (generated)
-- **Private Key**: API private key (generated, keep secure)
-- **Member ID**: API member's ID for impersonation
-- **Client ID**: Integration identifier (optional)
-
-**Authentication Header Format:**
-```
-Authorization: Basic base64(CompanyID+PublicKey+PrivateKey:MemberID)
-Client-Id: FieldNationIntegration
-```
-
-> **Security Best Practice**: Use dedicated API member (not personal account). Store Private Key securely - it's equivalent to a password.
-
----
-
-## Data Flow Patterns
-
-### Inbound: ConnectWise → Field Nation
-
-**Trigger**: Callback fired on ticket status/board change  
-**Action**: Callback sends Ticket ID to Field Nation  
-**Result**: Field Nation work order created/updated
-
-**Example Callback Triggers:**
-- Ticket Status changed to "Dispatch"
-- Board changed to "Field Services"
-- Custom field "Send to FN" = true
-- Priority set to "Priority 1"
-
----
-
-### Outbound: Field Nation → ConnectWise
-
-**Trigger**: Field Nation work order event  
-**Action**: Integration Broker calls ConnectWise REST API  
-**Result**: ConnectWise ticket updated with status/notes
-
-**Configurable Events:**
-- Work order assigned → Update ticket status
-- Work order completed → Add internal note
-- Provider checked in → Update custom field
-- Work order approved → Update status to "Completed"
-
----
-
-## Best Practices
-
-### Callback Design
-
-- ✅ Use specific status/board values
-- ✅ Configure for relevant ticket types only
-- ✅ Add safeguards to prevent duplicates
-- ✅ Test in staging ConnectWise instance
-- ✅ Monitor callback delivery logs
-
-### Field Mappings
-
-- ✅ Map all required Field Nation fields
-- ✅ Use custom fields for additional data
-- ✅ Handle ConnectWise status boards correctly
-- ✅ Test service location address mapping
-- ✅ Document custom field IDs
-
-### Security
-
-- ✅ Use dedicated API member
-- ✅ Rotate API keys annually
-- ✅ Grant minimum required permissions
-- ✅ Monitor API usage in ConnectWise
-- ✅ Enable IP whitelisting if required
-
----
-
-## Limitations & Considerations
-
-### API Limits
-
-ConnectWise enforces rate limits:
-- Typically 1,000 requests per 5 minutes
-- Monitor via System → API Usage
-
-Each work order sync consumes **2-3 API calls**.
-
-### REST API Versioning
-
-- ConnectWise API versions periodically
-- Test after ConnectWise upgrades
-- Review release notes for breaking changes
-
-### Related Object Depth
-
-Can access:
-- ✅ Fields on Service Ticket
-- ✅ Fields from Company, Contact, Board, Site
-- ❌ Deep nested relationships (custom JSONNET needed)
-
----
-
----
-
-### undefined
-URL: /docs/connectors/platforms/connectwise/workflow
-
-# Connectors: undefined
-URL: /docs/connectors/platforms/connectwise/workflow
-Source: content/docs/connectors/platforms/connectwise/workflow.mdx
-
----
-title: Workflow Setup
-description: Configure ConnectWise callbacks to automatically send service ticket data to Field Nation.
----
-
-## Prerequisites
-
-- ☐ [Field Nation configuration complete](/docs/connectors/platforms/connectwise/configuration)
-- ☐ Trigger URL copied
-- ☐ ConnectWise admin access
-
----
-
-## Configure Callback in ConnectWise
-
-### Navigate to Callbacks
-
-System → Setup Tables → Callbacks
-
-### Create New Callback
-
-Click "+" to add new callback
-
-### Configure Callback
-
-**Description**: `Field Nation Integration`
-
-**URL**: Paste Field Nation trigger URL
-
-**Object Type**: `Service Ticket`
-
-**Level**: `Owner Level` or `All Levels`
-
-**Trigger Events:**
-- ☑ Added
-- ☑ Changed
-- ☐ Deleted (optional)
-
-**Inactive Members**: Unchecked
-
----
-
-## Define Trigger Conditions
-
-**Option 1: Status-Based**
-```
-Status changed to "Dispatch"
-```
-
-**Option 2: Board-Based**
-```
-Board = "Field Services"
-```
-
-**Option 3: Custom Field**
-```
-Custom Field "Send to FN" = true
-```
-
-Use ConnectWise workflow rules or automation to set these conditions.
-
----
-
-## Test Integration
-
-1. Create test service ticket
-2. Update to trigger callback conditions
-3. Verify webhook fires (System → Callback Log)
-4. Check Field Nation for work order
-
----
-
-## Troubleshooting
-
-  
-    Check:
-    - Callback active
-    - Trigger events selected
-    - Level permissions correct
-    - URL accessible
-  
-  
-  
-    Check:
-    - Field Nation credentials valid
-    - All required fields mapped
-    - Callback log for errors
-    - Integration Broker logs
-  
 
 ---
 
@@ -24824,1025 +25843,6 @@ curl -X DELETE https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
 
 ---
 
-### undefined
-URL: /docs/connectors/platforms/autotask/configuration
-
-# Connectors: undefined
-URL: /docs/connectors/platforms/autotask/configuration
-Source: content/docs/connectors/platforms/autotask/configuration.mdx
-
----
-title: Configuration
-description: Configure the Autotask connector in Field Nation's Integration Broker with SOAP API credentials and field mappings.
----
-
-## Prerequisites Checklist
-
-Before starting, gather:
-
-- ☐ Autotask username (API user email)
-- ☐ Autotask password
-- ☐ Integration Code (generated in Autotask)
-- ☐ Security Token (generated in Autotask)
-- ☐ Autotask instance URL
-- ☐ Admin access to Field Nation integrations
-
----
-
-## Step 1: Generate Autotask API Credentials
-
-### Log into Autotask
-
-Use admin account
-
-### Navigate to API User
-
-Admin → Resources (Users) → Select API user (or create new)
-
-### Generate Integration Code
-
-**API Integration** section → Click "Generate API Integration Code"
-
-**Copy the code** - You'll need this for Field Nation
-
-### Generate Security Token
-
-Same section → "Generate API Security Token" (if not already exists)
-
-**Copy the token** - Required for authentication
-
-### Note User Credentials
-
-- Username (email): API user's email address
-- Password: User's password
-
-> [INFO] **Integration Code**: Unique per integration. Generate new code for Field Nation (don't reuse from other integrations).
-
----
-
-## Step 2: Access Integration Broker
-
-Navigate to Field Nation's Integration Broker:
-
-**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
-**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
-
-Select "Autotask" from available connectors
-
----
-
-## Step 3: Basic Settings
-
-### Instance Name
-
-**Optional** - Descriptive name for this integration
-
-**Examples:**
-- "Production Autotask"
-- "Autotask PSA - Main"
-- "Datto PSA Sandbox"
-
----
-
-### Instance URL
-
-**Required** - Your Autotask instance URL
-
-**Format:**
-```
-https://webservices{X}.autotask.net/atservices/1.6/atws.asmx
-```
-
-Where `{X}` is your zone number (1-20)
-
-**Find Your Zone:**
-1. Log into Autotask
-2. Check browser URL: `https://ww{X}.autotask.net`
-3. Use that zone number in API URL
-
-**Examples:**
-- Zone 5: `https://webservices5.autotask.net/atservices/1.6/atws.asmx`
-- Zone 12: `https://webservices12.autotask.net/atservices/1.6/atws.asmx`
-
----
-
-### Entity Type
-
-**Required** - Autotask entity to integrate
-
-**Supported:**
-- `Ticket` - Service tickets (most common)
-- `ServiceCall` - Service call records
-- `Project` - Project tasks requiring field work
-
-**Format**: Use exact entity name (case-sensitive)
-
----
-
-## Step 4: Authentication
-
-Enter SOAP API credentials:
-
-**Username**  
-API user's email address  
-Example: `integration@company.com`
-
-**Password**  
-User's Autotask password
-
-**Integration Code**  
-Generated tracking identifier from Step 1
-
-**Security Token**  
-API authentication token from Step 1
-
----
-
-## Step 5: Test Connection
-
-### Click "Test Connection"
-
-Button in configuration form
-
-### Broker Validates
-
-- Authenticates with Autotask SOAP API
-- Queries entity metadata
-- Verifies permissions
-
-### Review Result
-
-**Success**: ✅ Green confirmation
-- Connection established
-- Authentication valid
-- Entity accessible
-
-**Failure**: ❌ Error message
-- Check credentials
-- Verify zone number correct
-- Ensure API user has permissions
-
-### Common Authentication Errors
-
-  
-    **Error**: Authentication failed
-    
-    **Causes:**
-    - Wrong username or password
-    - Integration Code incorrect
-    - Security Token expired or wrong
-    
-    **Solution:**
-    1. Verify credentials in Autotask
-    2. Regenerate Integration Code if needed
-    3. Regenerate Security Token if expired
-    4. Test login to Autotask web interface
-  
-  
-  
-    **Error**: Cannot reach endpoint
-    
-    **Cause:** Incorrect zone in API URL
-    
-    **Solution:**
-    1. Log into Autotask
-    2. Check URL: `ww{X}.autotask.net`
-    3. Update API URL to match zone
-  
-  
-  
-    **Error**: User does not have API access
-    
-    **Solution:**
-    1. In Autotask Admin → Resources (Users)
-    2. Select API user
-    3. Security tab → Enable "API User"
-    4. Security Level → Grant "API User (system)"
-  
-  
-  
-    **Error**: Entity type not accessible
-    
-    **Solution:**
-    1. Verify entity name spelling (case-sensitive)
-    2. Ensure API user has read access to entity
-    3. Check entity exists in your Autotask instance
-  
-
----
-
-## Step 6: Get Trigger URL
-
-Once authentication succeeds, Field Nation generates unique trigger URL:
-
-**Format:**
-```
-https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
-```
-
-**Copy this URL** - You'll configure it in Autotask webhook
-
-> [INFO] **Security**: Client token authenticates incoming webhooks. Keep URL secure.
-
----
-
-## Step 7: Refresh Fields
-
-Discover available fields for mapping:
-
-### Click "Refresh Fields"
-
-Button in field mapping section
-
-### Broker Queries Autotask
-
-- Calls SOAP API GetFieldInfo
-- Retrieves field definitions for entity
-- Discovers User-Defined Fields
-
-### Fields Populate
-
-Dropdowns fill with:
-- Standard fields (title, description, status)
-- User-Defined Fields (UDF)
-- Related entity fields (account, contact)
-- Picklist values
-
----
-
-## Step 8: Configure Field Mappings
-
-Map data between Autotask and Field Nation:
-
-### Inbound (Autotask → Field Nation)
-
-**Example Mappings:**
-```
-Autotask Field                → FN Field                   Action
-──────────────────────────────────────────────────────────────────
-Title                        → title                      Sync
-Description                  → description                Sync
-AccountName                  → location.company.name      Sync
-Status                       → status_id                  Array Map
-Priority                     → priority                   Array Map
-DueDateTime                  → schedule.start             Date Convert
-AssignedResource.Email       → contact.email              Sync
-UDF_TicketNumber            → custom_field_123           Sync
-```
-
-### Outbound (Field Nation → Autotask)
-
-**Example Mappings:**
-```
-FN Field                     → Autotask Field             Action
-──────────────────────────────────────────────────────────────────
-status.name                  → Status                     Array Map
-assignee.user.name           → UDF_Technician            Sync
-completion_notes             → Resolution                 Sync
-completion_date              → CompletedDate              Date Convert
-```
-
-### Status Mapping
-
-**Autotask Status Values:**
-- Varies by configuration
-- Common: New, In Progress, Complete, Closed
-
-**Field Nation Status IDs:**
-```
-1 = Draft
-2 = Assigned
-3 = Work Done
-4 = Approved
-5 = Paid
-```
-
-**Array Map Configuration:**
-```jsonnet
-{
-  "source": "Status",
-  "target": "status_id",
-  "action": "array_map",
-  "mappings": [
-    { "compare": "New", "value": "1" },
-    { "compare": "In Progress", "value": "2" },
-    { "compare": "Complete", "value": "3" },
-    { "compare": "Closed", "value": "4" }
-  ],
-  "default": "1"
-}
-```
-
-[Complete field mapping guide →](/docs/connectors/concepts/field-mappings)
-
----
-
-## Step 9: Save Configuration
-
-### Review Settings
-
-Verify:
-- ☐ Instance URL correct (zone number)
-- ☐ Entity type correct
-- ☐ Authentication successful
-- ☐ Fields refreshed
-- ☐ Inbound mappings configured
-- ☐ Outbound mappings configured
-
-### Save
-
-Click "Save" to persist configuration
-
-### Note Trigger URL
-
-Copy trigger URL for Autotask webhook setup
-
----
-
-## Configuration Checklist
-
-### Field Nation Configuration
-- ☐ Instance name configured
-- ☐ Instance URL with correct zone
-- ☐ Entity type specified
-- ☐ Credentials entered (username, password, integration code, token)
-- ☐ Connection tested successfully
-- ☐ Trigger URL copied
-- ☐ Fields refreshed
-- ☐ Inbound field mappings configured
-- ☐ Outbound field mappings configured
-- ☐ Configuration saved
-
-### Autotask Configuration (Next Steps)
-- ☐ Webhook configured
-- ☐ Trigger conditions defined
-- ☐ Webhook tested with sample ticket
-
-[Autotask workflow setup →](/docs/connectors/platforms/autotask/workflow)
-
----
-
-## Troubleshooting
-
-  
-    **Issue**: Expected fields not in dropdown
-    
-    **Solution:**
-    1. Click "Refresh Fields" again
-    2. Verify API user has field-level read permissions
-    3. For UDFs, ensure they're defined on entity
-    4. Check field API names in Autotask Admin
-  
-  
-  
-    **Issue**: Integration stops working
-    
-    **Solution:**
-    1. Check if Security Token regenerated
-    2. Verify API user still active
-    3. Test credentials in Autotask
-    4. Reconnect in Field Nation
-  
-  
-  
-    **Issue**: Cannot save mappings
-    
-    **Solution:**
-    1. Ensure all required FN fields mapped
-    2. Check data type compatibility
-    3. Add default values for optional fields
-    4. Review error messages for specific issues
-  
-
----
-
----
-
-### undefined
-URL: /docs/connectors/platforms/autotask/overview
-
-# Connectors: undefined
-URL: /docs/connectors/platforms/autotask/overview
-Source: content/docs/connectors/platforms/autotask/overview.mdx
-
----
-title: Autotask Connector
-description: Integrate Datto Autotask PSA with Field Nation for automated field service dispatch from service tickets and work orders.
----
-
-## Overview
-
-The Autotask connector enables seamless integration between Datto Autotask PSA and Field Nation:
-- **Ticket-based dispatch**: Automatically create work orders from Autotask Tickets
-- **SOAP API integration**: Secure authentication via token-based SOAP calls
-- **Bidirectional sync**: Status updates flow both directions
-- **Flexible triggers**: Configure based on ticket status, type, or custom fields
-- **UDF support**: Map User-Defined Fields between systems
-
----
-
-## At a Glance
-
-  
-    API Integration Token + SOAP Credentials
-  
-  
-    Tickets, Service Calls, Projects
-  
-  
-    Webhooks + API Polling (configurable)
-  
-  
-    Bidirectional (create, update, notes)
-  
-
----
-
-## How It Works
-
-### Configure Webhook
-
-Set up webhook in Autotask that triggers on ticket status changes or custom field updates
-
-### Webhook Notification
-
-Autotask sends ticket ID to Field Nation when trigger conditions met
-
-### Field Nation Fetches Data
-
-Integration Broker retrieves complete ticket data from Autotask SOAP API
-
-### Apply Mappings
-
-Broker transforms Autotask ticket data into Field Nation work order format
-
-### Create Work Order
-
-Work order created in Field Nation with correlation ID stored for bidirectional sync
-
----
-
-## Common Use Cases
-
-### Dispatch from Service Ticket
-
-Automatically create Field Nation work order when Autotask Ticket requires on-site service
-
-```
-Ticket Status = "Dispatch to Field" 
-  → Webhook triggers 
-  → Field Nation Work Order Created
-```
-
-### Project-Based Dispatch
-
-Create work orders from Autotask Project tasks requiring field technicians
-
-```
-Project Task Type = "On-Site"
-AND Task Status = "Ready"
-  → Work order created
-  → Task updated with FN details
-```
-
-### Status Synchronization
-
-Reflect Field Nation work order completion back to Autotask Ticket
-
-```
-FN Work Order = "Completed"
-  → Integration Broker
-  → Autotask Ticket Status = "Complete - Customer Notified"
-  → Internal Notes updated
-```
-
----
-
-## Architecture
-
-```mermaid
-sequenceDiagram
-    participant AT as Autotask
-    participant WH as Webhook
-    participant Broker as Integration Broker
-    participant FN as Field Nation
-    
-    AT->>WH: Ticket Status Changed
-    WH->>Broker: POST Trigger URL (Ticket ID)
-    Broker->>AT: SOAP API Call (Get Ticket)
-    AT-->>Broker: Ticket Data + UDFs
-    Broker->>Broker: Apply Field Mappings
-    Broker->>FN: Create/Update Work Order
-    FN-->>Broker: Success + WO ID
-    Broker->>AT: Update Ticket (optional)
-```
-
----
-
-## Features
-
-### Field Mapping Capabilities
-
-- **Standard Fields**: Title, Description, Status, Priority, Due Date
-- **User-Defined Fields**: Access any UDF on Ticket entity
-- **Related Entities**: Account, Contact, Resource (assigned technician)
-- **Picklist Fields**: Map Autotask picklists to Field Nation enums
-- **Date/Time Fields**: Automatic timezone conversion
-
-### Supported Operations
-
----
-
-## Prerequisites
-
-### Autotask Requirements
-
-  
-    - Autotask PSA license with API access enabled
-    - Admin or API-enabled user account
-    - SOAP API credentials generated
-    - Integration tracking identifier configured
-  
-  
-  
-    Generate in Autotask:
-    1. Navigate to Admin → Resources (Users)
-    2. Select API user
-    3. Generate API Integration Code
-    4. Generate API Security Token
-    5. Copy both for Field Nation configuration
-  
-  
-  
-    - Ability to configure Autotask webhooks
-    - Webhook endpoint URL from Field Nation
-    - Network access to send webhooks
-    - Optional: IP whitelisting for Field Nation
-  
-  
-  
-    API user must have:
-    - Read access to Ticket entity and all fields to sync
-    - Write access to fields for status/note updates
-    - Access to related entities (Account, Contact, Resource)
-    - Permission to view User-Defined Fields
-  
-
-### Field Nation Requirements
-
-- Active buyer account with admin access
-- Integration settings access
-- Sandbox environment (recommended for testing)
-
-[Complete prerequisites →](/docs/connectors/getting-started)
-
----
-
-## Authentication
-
-Autotask connector uses **SOAP API with Token Authentication**:
-
-```
-Username: API user email
-Password: API user password
-Integration Code: {integration_code}
-Security Token: {security_token}
-```
-
-**Components:**
-- **Username**: Autotask user email with API access
-- **Password**: User's password
-- **Integration Code**: Generated tracking identifier
-- **Security Token**: API authentication token
-
-**Generate Credentials:**
-1. Log into Autotask as admin
-2. Admin → Resources (Users) → Select API user
-3. API Integration section → Generate Integration Code
-4. Generate Security Token (if not already generated)
-5. Copy all credentials for Field Nation configuration
-
-> **Security Best Practice**: Use dedicated API user (not personal account). Integration Code is unique per integration - generate new code for Field Nation.
-
----
-
-## Data Flow Patterns
-
-### Inbound: Autotask → Field Nation
-
-**Trigger**: Webhook fired on ticket status change  
-**Action**: Webhook sends Ticket ID to Field Nation  
-**Result**: Field Nation work order created/updated
-
-**Example Webhook Triggers:**
-- Ticket Status = "Dispatch to Field"
-- Custom UDF "Send to FN" = Yes
-- Issue Type = "On-Site Required"
-- Queue = "Field Services"
-
----
-
-### Outbound: Field Nation → Autotask
-
-**Trigger**: Field Nation work order event (completed, etc.)  
-**Action**: Integration Broker calls Autotask SOAP API  
-**Result**: Autotask Ticket updated with status/notes
-
-**Configurable Events:**
-- Work order assigned → Update Ticket Status
-- Work order completed → Add Internal Note with details
-- Provider checked in → Update custom UDF
-- Work order approved → Update Status to "Complete"
-
----
-
-## Best Practices
-
-### Webhook Design
-
-- ✅ Use specific status values (not "any change")
-- ✅ Configure webhook for relevant ticket types only
-- ✅ Add safeguards to prevent duplicate triggers
-- ✅ Test in sandbox Autotask instance first
-- ✅ Monitor webhook delivery logs
-
-### Field Mappings
-
-- ✅ Map all required Field Nation fields
-- ✅ Use User-Defined Fields for custom data
-- ✅ Handle Autotask picklists with Array Map
-- ✅ Test timezone conversions for date fields
-- ✅ Document UDF IDs and purposes
-
-### Security
-
-- ✅ Use dedicated API user
-- ✅ Rotate Security Token periodically
-- ✅ Grant minimum required permissions
-- ✅ Monitor API usage limits
-- ✅ Enable IP whitelisting if policy requires
-
----
-
-## Limitations & Considerations
-
-### API Limits
-
-Autotask enforces API call limits:
-- Varies by license type and contract
-- Monitor usage in Autotask Admin → API Usage
-
-Each work order sync consumes **2-3 API calls** (authentication + data retrieval + optional update).
-
-### SOAP API Complexity
-
-- SOAP-based (not REST) - more complex than modern APIs
-- XML payload parsing required
-- Field discovery may require manual configuration
-- Some fields may not be accessible via API
-
-### Related Entity Depth
-
-Can access:
-- ✅ Fields on Ticket entity
-- ✅ Fields from related Account, Contact, Resource
-- ❌ Grand-parent relationships (requires custom JSONNET)
-
----
-
----
-
-### undefined
-URL: /docs/connectors/platforms/autotask/workflow
-
-# Connectors: undefined
-URL: /docs/connectors/platforms/autotask/workflow
-Source: content/docs/connectors/platforms/autotask/workflow.mdx
-
----
-title: Workflow Setup
-description: Configure Autotask webhooks to automatically send ticket data to Field Nation when trigger conditions are met.
----
-
-## Prerequisites
-
-- ☐ Completed [Field Nation configuration](/docs/connectors/platforms/autotask/configuration)
-- ☐ Field Nation trigger URL copied
-- ☐ Autotask admin access
-- ☐ Webhook configuration permissions
-
----
-
-## Workflow Overview
-
-```mermaid
-graph LR
-    A[Ticket Created/Updated] --> B{Webhook<br/>Conditions Met?}
-    B -->|Yes| C[Send to Field Nation]
-    C --> D[Work Order Created]
-    B -->|No| E[No Action]
-```
-
-**Webhook**: Monitors tickets and evaluates conditions  
-**Trigger URL**: Destination for webhook notifications  
-**Field Nation**: Fetches ticket data and creates work order
-
----
-
-## Step 1: Configure Webhook in Autotask
-
-### Navigate to Webhooks
-
-Autotask → Admin → Webhooks
-
-### Create New Webhook
-
-Click **"New Webhook"** or **"Add Webhook"**
-
-### Configure Webhook Settings
-
-**Name**: `Field Nation Integration`
-
-**Entity**: Select entity type (e.g., `Ticket`)
-
-**Webhook URL**: Paste Field Nation trigger URL
-```
-https://api.fieldnation.com/integrations/trigger/{YOUR_CLIENT_TOKEN}
-```
-
-**HTTP Method**: `POST`
-
-**Content Type**: `application/json`
-
----
-
-## Step 2: Define Trigger Conditions
-
-Configure when webhook fires:
-
-### Event Types
-
-Select events that should trigger:
-- ☑ **Create** - New tickets
-- ☑ **Update** - Ticket changes
-- ☐ **Delete** - Usually not needed
-
----
-
-### Filter Conditions
-
-**Option 1: Status-Based**
-```
-Status = "Dispatch to Field"
-```
-
-**Option 2: Custom Field**
-```
-UDF "Send to Field Nation" = Yes
-```
-
-**Option 3: Queue-Based**
-```
-Queue Name = "Field Services"
-AND Priority IN (Critical, High)
-```
-
-**Option 4: Issue Type**
-```
-Issue Type = "On-Site Required"
-AND Status != "Cancelled"
-```
-
----
-
-### Webhook Payload
-
-Configure what data to send:
-
-**Minimal Payload (Recommended):**
-```json
-{
-  "ticketId": "{TicketID}",
-  "entityType": "Ticket",
-  "action": "{Action}"
-}
-```
-
-Field Nation will fetch complete ticket data via SOAP API.
-
-**Why minimal?**
-- Reduces payload size
-- Ensures latest data (fetched at processing time)
-- Prevents stale data issues
-
----
-
-## Step 3: Test Webhook
-
-### Create Test Ticket
-
-1. Navigate to Autotask Tickets
-2. Create new ticket
-3. Fill required fields
-4. Set conditions to trigger webhook
-5. Save ticket
-
-### Verify Webhook Fired
-
-Check Autotask Admin → Webhooks → Delivery Log:
-- Look for webhook execution
-- Verify 200 OK response
-- Check payload sent
-
-### Verify in Field Nation
-
-1. Log into Field Nation
-2. Navigate to Work Orders
-3. Find newly created work order
-4. Verify field values correct
-
----
-
-## Troubleshooting
-
-  
-    **Check:**
-    - ☐ Webhook active/enabled
-    - ☐ Ticket meets filter conditions
-    - ☐ Event types selected correctly
-    - ☐ Webhook URL correct
-    
-    **Debug:**
-    - Check Autotask webhook delivery log
-    - Test with simple ticket (minimal fields)
-    - Review filter conditions (test individually)
-  
-  
-  
-    **Check:**
-    - ☐ Field Nation configuration complete
-    - ☐ Credentials valid
-    - ☐ All required FN fields mapped
-    - ☐ SOAP API accessible from Field Nation
-    
-    **Debug:**
-    1. Check Integration Broker logs in Field Nation
-    2. Look for incoming webhook
-    3. Review SOAP API call results
-    4. Check field mapping errors
-  
-  
-  
-    **Cause:** Webhook triggering multiple times
-    
-    **Solutions:**
-    1. Add sync status UDF to Autotask Ticket
-    2. Update UDF after first send (prevent re-trigger)
-    3. Use "Create" event only (not "Update")
-    4. Add filter: UDF "Synced to FN" != Yes
-  
-  
-  
-    **Check:**
-    - ☐ Field mappings configured correctly
-    - ☐ Data types compatible
-    - ☐ Picklist values mapped (Array Map)
-    - ☐ Date formats compatible
-    
-    **Solution:**
-    - Review Field Nation field mappings
-    - Test with minimal data first
-    - Add transformations as needed
-  
-
----
-
-## Advanced Configurations
-
-### Prevent Duplicate Sends
-
-Add tracking UDF to Autotask Tickets:
-
-### Create UDF
-
-Autotask → Admin → User Defined Fields → Ticket
-
-**Field Name**: "FN Sync Status"  
-**Type**: Text or Picklist  
-**Values**: Not Sent, Sent, Synced
-
-### Update Webhook Filter
-
-Add condition:
-```
-FN Sync Status != "Sent"
-AND FN Sync Status != "Synced"
-```
-
-### Update After Sync
-
-Configure outbound mapping to set:
-```
-FN Sync Status = "Sent" (after successful creation)
-```
-
----
-
-### Multiple Webhooks for Different Scenarios
-
-**Webhook 1**: Urgent Tickets
-```
-Priority = Critical
-Status = New
-→ Immediate dispatch
-```
-
-**Webhook 2**: Standard Tickets
-```
-Status = "Dispatch to Field"
-Priority != Critical
-→ Normal dispatch
-```
-
-**Webhook 3**: Project Tasks
-```
-Entity = Project
-Task Type = "On-Site"
-→ Project-based dispatch
-```
-
----
-
-### Bidirectional Sync
-
-Update Autotask when Field Nation changes:
-
-**Field Nation Event** → **Autotask Action**
-
-- Work order assigned → Update Ticket Status
-- Work order completed → Add Internal Note
-- Completion approved → Update Status to "Complete"
-
-Configured in Field Nation's event trigger settings.
-
----
-
-## Production Deployment
-
-### Pre-Launch Checklist
-
-- ☐ Tested in Autotask sandbox
-- ☐ All field mappings validated
-- ☐ Error handling tested
-- ☐ Webhook conditions finalized
-- ☐ Team training completed
-- ☐ Documentation updated
-
-### Launch Steps
-
-### Export Webhook Config
-
-Save webhook configuration details
-
-### Configure Production
-
-1. Access production Autotask
-2. Create webhook (same settings)
-3. Update Field Nation to production
-4. Test with sample ticket
-
-### Monitor Closely
-
-Watch first few synchronizations:
-- Check webhook delivery log
-- Review work order data
-- Verify bidirectional sync
-
----
-
-## Monitoring & Maintenance
-
-### Regular Tasks
-
-**Daily:**
-- Check webhook delivery log for errors
-- Monitor work order creation rate
-- Review failed webhooks
-
-**Weekly:**
-- Test sample synchronization
-- Review field mappings
-- Check Autotask API usage
-
-**Monthly:**
-- Rotate Security Token (Field Nation config)
-- Review and optimize webhook conditions
-- Audit integration usage
-
----
-
----
-
 ## Resources (5)
 
 ### undefined
@@ -27733,6 +27733,110 @@ icon: BookOpen
 ---
 
 ### undefined
+URL: /api-references/rest-api/v2/assignments/assignee-delete
+
+# API References: undefined
+URL: /api-references/rest-api/v2/assignments/assignee-delete
+Source: content/api-references/rest-api/v2/assignments/assignee-delete.mdx
+
+---
+title: Unassign user from a work order
+full: true
+_openapi:
+  method: DELETE
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Remove the assigned provider (user) from a work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Remove the assigned provider (user) from a work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/assignments/cancel-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/assignments/cancel-post
+Source: content/api-references/rest-api/v2/assignments/cancel-post.mdx
+
+---
+title: Unassign Work Order Provider
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Unassign and remove the currently assigned provider from the work
+          order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Unassign and remove the currently assigned provider from the work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/assignments/delay-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/assignments/delay-post
+Source: content/api-references/rest-api/v2/assignments/delay-post.mdx
+
+---
+title: Acknowledge Provider Delay
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Acknowledge a provider-reported delay on the work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Acknowledge a provider-reported delay on the work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/assignments/providers-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/assignments/providers-get
+Source: content/api-references/rest-api/v2/assignments/providers-get.mdx
+
+---
+title: List Work Order Pending Requests
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          List pending provider requests (e.g., route requests) for the work
+          order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+List pending provider requests (e.g., route requests) for the work order.
+
+---
+
+### undefined
 URL: /api-references/rest-api/v2/authentication/token-post
 
 # API References: undefined
@@ -27899,91 +28003,14 @@ Upload a file to the specified attachment folder using
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/assignments/assignee-delete
+URL: /api-references/rest-api/v2/bonuses/bonuses-get
 
 # API References: undefined
-URL: /api-references/rest-api/v2/assignments/assignee-delete
-Source: content/api-references/rest-api/v2/assignments/assignee-delete.mdx
+URL: /api-references/rest-api/v2/bonuses/bonuses-get
+Source: content/api-references/rest-api/v2/bonuses/bonuses-get.mdx
 
 ---
-title: Unassign user from a work order
-full: true
-_openapi:
-  method: DELETE
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Remove the assigned provider (user) from a work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Remove the assigned provider (user) from a work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/assignments/cancel-post
-
-# API References: undefined
-URL: /api-references/rest-api/v2/assignments/cancel-post
-Source: content/api-references/rest-api/v2/assignments/cancel-post.mdx
-
----
-title: Unassign Work Order Provider
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Unassign and remove the currently assigned provider from the work
-          order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Unassign and remove the currently assigned provider from the work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/assignments/delay-post
-
-# API References: undefined
-URL: /api-references/rest-api/v2/assignments/delay-post
-Source: content/api-references/rest-api/v2/assignments/delay-post.mdx
-
----
-title: Acknowledge Provider Delay
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Acknowledge a provider-reported delay on the work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Acknowledge a provider-reported delay on the work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/assignments/providers-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/assignments/providers-get
-Source: content/api-references/rest-api/v2/assignments/providers-get.mdx
-
----
-title: List Work Order Pending Requests
+title: List Bonuses
 full: true
 _openapi:
   method: GET
@@ -27991,14 +28018,12 @@ _openapi:
   structuredData:
     headings: []
     contents:
-      - content: >-
-          List pending provider requests (e.g., route requests) for the work
-          order.
+      - content: Retrieve all bonus options available for work orders.
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-List pending provider requests (e.g., route requests) for the work order.
+Retrieve all bonus options available for work orders.
 
 ---
 
@@ -28188,6 +28213,185 @@ Creates a new client for your company
 ---
 
 ### undefined
+URL: /api-references/rest-api/v2/company/expenses-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/expenses-get
+Source: content/api-references/rest-api/v2/company/expenses-get.mdx
+
+---
+title: List Company Expenses
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve all expense categories configured for your company.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve all expense categories configured for your company.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/company/incomplete-reasons-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/incomplete-reasons-get
+Source: content/api-references/rest-api/v2/company/incomplete-reasons-get.mdx
+
+---
+title: List Incomplete Reasons
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve all incomplete reason options configured for your company.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve all incomplete reason options configured for your company.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/company/managers-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/managers-get
+Source: content/api-references/rest-api/v2/company/managers-get.mdx
+
+---
+title: List Company Managers
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve all managers associated with your company.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve all managers associated with your company.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/company/networks-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/networks-get
+Source: content/api-references/rest-api/v2/company/networks-get.mdx
+
+---
+title: List Company Networks
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve all networks accessible by the specified company.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve all networks accessible by the specified company.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/company/site-revisit-reasons-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/site-revisit-reasons-get
+Source: content/api-references/rest-api/v2/company/site-revisit-reasons-get.mdx
+
+---
+title: List Site Revisit Reasons
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Retrieve available reasons that providers and your company can select
+          when entering revisit and job incomplete details.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve available reasons that providers and your company can select when entering revisit and job incomplete details.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/company/tags-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/tags-get
+Source: content/api-references/rest-api/v2/company/tags-get.mdx
+
+---
+title: List Company Tags
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve all tags associated with your company.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve all tags associated with your company.
+
+                       
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/company/tags-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/company/tags-post
+Source: content/api-references/rest-api/v2/company/tags-post.mdx
+
+---
+title: Create Company Tag
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Create a new tag for your company.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Create a new tag for your company.
+
+---
+
+### undefined
 URL: /api-references/rest-api/v2/contacts/contactid-delete
 
 # API References: undefined
@@ -28284,31 +28488,6 @@ _openapi:
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
 Add a new contact to the work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/bonuses/bonuses-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/bonuses/bonuses-get
-Source: content/api-references/rest-api/v2/bonuses/bonuses-get.mdx
-
----
-title: List Bonuses
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all bonus options available for work orders.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all bonus options available for work orders.
 
 ---
 
@@ -28592,245 +28771,6 @@ _openapi:
 
 List custom fields configured for this work order, including values and
 visibility.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/location/location-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/location/location-get
-Source: content/api-references/rest-api/v2/location/location-get.mdx
-
----
-title: Get Work Order Location
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Retrieve the current location for a work order, including saved
-          location
-
-          details when applicable.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve the current location for a work order, including saved location
-details when applicable.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/location/location-put
-
-# API References: undefined
-URL: /api-references/rest-api/v2/location/location-put
-Source: content/api-references/rest-api/v2/location/location-put.mdx
-
----
-title: Update Work Order Location
-full: true
-_openapi:
-  method: PUT
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Update the location associated with the work order (address, saved
-          location,
-
-          or coordinates).
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Update the location associated with the work order (address, saved location,
-or coordinates).
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/expenses-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/expenses-get
-Source: content/api-references/rest-api/v2/company/expenses-get.mdx
-
----
-title: List Company Expenses
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all expense categories configured for your company.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all expense categories configured for your company.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/incomplete-reasons-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/incomplete-reasons-get
-Source: content/api-references/rest-api/v2/company/incomplete-reasons-get.mdx
-
----
-title: List Incomplete Reasons
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all incomplete reason options configured for your company.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all incomplete reason options configured for your company.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/managers-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/managers-get
-Source: content/api-references/rest-api/v2/company/managers-get.mdx
-
----
-title: List Company Managers
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all managers associated with your company.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all managers associated with your company.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/networks-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/networks-get
-Source: content/api-references/rest-api/v2/company/networks-get.mdx
-
----
-title: List Company Networks
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all networks accessible by the specified company.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all networks accessible by the specified company.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/site-revisit-reasons-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/site-revisit-reasons-get
-Source: content/api-references/rest-api/v2/company/site-revisit-reasons-get.mdx
-
----
-title: List Site Revisit Reasons
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Retrieve available reasons that providers and your company can select
-          when entering revisit and job incomplete details.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve available reasons that providers and your company can select when entering revisit and job incomplete details.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/tags-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/tags-get
-Source: content/api-references/rest-api/v2/company/tags-get.mdx
-
----
-title: List Company Tags
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all tags associated with your company.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all tags associated with your company.
-
-                       
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/company/tags-post
-
-# API References: undefined
-URL: /api-references/rest-api/v2/company/tags-post
-Source: content/api-references/rest-api/v2/company/tags-post.mdx
-
----
-title: Create Company Tag
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Create a new tag for your company.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Create a new tag for your company.
 
 ---
 
@@ -29173,14 +29113,14 @@ Create or apply a penalty by `penalty_id` to the work order.
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/locations/locationid-get
+URL: /api-references/rest-api/v2/location/location-get
 
 # API References: undefined
-URL: /api-references/rest-api/v2/locations/locationid-get
-Source: content/api-references/rest-api/v2/locations/locationid-get.mdx
+URL: /api-references/rest-api/v2/location/location-get
+Source: content/api-references/rest-api/v2/location/location-get.mdx
 
 ---
-title: Get Location
+title: Get Work Order Location
 full: true
 _openapi:
   method: GET
@@ -29189,63 +29129,46 @@ _openapi:
     headings: []
     contents:
       - content: >-
-          Retrieve details for a single saved location identified by
-          `location_id`.
+          Retrieve the current location for a work order, including saved
+          location
+
+          details when applicable.
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-Retrieve details for a single saved location identified by `location_id`.
+Retrieve the current location for a work order, including saved location
+details when applicable.
 
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/locations/locations-get
+URL: /api-references/rest-api/v2/location/location-put
 
 # API References: undefined
-URL: /api-references/rest-api/v2/locations/locations-get
-Source: content/api-references/rest-api/v2/locations/locations-get.mdx
+URL: /api-references/rest-api/v2/location/location-put
+Source: content/api-references/rest-api/v2/location/location-put.mdx
 
 ---
-title: List Locations
+title: Update Work Order Location
 full: true
 _openapi:
-  method: GET
+  method: PUT
   toc: []
   structuredData:
     headings: []
     contents:
-      - content: Gets stored locations
+      - content: >-
+          Update the location associated with the work order (address, saved
+          location,
+
+          or coordinates).
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-Gets stored locations
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/locations/locations-post
-
-# API References: undefined
-URL: /api-references/rest-api/v2/locations/locations-post
-Source: content/api-references/rest-api/v2/locations/locations-post.mdx
-
----
-title: Create Location
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Add a location to company
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Add a location to company
+Update the location associated with the work order (address, saved location,
+or coordinates).
 
 ---
 
@@ -29330,6 +29253,83 @@ _openapi:
 
 Post a new message to a work order. Optionally set `async=true` to
 process the delivery asynchronously.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/locations/locationid-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/locations/locationid-get
+Source: content/api-references/rest-api/v2/locations/locationid-get.mdx
+
+---
+title: Get Location
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Retrieve details for a single saved location identified by
+          `location_id`.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve details for a single saved location identified by `location_id`.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/locations/locations-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/locations/locations-get
+Source: content/api-references/rest-api/v2/locations/locations-get.mdx
+
+---
+title: List Locations
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Gets stored locations
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Gets stored locations
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/locations/locations-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/locations/locations-post
+Source: content/api-references/rest-api/v2/locations/locations-post.mdx
+
+---
+title: Create Location
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Add a location to company
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Add a location to company
 
 ---
 
@@ -29814,6 +29814,180 @@ This endpoint allows you to add one or more providers to multiple talent pool gr
 ---
 
 ### undefined
+URL: /api-references/rest-api/v2/qualifications/qualificationid-delete
+
+# API References: undefined
+URL: /api-references/rest-api/v2/qualifications/qualificationid-delete
+Source: content/api-references/rest-api/v2/qualifications/qualificationid-delete.mdx
+
+---
+title: Delete Work Order Qualification
+full: true
+_openapi:
+  method: DELETE
+  toc: []
+  structuredData:
+    headings: []
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/qualifications/qualifications-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/qualifications/qualifications-get
+Source: content/api-references/rest-api/v2/qualifications/qualifications-get.mdx
+
+---
+title: List Work Order Qualifications
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: List the qualification rules and outcomes for the work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+List the qualification rules and outcomes for the work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/qualifications/qualifications-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/qualifications/qualifications-post
+Source: content/api-references/rest-api/v2/qualifications/qualifications-post.mdx
+
+---
+title: Create Work Order Qualification
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Add or update qualification requirements for a work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Add or update qualification requirements for a work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/qualifications/qualifications-put
+
+# API References: undefined
+URL: /api-references/rest-api/v2/qualifications/qualifications-put
+Source: content/api-references/rest-api/v2/qualifications/qualifications-put.mdx
+
+---
+title: Update Work Order Qualification
+full: true
+_openapi:
+  method: PUT
+  toc: []
+  structuredData:
+    headings: []
+    contents: []
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/schedule/eta-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/schedule/eta-get
+Source: content/api-references/rest-api/v2/schedule/eta-get.mdx
+
+---
+title: Get Work Order ETA
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: |-
+          Get the estimated time of arrival (ETA) and related timing information
+          for this work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Get the estimated time of arrival (ETA) and related timing information
+for this work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/schedule/schedule-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/schedule/schedule-get
+Source: content/api-references/rest-api/v2/schedule/schedule-get.mdx
+
+---
+title: Get Work Order Schedule
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Retrieve the service window and scheduling information for a work
+          order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve the service window and scheduling information for a work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/schedule/schedule-put
+
+# API References: undefined
+URL: /api-references/rest-api/v2/schedule/schedule-put
+Source: content/api-references/rest-api/v2/schedule/schedule-put.mdx
+
+---
+title: Update Work Order Schedule
+full: true
+_openapi:
+  method: PUT
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Update the service window and scheduling information for a work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Update the service window and scheduling information for a work order.
+
+---
+
+### undefined
 URL: /api-references/rest-api/v2/revisits/incident-delete
 
 # API References: undefined
@@ -29996,100 +30170,6 @@ Create a site revisit record for the work order.
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/qualifications/qualificationid-delete
-
-# API References: undefined
-URL: /api-references/rest-api/v2/qualifications/qualificationid-delete
-Source: content/api-references/rest-api/v2/qualifications/qualificationid-delete.mdx
-
----
-title: Delete Work Order Qualification
-full: true
-_openapi:
-  method: DELETE
-  toc: []
-  structuredData:
-    headings: []
-    contents: []
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/qualifications/qualifications-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/qualifications/qualifications-get
-Source: content/api-references/rest-api/v2/qualifications/qualifications-get.mdx
-
----
-title: List Work Order Qualifications
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: List the qualification rules and outcomes for the work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-List the qualification rules and outcomes for the work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/qualifications/qualifications-post
-
-# API References: undefined
-URL: /api-references/rest-api/v2/qualifications/qualifications-post
-Source: content/api-references/rest-api/v2/qualifications/qualifications-post.mdx
-
----
-title: Create Work Order Qualification
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Add or update qualification requirements for a work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Add or update qualification requirements for a work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/qualifications/qualifications-put
-
-# API References: undefined
-URL: /api-references/rest-api/v2/qualifications/qualifications-put
-Source: content/api-references/rest-api/v2/qualifications/qualifications-put.mdx
-
----
-title: Update Work Order Qualification
-full: true
-_openapi:
-  method: PUT
-  toc: []
-  structuredData:
-    headings: []
-    contents: []
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
----
-
-### undefined
 URL: /api-references/rest-api/v2/shipments/shipmentid-delete
 
 # API References: undefined
@@ -30189,191 +30269,6 @@ _openapi:
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
 Create a shipment record for the work order (incoming or outgoing).
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/schedule/eta-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/schedule/eta-get
-Source: content/api-references/rest-api/v2/schedule/eta-get.mdx
-
----
-title: Get Work Order ETA
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: |-
-          Get the estimated time of arrival (ETA) and related timing information
-          for this work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Get the estimated time of arrival (ETA) and related timing information
-for this work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/schedule/schedule-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/schedule/schedule-get
-Source: content/api-references/rest-api/v2/schedule/schedule-get.mdx
-
----
-title: Get Work Order Schedule
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Retrieve the service window and scheduling information for a work
-          order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve the service window and scheduling information for a work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/schedule/schedule-put
-
-# API References: undefined
-URL: /api-references/rest-api/v2/schedule/schedule-put
-Source: content/api-references/rest-api/v2/schedule/schedule-put.mdx
-
----
-title: Update Work Order Schedule
-full: true
-_openapi:
-  method: PUT
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Update the service window and scheduling information for a work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Update the service window and scheduling information for a work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/signatures/signatureid-delete
-
-# API References: undefined
-URL: /api-references/rest-api/v2/signatures/signatureid-delete
-Source: content/api-references/rest-api/v2/signatures/signatureid-delete.mdx
-
----
-title: Delete Work Order Signature
-full: true
-_openapi:
-  method: DELETE
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Delete a signature from the work order by its ID.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Delete a signature from the work order by its ID.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/signatures/signatureid-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/signatures/signatureid-get
-Source: content/api-references/rest-api/v2/signatures/signatureid-get.mdx
-
----
-title: Get Work Order Signature
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve a single signature by its ID for the given work order.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve a single signature by its ID for the given work order.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/signatures/signatures-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/signatures/signatures-get
-Source: content/api-references/rest-api/v2/signatures/signatures-get.mdx
-
----
-title: List Work Order Signatures
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          List signatures captured for the work order with metadata and
-          authorship.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-List signatures captured for the work order with metadata and authorship.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/signatures/signatures-post
-
-# API References: undefined
-URL: /api-references/rest-api/v2/signatures/signatures-post
-Source: content/api-references/rest-api/v2/signatures/signatures-post.mdx
-
----
-title: Create Work Order Signature
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: |-
-          Add a signature to the work order. Include the image data and metadata
-          in the JSON payload.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Add a signature to the work order. Include the image data and metadata
-in the JSON payload.
 
 ---
 
@@ -30639,6 +30534,137 @@ Create a new talent pool group with associated talent pools.
 ---
 
 ### undefined
+URL: /api-references/rest-api/v2/talent-pools/attributes-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/talent-pools/attributes-get
+Source: content/api-references/rest-api/v2/talent-pools/attributes-get.mdx
+
+---
+title: List Provider Attributes
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Retrieve a paginated list of attributes for a specific provider in a
+          talent pool with optional sorting.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve a paginated list of attributes for a specific provider in a talent pool with optional sorting.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/talent-pools/attributes-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/talent-pools/attributes-post
+Source: content/api-references/rest-api/v2/talent-pools/attributes-post.mdx
+
+---
+title: Create Provider Attributes
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Add new attributes for a specific provider in a talent pool.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Add new attributes for a specific provider in a talent pool.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/talent-pools/attributes-put
+
+# API References: undefined
+URL: /api-references/rest-api/v2/talent-pools/attributes-put
+Source: content/api-references/rest-api/v2/talent-pools/attributes-put.mdx
+
+---
+title: Update Provider Attributes
+full: true
+_openapi:
+  method: PUT
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Bulk update multiple attributes for a specific provider in a talent
+          pool.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Bulk update multiple attributes for a specific provider in a talent pool.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/talent-pools/attributeuuid-delete
+
+# API References: undefined
+URL: /api-references/rest-api/v2/talent-pools/attributeuuid-delete
+Source: content/api-references/rest-api/v2/talent-pools/attributeuuid-delete.mdx
+
+---
+title: Delete Provider Attribute
+full: true
+_openapi:
+  method: DELETE
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Delete a specific attribute for a provider in a talent pool.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Delete a specific attribute for a provider in a talent pool.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/talent-pools/attributeuuid-put
+
+# API References: undefined
+URL: /api-references/rest-api/v2/talent-pools/attributeuuid-put
+Source: content/api-references/rest-api/v2/talent-pools/attributeuuid-put.mdx
+
+---
+title: Update Provider Attribute
+full: true
+_openapi:
+  method: PUT
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Update the value of a specific attribute for a provider in a talent
+          pool.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Update the value of a specific attribute for a provider in a talent pool.
+
+---
+
+### undefined
 URL: /api-references/rest-api/v2/tasks/alertid-delete
 
 # API References: undefined
@@ -30897,58 +30923,6 @@ create work orders with predefined fields and tasks.
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/types-of-work/service-types-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/types-of-work/service-types-get
-Source: content/api-references/rest-api/v2/types-of-work/service-types-get.mdx
-
----
-title: List Service Types
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Retrieve all service types associated with a specific type of work.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all service types associated with a specific type of work.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/types-of-work/types-of-work-get
-
-# API References: undefined
-URL: /api-references/rest-api/v2/types-of-work/types-of-work-get
-Source: content/api-references/rest-api/v2/types-of-work/types-of-work-get.mdx
-
----
-title: Get types of work
-full: true
-_openapi:
-  method: GET
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Retrieve all available types of work and their associated service
-          categories.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Retrieve all available types of work and their associated service categories.
-
----
-
-### undefined
 URL: /api-references/rest-api/v2/time-logs/timelogs-get
 
 # API References: undefined
@@ -31079,14 +31053,14 @@ Update a single time log entry for the work order.
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/users/userid-get
+URL: /api-references/rest-api/v2/types-of-work/service-types-get
 
 # API References: undefined
-URL: /api-references/rest-api/v2/users/userid-get
-Source: content/api-references/rest-api/v2/users/userid-get.mdx
+URL: /api-references/rest-api/v2/types-of-work/service-types-get
+Source: content/api-references/rest-api/v2/types-of-work/service-types-get.mdx
 
 ---
-title: Get User Details
+title: List Service Types
 full: true
 _openapi:
   method: GET
@@ -31094,24 +31068,24 @@ _openapi:
   structuredData:
     headings: []
     contents:
-      - content: Retrieve detailed information about a specific user by their ID.
+      - content: Retrieve all service types associated with a specific type of work.
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-Retrieve detailed information about a specific user by their ID.
+Retrieve all service types associated with a specific type of work.
 
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/talent-pools/attributes-get
+URL: /api-references/rest-api/v2/types-of-work/types-of-work-get
 
 # API References: undefined
-URL: /api-references/rest-api/v2/talent-pools/attributes-get
-Source: content/api-references/rest-api/v2/talent-pools/attributes-get.mdx
+URL: /api-references/rest-api/v2/types-of-work/types-of-work-get
+Source: content/api-references/rest-api/v2/types-of-work/types-of-work-get.mdx
 
 ---
-title: List Provider Attributes
+title: Get types of work
 full: true
 _openapi:
   method: GET
@@ -31120,77 +31094,25 @@ _openapi:
     headings: []
     contents:
       - content: >-
-          Retrieve a paginated list of attributes for a specific provider in a
-          talent pool with optional sorting.
+          Retrieve all available types of work and their associated service
+          categories.
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-Retrieve a paginated list of attributes for a specific provider in a talent pool with optional sorting.
+Retrieve all available types of work and their associated service categories.
 
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/talent-pools/attributes-post
+URL: /api-references/rest-api/v2/signatures/signatureid-delete
 
 # API References: undefined
-URL: /api-references/rest-api/v2/talent-pools/attributes-post
-Source: content/api-references/rest-api/v2/talent-pools/attributes-post.mdx
+URL: /api-references/rest-api/v2/signatures/signatureid-delete
+Source: content/api-references/rest-api/v2/signatures/signatureid-delete.mdx
 
 ---
-title: Create Provider Attributes
-full: true
-_openapi:
-  method: POST
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: Add new attributes for a specific provider in a talent pool.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Add new attributes for a specific provider in a talent pool.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/talent-pools/attributes-put
-
-# API References: undefined
-URL: /api-references/rest-api/v2/talent-pools/attributes-put
-Source: content/api-references/rest-api/v2/talent-pools/attributes-put.mdx
-
----
-title: Update Provider Attributes
-full: true
-_openapi:
-  method: PUT
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Bulk update multiple attributes for a specific provider in a talent
-          pool.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Bulk update multiple attributes for a specific provider in a talent pool.
-
----
-
-### undefined
-URL: /api-references/rest-api/v2/talent-pools/attributeuuid-delete
-
-# API References: undefined
-URL: /api-references/rest-api/v2/talent-pools/attributeuuid-delete
-Source: content/api-references/rest-api/v2/talent-pools/attributeuuid-delete.mdx
-
----
-title: Delete Provider Attribute
+title: Delete Work Order Signature
 full: true
 _openapi:
   method: DELETE
@@ -31198,39 +31120,92 @@ _openapi:
   structuredData:
     headings: []
     contents:
-      - content: Delete a specific attribute for a provider in a talent pool.
+      - content: Delete a signature from the work order by its ID.
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-Delete a specific attribute for a provider in a talent pool.
+Delete a signature from the work order by its ID.
 
 ---
 
 ### undefined
-URL: /api-references/rest-api/v2/talent-pools/attributeuuid-put
+URL: /api-references/rest-api/v2/signatures/signatureid-get
 
 # API References: undefined
-URL: /api-references/rest-api/v2/talent-pools/attributeuuid-put
-Source: content/api-references/rest-api/v2/talent-pools/attributeuuid-put.mdx
+URL: /api-references/rest-api/v2/signatures/signatureid-get
+Source: content/api-references/rest-api/v2/signatures/signatureid-get.mdx
 
 ---
-title: Update Provider Attribute
+title: Get Work Order Signature
 full: true
 _openapi:
-  method: PUT
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve a single signature by its ID for the given work order.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve a single signature by its ID for the given work order.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/signatures/signatures-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/signatures/signatures-get
+Source: content/api-references/rest-api/v2/signatures/signatures-get.mdx
+
+---
+title: List Work Order Signatures
+full: true
+_openapi:
+  method: GET
   toc: []
   structuredData:
     headings: []
     contents:
       - content: >-
-          Update the value of a specific attribute for a provider in a talent
-          pool.
+          List signatures captured for the work order with metadata and
+          authorship.
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
 
-Update the value of a specific attribute for a provider in a talent pool.
+List signatures captured for the work order with metadata and authorship.
+
+---
+
+### undefined
+URL: /api-references/rest-api/v2/signatures/signatures-post
+
+# API References: undefined
+URL: /api-references/rest-api/v2/signatures/signatures-post
+Source: content/api-references/rest-api/v2/signatures/signatures-post.mdx
+
+---
+title: Create Work Order Signature
+full: true
+_openapi:
+  method: POST
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: |-
+          Add a signature to the work order. Include the image data and metadata
+          in the JSON payload.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Add a signature to the work order. Include the image data and metadata
+in the JSON payload.
 
 ---
 
@@ -31542,6 +31517,31 @@ Return the current status of a work order (including sub-status and flags).
 
 ---
 
+### undefined
+URL: /api-references/rest-api/v2/users/userid-get
+
+# API References: undefined
+URL: /api-references/rest-api/v2/users/userid-get
+Source: content/api-references/rest-api/v2/users/userid-get.mdx
+
+---
+title: Get User Details
+full: true
+_openapi:
+  method: GET
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: Retrieve detailed information about a specific user by their ID.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Retrieve detailed information about a specific user by their ID.
+
+---
+
 ## Webhooks (12)
 
 ### undefined
@@ -31558,6 +31558,37 @@ icon: BookOpen
 ---
 
 {/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+---
+
+### undefined
+URL: /api-references/webhooks/v3/attributes/attributename-delete
+
+# API References: undefined
+URL: /api-references/webhooks/v3/attributes/attributename-delete
+Source: content/api-references/webhooks/v3/attributes/attributename-delete.mdx
+
+---
+title: Delete Webhook Attribute
+full: true
+_openapi:
+  method: DELETE
+  toc: []
+  structuredData:
+    headings: []
+    contents:
+      - content: >-
+          Remove a specific webhook attribute (for example, a custom header or
+          legacy field mapping) by its type and name.
+
+          Use this endpoint to clean up attributes that are no longer needed on
+          a webhook.
+---
+
+{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
+
+Remove a specific webhook attribute (for example, a custom header or legacy field mapping) by its type and name.
+Use this endpoint to clean up attributes that are no longer needed on a webhook.
 
 ---
 
@@ -31869,36 +31900,5 @@ _openapi:
 
 Retrieve a paginated change history for a single webhook, including who made each change, what changed, and when it occurred.
 Use this audit trail to track configuration updates and troubleshoot issues.
-
----
-
-### undefined
-URL: /api-references/webhooks/v3/attributes/attributename-delete
-
-# API References: undefined
-URL: /api-references/webhooks/v3/attributes/attributename-delete
-Source: content/api-references/webhooks/v3/attributes/attributename-delete.mdx
-
----
-title: Delete Webhook Attribute
-full: true
-_openapi:
-  method: DELETE
-  toc: []
-  structuredData:
-    headings: []
-    contents:
-      - content: >-
-          Remove a specific webhook attribute (for example, a custom header or
-          legacy field mapping) by its type and name.
-
-          Use this endpoint to clean up attributes that are no longer needed on
-          a webhook.
----
-
-{/* This file was generated by Fumadocs. Do not edit this file directly. Any changes should be made by running the generation command again. */}
-
-Remove a specific webhook attribute (for example, a custom header or legacy field mapping) by its type and name.
-Use this endpoint to clean up attributes that are no longer needed on a webhook.
 
 ---

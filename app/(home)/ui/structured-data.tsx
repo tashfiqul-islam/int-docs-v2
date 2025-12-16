@@ -1,12 +1,17 @@
 type StructuredDataType = "organization" | "software" | "faq";
 
+import logoLight from "~/assets/light/logo_light.png";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://developers.fieldnation.com";
+
 const structuredDataMap = {
   organization: {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Field Nation",
     url: "https://www.fieldnation.com",
-    logo: "https://developers.fieldnation.com/light/logo_light.png",
+    logo: `${SITE_URL}${logoLight.src}`,
     description:
       "Field service management marketplace connecting businesses with skilled technicians worldwide",
     sameAs: [
