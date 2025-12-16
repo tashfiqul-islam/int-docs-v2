@@ -133,7 +133,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Gemini"
             className="size-4"
             height={16}
-            src="/llm_icons/gemini.svg"
+            src="/logo/llm-icons/gemini.svg"
             width={16}
           />
         ),
@@ -148,7 +148,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Claude"
             className="size-4"
             height={16}
-            src="/llm_icons/claude-ai-icon.svg"
+            src="/logo/llm-icons/claude-ai-icon.svg"
             width={16}
           />
         ),
@@ -163,7 +163,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Perplexity"
             className="size-4"
             height={16}
-            src="/llm_icons/perplexity.svg"
+            src="/logo/llm-icons/perplexity.svg"
             width={16}
           />
         ),
