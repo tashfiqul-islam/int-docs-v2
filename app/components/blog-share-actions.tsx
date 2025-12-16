@@ -10,6 +10,11 @@ import { Check, ChevronDown, Copy, ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
+import discordIcon from "~/assets/logo/socials/discord.svg";
+import facebookIcon from "~/assets/logo/socials/facebook-icon.svg";
+import redditIcon from "~/assets/logo/socials/reddit.svg";
+import xDarkIcon from "~/assets/logo/socials/x_dark.svg";
+import xLightIcon from "~/assets/logo/socials/x_light.svg";
 import { buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
@@ -53,9 +58,7 @@ export function BlogShareActions({ shareUrl, title }: BlogShareActionsProps) {
     const encodedTitle = encodeURIComponent(title);
 
     const isDark = mounted && resolvedTheme === "dark";
-    const xLogo = isDark
-      ? "/logo/socials/x_dark.svg"
-      : "/logo/socials/x_light.svg";
+    const xLogo = isDark ? xDarkIcon : xLightIcon;
 
     return [
       {
@@ -79,7 +82,7 @@ export function BlogShareActions({ shareUrl, title }: BlogShareActionsProps) {
             alt="Reddit"
             className="size-4"
             height={16}
-            src="/logo/socials/reddit.svg"
+            src={redditIcon}
             width={16}
           />
         ),
@@ -92,7 +95,7 @@ export function BlogShareActions({ shareUrl, title }: BlogShareActionsProps) {
             alt="Facebook"
             className="size-4"
             height={16}
-            src="/logo/socials/facebook-icon.svg"
+            src={facebookIcon}
             width={16}
           />
         ),
@@ -105,7 +108,7 @@ export function BlogShareActions({ shareUrl, title }: BlogShareActionsProps) {
             alt="Discord"
             className="size-4"
             height={16}
-            src="/logo/socials/discord.svg"
+            src={discordIcon}
             width={16}
           />
         ),

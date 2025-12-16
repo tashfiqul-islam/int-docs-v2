@@ -10,6 +10,13 @@ import { Check, ChevronDown, Copy, ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
+import claudeIcon from "~/assets/logo/llm-icons/claude-ai-icon.svg";
+import geminiIcon from "~/assets/logo/llm-icons/gemini.svg";
+import markdownDark from "~/assets/logo/llm-icons/markdown_dark.svg";
+import markdownLight from "~/assets/logo/llm-icons/markdown_light.svg";
+import openAiDark from "~/assets/logo/llm-icons/OpenAI_dark.svg";
+import openAiLight from "~/assets/logo/llm-icons/OpenAI_light.svg";
+import perplexityIcon from "~/assets/logo/llm-icons/perplexity.svg";
 import { buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
@@ -86,12 +93,8 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
     ].join("\n");
 
     const isDark = mounted && resolvedTheme === "dark";
-    const openAILogo = isDark
-      ? "/logo/llm-icons/OpenAI_dark.svg"
-      : "/logo/llm-icons/OpenAI_light.svg";
-    const markdownLogo = isDark
-      ? "/logo/llm-icons/markdown_dark.svg"
-      : "/logo/llm-icons/markdown_light.svg";
+    const openAILogo = isDark ? openAiDark : openAiLight;
+    const markdownLogo = isDark ? markdownDark : markdownLight;
 
     return [
       {
@@ -133,7 +136,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Gemini"
             className="size-4"
             height={16}
-            src="/logo/llm-icons/gemini.svg"
+            src={geminiIcon}
             width={16}
           />
         ),
@@ -148,7 +151,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Claude"
             className="size-4"
             height={16}
-            src="/logo/llm-icons/claude-ai-icon.svg"
+            src={claudeIcon}
             width={16}
           />
         ),
@@ -163,7 +166,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
             alt="Perplexity"
             className="size-4"
             height={16}
-            src="/logo/llm-icons/perplexity.svg"
+            src={perplexityIcon}
             width={16}
           />
         ),

@@ -3,13 +3,14 @@
 import { ArrowRight, BookOpen, Code2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import homeDark from "~/assets/home_dark.png";
+import homeLight from "~/assets/home_light.png";
 import { Button } from "~/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-fd-background">
-      {/* Subtle gradient background */}
-      <div className="absolute inset-0 -z-10">
+    <section className="overflow-hidden border-fd-border/50 border-b bg-fd-background py-20 pb-32 sm:py-32 lg:pb-32 xl:pb-36">
+      <div className="container relative z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.18),transparent_50%)]" />
       </div>
 
@@ -189,24 +190,27 @@ export function HeroSection() {
                   `,
                 }}
               >
-                {/* Light mode image */}
-                <Image
-                  alt="Field Nation Developer Portal"
-                  className="block dark:hidden"
-                  height={500}
-                  priority
-                  src="/home_light.png"
-                  width={700}
-                />
-                {/* Dark mode image */}
-                <Image
-                  alt="Field Nation Developer Portal"
-                  className="hidden dark:block"
-                  height={500}
-                  priority
-                  src="/home_dark.png"
-                  width={700}
-                />
+                {/* Screenshot images */}
+                <div className="relative">
+                  {/* Light mode image */}
+                  <Image
+                    alt="Field Nation Developer Portal"
+                    className="block h-auto w-full dark:hidden"
+                    height={600}
+                    priority
+                    src={homeLight}
+                    width={900}
+                  />
+                  {/* Dark mode image */}
+                  <Image
+                    alt="Field Nation Developer Portal"
+                    className="hidden h-auto w-full dark:block"
+                    height={600}
+                    priority
+                    src={homeDark}
+                    width={900}
+                  />
+                </div>
               </div>
 
               {/* Subtle reflection/glow on top edge */}

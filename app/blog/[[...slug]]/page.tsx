@@ -3,8 +3,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BlogShareActions } from "@/app/components/blog-share-actions";
 import { blogPosts } from "@/lib/source";
+import blogBanner from "~/assets/blog-banner.png";
+import { BlogShareActions } from "~/components/blog-share-actions";
+
+export const runtime = "edge";
 
 type BlogPageData = {
   body: React.ComponentType<{
@@ -132,16 +135,17 @@ function BlogIndex() {
       <section className="px-4 pt-6 md:px-6 lg:px-8">
         <div className="relative mx-auto h-[200px] max-w-[var(--fd-layout-width)] overflow-hidden rounded-2xl md:h-[280px]">
           {/* Background Image */}
+
           <Image
             alt="Field Nation Developer Blog"
             className="absolute inset-0 h-full w-full object-cover"
             fill
+            placeholder="blur"
             priority
-            src="/blog-banner.png"
+            src={blogBanner}
           />
           {/* Dark Overlay for readability */}
           <div className="absolute inset-0 bg-black/40" />
-
           {/* Banner Content - Positioned at bottom left */}
           <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8">
             <h1 className="mb-2 font-bold font-mono text-3xl text-white md:text-4xl">
