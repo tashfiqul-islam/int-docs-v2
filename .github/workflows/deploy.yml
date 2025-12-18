@@ -71,7 +71,7 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/bun.lockb') }}-
 
       - name: Build with Next.js
-        run: NEXT_EXPORT=true bun run build
+        run: NEXT_EXPORT=true bun run --bun build
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
