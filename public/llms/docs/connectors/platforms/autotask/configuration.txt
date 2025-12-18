@@ -1,0 +1,410 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/autotask/configuration
+Source: content/docs/connectors/platforms/autotask/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the Autotask connector in Field Nation's Integration Broker with SOAP API credentials and field mappings.
+---
+
+## Prerequisites Checklist
+
+Before starting, gather:
+
+- ☐ Autotask username (API user email)
+- ☐ Autotask password
+- ☐ Integration Code (generated in Autotask)
+- ☐ Security Token (generated in Autotask)
+- ☐ Autotask instance URL
+- ☐ Admin access to Field Nation integrations
+
+---
+
+## Step 1: Generate Autotask API Credentials
+
+
+
+### Log into Autotask
+
+Use admin account
+
+### Navigate to API User
+
+Admin → Resources (Users) → Select API user (or create new)
+
+### Generate Integration Code
+
+**API Integration** section → Click "Generate API Integration Code"
+
+**Copy the code** - You'll need this for Field Nation
+
+### Generate Security Token
+
+Same section → "Generate API Security Token" (if not already exists)
+
+**Copy the token** - Required for authentication
+
+### Note User Credentials
+
+- Username (email): API user's email address
+- Password: User's password
+
+
+
+> [INFO] **Integration Code**: Unique per integration. Generate new code for Field Nation (don't reuse from other integrations).
+
+---
+
+## Step 2: Access Integration Broker
+
+Navigate to Field Nation's Integration Broker:
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+Select "Autotask" from available connectors
+
+---
+
+## Step 3: Basic Settings
+
+### Instance Name
+
+**Optional** - Descriptive name for this integration
+
+**Examples:**
+- "Production Autotask"
+- "Autotask PSA - Main"
+- "Datto PSA Sandbox"
+
+---
+
+### Instance URL
+
+**Required** - Your Autotask instance URL
+
+**Format:**
+```
+https://webservices{X}.autotask.net/atservices/1.6/atws.asmx
+```
+
+Where `{X}` is your zone number (1-20)
+
+**Find Your Zone:**
+1. Log into Autotask
+2. Check browser URL: `https://ww{X}.autotask.net`
+3. Use that zone number in API URL
+
+**Examples:**
+- Zone 5: `https://webservices5.autotask.net/atservices/1.6/atws.asmx`
+- Zone 12: `https://webservices12.autotask.net/atservices/1.6/atws.asmx`
+
+---
+
+### Entity Type
+
+**Required** - Autotask entity to integrate
+
+**Supported:**
+- `Ticket` - Service tickets (most common)
+- `ServiceCall` - Service call records
+- `Project` - Project tasks requiring field work
+
+**Format**: Use exact entity name (case-sensitive)
+
+---
+
+## Step 4: Authentication
+
+Enter SOAP API credentials:
+
+**Username**  
+API user's email address  
+Example: `integration@company.com`
+
+**Password**  
+User's Autotask password
+
+**Integration Code**  
+Generated tracking identifier from Step 1
+
+**Security Token**  
+API authentication token from Step 1
+
+---
+
+## Step 5: Test Connection
+
+
+
+### Click "Test Connection"
+
+Button in configuration form
+
+### Broker Validates
+
+- Authenticates with Autotask SOAP API
+- Queries entity metadata
+- Verifies permissions
+
+### Review Result
+
+**Success**: ✅ Green confirmation
+- Connection established
+- Authentication valid
+- Entity accessible
+
+**Failure**: ❌ Error message
+- Check credentials
+- Verify zone number correct
+- Ensure API user has permissions
+
+
+
+### Common Authentication Errors
+
+
+  
+    **Error**: Authentication failed
+    
+    **Causes:**
+    - Wrong username or password
+    - Integration Code incorrect
+    - Security Token expired or wrong
+    
+    **Solution:**
+    1. Verify credentials in Autotask
+    2. Regenerate Integration Code if needed
+    3. Regenerate Security Token if expired
+    4. Test login to Autotask web interface
+  
+  
+  
+    **Error**: Cannot reach endpoint
+    
+    **Cause:** Incorrect zone in API URL
+    
+    **Solution:**
+    1. Log into Autotask
+    2. Check URL: `ww{X}.autotask.net`
+    3. Update API URL to match zone
+  
+  
+  
+    **Error**: User does not have API access
+    
+    **Solution:**
+    1. In Autotask Admin → Resources (Users)
+    2. Select API user
+    3. Security tab → Enable "API User"
+    4. Security Level → Grant "API User (system)"
+  
+  
+  
+    **Error**: Entity type not accessible
+    
+    **Solution:**
+    1. Verify entity name spelling (case-sensitive)
+    2. Ensure API user has read access to entity
+    3. Check entity exists in your Autotask instance
+  
+
+
+---
+
+## Step 6: Get Trigger URL
+
+Once authentication succeeds, Field Nation generates unique trigger URL:
+
+**Format:**
+```
+https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
+```
+
+**Copy this URL** - You'll configure it in Autotask webhook
+
+> [INFO] **Security**: Client token authenticates incoming webhooks. Keep URL secure.
+
+---
+
+## Step 7: Refresh Fields
+
+Discover available fields for mapping:
+
+
+
+### Click "Refresh Fields"
+
+Button in field mapping section
+
+### Broker Queries Autotask
+
+- Calls SOAP API GetFieldInfo
+- Retrieves field definitions for entity
+- Discovers User-Defined Fields
+
+### Fields Populate
+
+Dropdowns fill with:
+- Standard fields (title, description, status)
+- User-Defined Fields (UDF)
+- Related entity fields (account, contact)
+- Picklist values
+
+
+
+---
+
+## Step 8: Configure Field Mappings
+
+Map data between Autotask and Field Nation:
+
+### Inbound (Autotask → Field Nation)
+
+**Example Mappings:**
+```
+Autotask Field                → FN Field                   Action
+──────────────────────────────────────────────────────────────────
+Title                        → title                      Sync
+Description                  → description                Sync
+AccountName                  → location.company.name      Sync
+Status                       → status_id                  Array Map
+Priority                     → priority                   Array Map
+DueDateTime                  → schedule.start             Date Convert
+AssignedResource.Email       → contact.email              Sync
+UDF_TicketNumber            → custom_field_123           Sync
+```
+
+### Outbound (Field Nation → Autotask)
+
+**Example Mappings:**
+```
+FN Field                     → Autotask Field             Action
+──────────────────────────────────────────────────────────────────
+status.name                  → Status                     Array Map
+assignee.user.name           → UDF_Technician            Sync
+completion_notes             → Resolution                 Sync
+completion_date              → CompletedDate              Date Convert
+```
+
+### Status Mapping
+
+**Autotask Status Values:**
+- Varies by configuration
+- Common: New, In Progress, Complete, Closed
+
+**Field Nation Status IDs:**
+```
+1 = Draft
+2 = Assigned
+3 = Work Done
+4 = Approved
+5 = Paid
+```
+
+**Array Map Configuration:**
+```jsonnet
+{
+  "source": "Status",
+  "target": "status_id",
+  "action": "array_map",
+  "mappings": [
+    { "compare": "New", "value": "1" },
+    { "compare": "In Progress", "value": "2" },
+    { "compare": "Complete", "value": "3" },
+    { "compare": "Closed", "value": "4" }
+  ],
+  "default": "1"
+}
+```
+
+[Complete field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 9: Save Configuration
+
+
+
+### Review Settings
+
+Verify:
+- ☐ Instance URL correct (zone number)
+- ☐ Entity type correct
+- ☐ Authentication successful
+- ☐ Fields refreshed
+- ☐ Inbound mappings configured
+- ☐ Outbound mappings configured
+
+### Save
+
+Click "Save" to persist configuration
+
+### Note Trigger URL
+
+Copy trigger URL for Autotask webhook setup
+
+
+
+---
+
+## Configuration Checklist
+
+### Field Nation Configuration
+- ☐ Instance name configured
+- ☐ Instance URL with correct zone
+- ☐ Entity type specified
+- ☐ Credentials entered (username, password, integration code, token)
+- ☐ Connection tested successfully
+- ☐ Trigger URL copied
+- ☐ Fields refreshed
+- ☐ Inbound field mappings configured
+- ☐ Outbound field mappings configured
+- ☐ Configuration saved
+
+### Autotask Configuration (Next Steps)
+- ☐ Webhook configured
+- ☐ Trigger conditions defined
+- ☐ Webhook tested with sample ticket
+
+[Autotask workflow setup →](/docs/connectors/platforms/autotask/workflow)
+
+---
+
+## Troubleshooting
+
+
+  
+    **Issue**: Expected fields not in dropdown
+    
+    **Solution:**
+    1. Click "Refresh Fields" again
+    2. Verify API user has field-level read permissions
+    3. For UDFs, ensure they're defined on entity
+    4. Check field API names in Autotask Admin
+  
+  
+  
+    **Issue**: Integration stops working
+    
+    **Solution:**
+    1. Check if Security Token regenerated
+    2. Verify API user still active
+    3. Test credentials in Autotask
+    4. Reconnect in Field Nation
+  
+  
+  
+    **Issue**: Cannot save mappings
+    
+    **Solution:**
+    1. Ensure all required FN fields mapped
+    2. Check data type compatibility
+    3. Add default values for optional fields
+    4. Review error messages for specific issues
+  
+
+
+---

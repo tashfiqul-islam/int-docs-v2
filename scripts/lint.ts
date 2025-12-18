@@ -5,27 +5,27 @@ import {
   scanURLs,
   validateFiles,
 } from "next-validate-link";
-import { source } from "@/lib/source";
+import { apiReferencesSource, source } from "@/lib/source";
 
 async function checkLinks() {
   // Get all pages from docs source
   const docsPages = source.getPages();
+  const apiPages = apiReferencesSource.getPages();
+  const allPages = [...docsPages, ...apiPages];
 
   // Get headings for docs pages
-  const docsHeadings = docsPages.map((page) => ({
-    value: {
-      slug: page.slugs,
-    },
-    hashes: getHeadings(page),
-  }));
 
   const scanned = await scanURLs({
     // pick a preset for your React framework
     preset: "next",
-    populate: {
-      "docs/[[...slug]]": docsHeadings,
-    },
   });
+
+  // Manually populate the scanned URLs with our docs pages
+  // This avoids issues with populate key matching
+  for (const page of allPages) {
+    // Map takes (url -> metadata), we use empty object for metadata
+    scanned.urls.set(page.url, {});
+  }
 
   // Get files from docs source
   const docsFiles = await getDocsFiles(docsPages);
@@ -45,12 +45,6 @@ async function checkLinks() {
     }),
     true
   );
-}
-
-function getHeadings(page: InferPageType<typeof source>): string[] {
-  const toc =
-    "toc" in page.data ? (page.data.toc as Array<{ url: string }>) : [];
-  return toc.map((item: { url: string }) => item.url.slice(1));
 }
 
 function getDocsFiles(

@@ -28,7 +28,7 @@ export default function HomePage() {
           <Features />
         </SectionSeparator>
 
-        {/* Platform Statement & Customer Story */}
+        {/* Platform Statement */}
         <SectionSeparator>
           <PlatformStatement />
         </SectionSeparator>

@@ -1,0 +1,253 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/smartsheet/workflow
+Source: content/docs/connectors/platforms/smartsheet/workflow.mdx
+
+
+
+---
+title: Workflow Setup
+description: Configure Smartsheet webhooks to trigger Field Nation work order creation when rows are added or updated.
+---
+
+## Prerequisites
+
+- ☐ [Field Nation configuration complete](/docs/connectors/platforms/smartsheet/configuration)
+- ☐ Trigger URL copied
+- ☐ Smartsheet sheet admin access
+- ☐ Ability to create webhooks
+
+---
+
+## Configure Webhook in Smartsheet
+
+> [INFO] Smartsheet webhooks are created via **API** (no UI). You can use Postman, curl, or custom scripts.
+
+### Using Smartsheet API
+
+
+
+### Create Webhook via API
+
+**Endpoint:**
+```
+POST https://api.smartsheet.com/2.0/webhooks
+```
+
+**Headers:**
+```
+Authorization: Bearer {your_access_token}
+Content-Type: application/json
+```
+
+**Body:**
+```json
+{
+  "name": "Field Nation Integration",
+  "callbackUrl": "https://api.fieldnation.com/integrations/trigger/{YOUR_CLIENT_TOKEN}",
+  "scope": "sheet",
+  "scopeObjectId": {sheet_id},
+  "events": [
+    "row.added",
+    "row.updated"
+  ],
+  "version": 1
+}
+```
+
+### Example curl Command
+
+```bash
+curl -X POST https://api.smartsheet.com/2.0/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Field Nation Integration",
+    "callbackUrl": "https://api.fieldnation.com/integrations/trigger/YOUR_CLIENT_TOKEN",
+    "scope": "sheet",
+    "scopeObjectId": 1234567890123456,
+    "events": ["row.added", "row.updated"],
+    "version": 1
+  }'
+```
+
+### Enable Webhook
+
+After creation, enable it:
+
+```bash
+curl -X PUT https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": true}'
+```
+
+
+
+---
+
+## Alternative: Using Smartsheet API via Postman
+
+
+
+### Import Smartsheet Collection
+
+Download Smartsheet Postman collection from [Smartsheet API docs](https://smartsheet.redoc.ly/)
+
+### Set Environment Variables
+
+- `access_token`: Your access token
+- `sheet_id`: Your sheet ID
+- `callback_url`: Field Nation trigger URL
+
+### Create Webhook
+
+Use "Create Webhook" request from collection
+
+### Enable Webhook
+
+Use "Update Webhook" request with `enabled: true`
+
+
+
+---
+
+## Verify Webhook
+
+### List Webhooks
+
+```bash
+curl https://api.smartsheet.com/2.0/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Look for your webhook with `enabled: true` and `status: ENABLED`
+
+---
+
+## Test Integration
+
+
+
+### Add Test Row
+
+1. Open Smartsheet
+2. Add new row
+3. Fill required columns
+4. Save
+
+### Verify Webhook
+
+Check webhook status via API:
+```bash
+curl https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Check Field Nation
+
+Verify work order created with correct data
+
+
+
+---
+
+## Advanced Configuration
+
+### Filter Rows
+
+Since Smartsheet webhooks fire on all changes, implement filtering:
+
+**Option 1**: Add "Status" column
+```
+Only process rows where Status = "Ready for Field"
+```
+
+**Option 2**: Add "Send to FN" checkbox
+```
+Only process rows where checkbox is checked
+```
+
+Configure filtering in Field Nation Integration Broker (custom JSONNET).
+
+---
+
+### Prevent Duplicate Sends
+
+Add checkbox column: "Synced to FN"
+
+When work order created, Field Nation updates row:
+```
+Synced to FN = checked
+```
+
+Integration Broker filters out rows where "Synced to FN" = checked.
+
+---
+
+## Troubleshooting
+
+
+  
+    - Verify access token has create webhook permission
+    - Check Sheet ID correct
+    - Ensure callback URL accessible
+    - Review API error response
+  
+  
+  
+    - Verify webhook enabled: `enabled: true`
+    - Check webhook status: `status: ENABLED`
+    - Review Smartsheet API logs
+    - Test with simple row add/update
+  
+  
+  
+    - Check Field Nation credentials valid
+    - Verify all required fields mapped
+    - Review Integration Broker logs
+    - Test with minimal row data
+  
+  
+  
+    - Webhooks fire on ANY change
+    - Add filtering logic
+    - Use "Synced to FN" checkbox
+    - Implement idempotency in Field Nation
+  
+
+
+---
+
+## Webhook Management
+
+### List All Webhooks
+
+```bash
+curl https://api.smartsheet.com/2.0/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Get Webhook Details
+
+```bash
+curl https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Disable Webhook
+
+```bash
+curl -X PUT https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"enabled": false}'
+```
+
+### Delete Webhook
+
+```bash
+curl -X DELETE https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+---

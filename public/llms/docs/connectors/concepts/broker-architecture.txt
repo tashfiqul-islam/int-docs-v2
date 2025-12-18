@@ -1,0 +1,448 @@
+# Connectors: undefined
+URL: /docs/connectors/concepts/broker-architecture
+Source: content/docs/connectors/concepts/broker-architecture.mdx
+
+
+
+---
+title: Integration Broker Architecture
+description: Understanding Field Nation's middleware system that powers all pre-built connectors with reliable, scalable data synchronization.
+---
+
+## System Overview
+
+```mermaid
+graph TB
+    subgraph "External Systems"
+        SF[Salesforce]
+        SN[ServiceNow]
+        AT[Autotask]
+        OT[Other Platforms]
+    end
+    
+    subgraph "Integration Broker"
+        TRG[Trigger Handler]
+        Q[Message Queues]
+        WRK[Broker Workers]
+        MAP[Field Mapping Engine]
+        JSNT[JSONNET Processor]
+    end
+    
+    subgraph "Field Nation"
+        API[REST API]
+        EVT[Event Stream]
+        WO[Work Orders]
+    end
+    
+    SF --> TRG
+    SN --> TRG
+    AT --> TRG
+    OT --> TRG
+    
+    TRG --> Q
+    Q --> WRK
+    WRK --> MAP
+    MAP --> JSNT
+    JSNT --> API
+    API --> WO
+    
+    EVT --> Q
+    WRK --> SF
+    WRK --> SN
+    WRK --> AT
+    WRK --> OT
+```
+
+---
+
+## Core Components
+
+### Broker Workers
+
+The primary processing engine that:
+- Consumes messages from Redis queues
+- Executes field mappings and transformations
+- Dispatches API calls to target systems
+- Handles retries and error recovery
+
+### Message Queues
+
+Redis-based queue system providing:
+- **Inbound Queue**: Webhook triggers from external systems
+- **Processing Queue**: Active operations being executed
+- **Retry Queue**: Failed operations with exponential backoff
+- **Dead Letter Queue (DLQ)**: Operations exceeding max retries
+
+### Field Mapping Engine
+
+Dynamic mapping system that:
+- Translates data schemas between systems
+- Applies transformation actions (sync, static, date convert, etc.)
+- Supports conditional logic and complex mappings
+- Handles bidirectional field mapping
+
+### Custom Action Processor
+
+JSONNET-based transformation engine for:
+- Complex data manipulation logic
+- Conditional field population
+- Custom business rules
+- Advanced array and object transformations
+
+[Learn more about JSONNET →](/docs/connectors/concepts/custom-actions)
+
+---
+
+## Data Flow
+
+### Inbound: External System → Field Nation
+
+
+
+### Trigger Reception
+
+External system sends webhook notification when record is created/updated. Each connector has a unique trigger URL with embedded authentication token.
+
+### Queue Processing
+
+Broker worker retrieves message, validates token, fetches complete record data from external system using configured API credentials.
+
+### Field Mapping
+
+System applies configured mappings to transform external data into Field Nation work order schema. Includes static values, date conversions, JSONNET transformations.
+
+### Work Order Creation
+
+Transformed data is validated and submitted to Field Nation API. System stores correlation between external record ID and Field Nation work order ID.
+
+### Error Handling
+
+Failed operations are logged, retried with exponential backoff, and moved to DLQ if max retries exceeded. Email notifications sent for persistent failures.
+
+
+
+---
+
+### Outbound: Field Nation → External System
+
+
+
+### Event Detection
+
+Field Nation publishes work order lifecycle events (status changes, assignments, completions, messages) to integration event stream.
+
+### Mapping Resolution
+
+Broker identifies originating external system using correlation ID. Applies reverse field mappings to transform Field Nation data to external schema.
+
+### API Dispatch
+
+System constructs API request (REST, SOAP, or platform SDK) and submits update to external platform using configured authentication.
+
+### Sync Confirmation
+
+Successful updates logged, work order sync status updated. Failed updates trigger retry with exponential backoff.
+
+
+
+---
+
+## Message Processing
+
+### Queue Processing Strategy
+
+The broker uses a **poll-and-acknowledge pattern**:
+
+1. Worker retrieves message from queue
+2. Worker processes message completely
+3. Worker acknowledges successful processing
+4. If worker crashes, message remains unacknowledged and retries after timeout
+
+### Rate Limiting
+
+Each integration respects external API quotas:
+- Maximum requests per minute
+- Concurrent connection limits
+- Burst allowances
+- Per-platform rate limit configuration
+
+### Retry Logic
+
+Failed operations retry with exponential backoff:
+
+| Attempt | Delay | Action |
+|---------|-------|--------|
+| 1 | 0s | Immediate |
+| 2 | 30s | First retry |
+| 3 | 60s | Second retry |
+| 4 | 120s | Third retry |
+| 5 | 240s | Fourth retry |
+| 6+ | 480s | Final attempts |
+
+After maximum retries, operation moves to Dead Letter Queue for manual review.
+
+---
+
+## Authentication & Security
+
+### Credential Management
+
+- **Encryption at Rest**: AES-256 encryption for all credentials
+- **In-Memory Only**: Decrypted only during active use
+- **No Logging**: Credentials never logged or exposed in errors
+- **Token Refresh**: Automatic OAuth token refresh
+
+### Authentication Methods Supported
+
+
+
+
+```
+Authorization: Basic base64(username:password)
+```
+Used by: Freshdesk, REST Connector
+
+
+
+```
+Authorization: Bearer {access_token}
+```
+Automatic token refresh with refresh tokens  
+Used by: Salesforce, ServiceNow
+
+
+
+```
+X-API-Key: {api_key}
+Authorization: Bearer {token}
+```
+Platform-specific header formats  
+Used by: Quickbase, Smartsheet
+
+
+
+```xml
+<soap:Header>
+  <TokenPassport>
+    <account>{account_id}</account>
+    <consumerKey>{consumer_key}</consumerKey>
+    <token>{token}</token>
+  </TokenPassport>
+</soap:Header>
+```
+Used by: NetSuite, Autotask
+
+
+
+
+### Request Authentication
+
+Each trigger URL includes unique client token:
+
+```
+https://api.fieldnation.com/integrations/trigger/{client_token}
+```
+
+Broker validates token before processing any data.
+
+---
+
+## Error Handling
+
+### Error Categories
+
+**Authentication Errors**
+- Invalid/expired credentials
+- Insufficient permissions
+- Token refresh failures
+- **Action**: Manual intervention required
+
+**Validation Errors**
+- Missing required fields
+- Invalid data types
+- Schema validation failures
+- **Action**: Fix field mappings or source data
+
+**API Errors**
+- Rate limit exceeded
+- Network timeouts
+- Service unavailable
+- **Action**: Automatic retry with backoff
+
+**Transformation Errors**
+- JSONNET execution failures
+- Field mapping exceptions
+- Data type conversions
+- **Action**: Review custom actions
+
+### Error Notifications
+
+Configure email alerts for:
+- Failed operations
+- Dead letter queue entries
+- Authentication failures
+- High error rates
+
+---
+
+## Performance Characteristics
+
+### Processing Capacity
+
+- **Throughput**: Thousands of work orders per minute
+- **Scaling**: Horizontal scaling via additional worker instances
+- **Concurrency**: Multiple workers process queue in parallel
+
+### Latency
+
+- **Typical**: 2-5 seconds end-to-end (trigger → work order created)
+- **Factors**: External API response time, field mapping complexity, queue depth
+
+### Reliability
+
+- **Uptime**: 99.9% availability
+- **Failover**: Automatic worker recovery
+- **Circuit Breakers**: Isolate failing external systems
+- **Health Checks**: Continuous monitoring
+
+---
+
+## Monitoring & Observability
+
+### Integration Logs
+
+All operations logged with:
+- Timestamps
+- User identifiers
+- Operation types
+- Outcomes (success/failure)
+- Error details
+- API request/response
+
+### Health Dashboards
+
+Track key metrics:
+- Queue depths by type
+- Processing rates
+- Error frequencies by category
+- API response times
+- Sync success rates
+
+### Audit Trail
+
+Comprehensive audit records for:
+- Compliance requirements
+- Incident investigation
+- Performance analysis
+- Capacity planning
+
+---
+
+## Configuration
+
+### Field Nation Settings
+
+**Integration Broker UI**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+Configure:
+- Authentication credentials (encrypted)
+- Field mappings (source → target)
+- Event triggers (which events sync)
+- Operation types (create only vs bidirectional)
+- Email notifications
+
+### External Platform Setup
+
+**Required Configuration**:
+- Webhook endpoints pointing to Field Nation trigger URL
+- Automation rules (Flows, Business Rules, Workflows)
+- API user with appropriate permissions
+- Firewall/IP whitelist configuration (if applicable)
+
+[Platform-specific guides →](/docs/connectors/introduction)
+
+---
+
+## Data Privacy
+
+### Data Handling
+
+- **In-Transit Processing**: Data processed in memory, not stored
+- **Logging**: Error logs scrubbed of sensitive information
+- **Retention**: Audit logs retained per compliance requirements
+- **Encryption**: All API calls use TLS 1.2+
+
+### Compliance
+
+The Integration Broker supports:
+- SOC 2 compliance
+- GDPR data handling
+- Audit trail requirements
+- Data residency considerations
+
+---
+
+## Best Practices
+
+### Configuration
+
+- ✅ Test in sandbox before production
+- ✅ Use service accounts (not personal credentials)
+- ✅ Set up error notifications
+- ✅ Monitor queue depths
+- ✅ Document field mappings
+
+### Security
+
+- ✅ Rotate credentials periodically
+- ✅ Use least-privilege API access
+- ✅ Enable IP whitelisting where possible
+- ✅ Review audit logs regularly
+- ✅ Encrypt credentials in your documentation
+
+### Performance
+
+- ✅ Keep field mappings simple when possible
+- ✅ Use custom actions only when necessary
+- ✅ Batch updates where supported
+- ✅ Monitor API rate limits
+- ✅ Scale workers for high volume
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+
+  
+    **Check:**
+    - Webhook triggering correctly
+    - Authentication credentials valid
+    - All required fields mapped
+    - Queue processing (not stuck)
+    - External API accessible
+  
+  
+  
+    **Check:**
+    - Event triggers configured
+    - Outbound field mappings correct
+    - External API permissions
+    - Correlation ID stored correctly
+    - Rate limits not exceeded
+  
+  
+  
+    **Check:**
+    - External API status
+    - Credential expiration
+    - Field mapping issues
+    - Data validation errors
+    - Network connectivity
+  
+
+
+[Complete troubleshooting guide →](/docs/connectors/concepts/troubleshooting)
+
+---

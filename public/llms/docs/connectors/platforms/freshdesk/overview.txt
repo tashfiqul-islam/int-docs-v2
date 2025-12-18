@@ -1,0 +1,169 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/freshdesk/overview
+Source: content/docs/connectors/platforms/freshdesk/overview.mdx
+
+
+
+---
+title: Freshdesk Connector
+description: Integrate Freshdesk helpdesk with Field Nation for automated field service dispatch from support tickets.
+---
+
+## Overview
+
+The Freshdesk connector enables seamless integration between Freshdesk and Field Nation:
+- **Ticket-based dispatch**: Create work orders from Freshdesk tickets
+- **REST API integration**: Simple authentication via API key
+- **Webhook triggers**: Real-time notifications
+- **Bidirectional sync**: Status and notes flow both directions
+- **Custom fields support**: Map Freshdesk custom fields
+
+---
+
+## At a Glance
+
+
+  
+    API Key (Basic Auth)
+  
+  
+    Tickets
+  
+  
+    Webhooks (automation rules)
+  
+  
+    Bidirectional (create, update, notes)
+  
+
+
+---
+
+## How It Works
+
+
+
+### Configure Automation
+
+Set up automation rule in Freshdesk that triggers on ticket status/tag changes
+
+### Webhook Fires
+
+Freshdesk sends ticket ID to Field Nation when conditions met
+
+### Fetch Ticket Data
+
+Integration Broker retrieves complete ticket from Freshdesk REST API
+
+### Apply Mappings
+
+Transform Freshdesk ticket into Field Nation work order
+
+### Create Work Order
+
+Work order created with correlation ID for bidirectional sync
+
+
+
+---
+
+## Common Use Cases
+
+### Dispatch from Support Ticket
+
+```
+Ticket Status = "Field Service Required"
+  → Webhook triggers
+  → Work order created
+```
+
+### Tag-Based Dispatch
+
+```
+Tag = "on-site"
+  → Automation rule fires
+  → Field technician dispatched
+```
+
+### Status Sync Back
+
+```
+FN Work Order = "Completed"
+  → Freshdesk Ticket Status = "Resolved"
+  → Private note added
+```
+
+---
+
+## Features
+
+### Field Mapping Capabilities
+
+- **Standard Fields**: Subject, Description, Status, Priority, Due By
+- **Custom Fields**: All custom ticket fields
+- **Requester Info**: Name, email, phone, company
+- **Attachments**: Optional file sync
+- **Tags**: Map Freshdesk tags
+
+### Supported Operations
+
+
+
+---
+
+## Prerequisites
+
+### Freshdesk Requirements
+
+
+  
+    Generate in Freshdesk:
+    1. Profile Settings → View Profile
+    2. Your API Key (right sidebar)
+    3. Copy key for Field Nation
+  
+  
+  
+    - Admin or account admin role
+    - Ability to create automation rules
+    - Ability to configure webhooks
+  
+  
+  
+    API key must have:
+    - Read access to tickets
+    - Write access for status updates
+    - Access to custom fields
+  
+
+
+---
+
+## Authentication
+
+Freshdesk uses **Basic Authentication** with API key:
+
+```
+Format: username:password
+Username: API Key
+Password: X (literal "X")
+```
+
+**Example:**
+```
+Authorization: Basic base64(your_api_key:X)
+```
+
+> [INFO] **Simple Setup**: Freshdesk uses API key as username, literal "X" as password for Basic Auth.
+
+---
+
+## Best Practices
+
+- ✅ Use automation rules for triggering (not manual webhooks)
+- ✅ Test in sandbox Freshdesk account first
+- ✅ Map priority/status correctly
+- ✅ Use tags for workflow control
+- ✅ Monitor webhook delivery
+
+---

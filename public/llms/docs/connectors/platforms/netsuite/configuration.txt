@@ -1,0 +1,220 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/netsuite/configuration
+Source: content/docs/connectors/platforms/netsuite/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the NetSuite connector with Token-Based Authentication and SuiteTalk SOAP API credentials.
+---
+
+## Prerequisites
+
+- ☐ NetSuite Account ID
+- ☐ Consumer Key & Secret (from Integration Record)
+- ☐ Token ID & Secret (from Access Token)
+- ☐ NetSuite instance URL
+- ☐ Admin access to Field Nation
+
+---
+
+## Step 1: Enable Token-Based Authentication
+
+
+
+### Navigate to Features
+
+Setup → Company → Enable Features
+
+### Enable TBA
+
+**SuiteCloud** tab → Check "Token-Based Authentication" ✅
+
+### Save
+
+Click "Save" to enable feature
+
+
+
+---
+
+## Step 2: Create Integration Record
+
+
+
+### Navigate to Integrations
+
+Setup → Integration → Manage Integrations → New
+
+### Configure Integration
+
+**Name**: `Field Nation Integration`
+
+**State**: Enabled ✅
+
+**Concurrency Limit**: Leave default
+
+### Save & Copy Credentials
+
+After save, copy:
+- **Consumer Key** (shown once)
+- **Consumer Secret** (shown once)
+
+Store securely immediately!
+
+
+
+---
+
+## Step 3: Generate Access Token
+
+
+
+### Navigate to Access Tokens
+
+Setup → Users/Roles → Access Tokens → New
+
+### Configure Token
+
+**Application Name**: Select "Field Nation Integration" (from Step 2)
+
+**User**: Select integration user (or create dedicated user)
+
+**Role**: Administrator or custom integration role
+
+**Token Name**: `Field Nation API Token`
+
+### Save & Copy Credentials
+
+After save, copy:
+- **Token ID**
+- **Token Secret** (shown once!)
+
+
+
+> **Critical**: Token Secret displayed ONCE. Save immediately to secure password manager.
+
+---
+
+## Step 4: Get Account ID
+
+**Setup → Company → Company Information**
+
+**Account ID** field → Copy value
+
+Example: `1234567` or `1234567_SB1` (sandbox)
+
+---
+
+## Step 5: Configure in Field Nation
+
+Access Integration Broker → Select "NetSuite"
+
+### Enter Credentials
+
+**Account ID**: From Step 4
+
+**Consumer Key**: From Integration Record (Step 2)
+
+**Consumer Secret**: From Integration Record (Step 2)
+
+**Token ID**: From Access Token (Step 3)
+
+**Token Secret**: From Access Token (Step 3)
+
+---
+
+### Instance URL
+
+**Format:**
+```
+https://{account_id}.suitetalk.api.netsuite.com/services/NetSuitePort_2021_2
+```
+
+**Sandbox:**
+```
+https://{account_id}_SB1.suitetalk.api.netsuite.com/services/NetSuitePort_2021_2
+```
+
+Field Nation may auto-construct this from Account ID.
+
+---
+
+### Record Type
+
+**Supported:**
+- `serviceOrder` - Service orders (most common)
+- `supportCase` - Support cases
+- `customRecord_*` - Custom records
+
+---
+
+## Step 6: Test Connection
+
+Click "Test Connection"
+
+**Success** ✅: Credentials valid, SuiteTalk API accessible
+
+**Failure** ❌: Review error:
+
+
+  
+    - Verify all 5 credentials correct
+    - Ensure Token not expired/revoked
+    - Check Account ID includes sandbox suffix if applicable
+  
+  
+  
+    - Grant integration role full access to target records
+    - Check user has role assigned
+    - Verify TBA enabled
+  
+
+
+---
+
+## Step 7: Refresh Fields & Map
+
+Click "Refresh Fields" → Configure mappings:
+
+**Inbound:**
+```
+title → title
+message → description
+status → status_id (Array Map)
+subsidiary.name → location.company.name
+```
+
+**Outbound:**
+```
+status.name → status (Array Map)
+approved_amount → actualCost
+```
+
+---
+
+## Step 8: Save Configuration
+
+Review settings → Save → Copy trigger URL
+
+---
+
+## Troubleshooting
+
+
+  
+    - Verify TBA enabled in features
+    - Check all 5 credentials correct
+    - Ensure token not revoked
+    - Test with NetSuite REST API explorer
+  
+  
+  
+    - Verify record type exists
+    - Check API name (camelCase)
+    - For custom records: Use `customRecord_{id}`
+  
+
+
+---

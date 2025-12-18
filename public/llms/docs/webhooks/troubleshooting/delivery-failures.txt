@@ -1,0 +1,459 @@
+# Webhooks: undefined
+URL: /docs/webhooks/troubleshooting/delivery-failures
+Source: content/docs/webhooks/troubleshooting/delivery-failures.mdx
+
+
+
+---
+title: Delivery Failures
+description: Diagnose and resolve specific webhook delivery failure scenarios with detailed error analysis and solutions.
+---
+
+## Analyzing Delivery Logs
+
+### Access Delivery Logs
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhookId=wh_abc123&deliveryStatus=500" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Get Detailed Log
+
+```bash
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs/del_xyz789 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Response includes pre-signed URL to full log file with request/response details.
+
+---
+
+## Common Delivery Errors
+
+### Connection Refused (ECONNREFUSED)
+
+**Error Message:**
+```
+Error: connect ECONNREFUSED 192.168.1.100:443
+```
+
+**Causes:**
+- Server not running
+- Wrong port
+- Firewall blocking connections
+
+**Solutions:**
+
+
+
+### Verify Server is Running
+
+```bash
+# Check if server is listening
+netstat -tulpn | grep :3000
+
+# Or
+lsof -i :3000
+```
+
+### Test Local Connectivity
+
+```bash
+curl -X POST http://localhost:3000/webhooks \
+  -H "Content-Type: application/json" \
+  -d '{"test": "data"}'
+```
+
+### Check Firewall Rules
+
+```bash
+# Allow incoming connections
+sudo ufw allow 3000/tcp
+
+# Or
+sudo iptables -A INPUT -p tcp --dport 3000 -j ACCEPT
+```
+
+### Verify ngrok/Tunnel
+
+```bash
+# Restart ngrok
+ngrok http 3000
+
+# Use new URL in webhook configuration
+```
+
+
+
+---
+
+### SSL Certificate Error
+
+**Error Message:**
+```
+Error: self signed certificate
+Error: unable to verify the first certificate
+```
+
+**Causes:**
+- Self-signed certificate
+- Expired certificate
+- Certificate chain incomplete
+
+**Solutions:**
+
+
+  
+    ```bash
+    # Install certbot
+    sudo apt-get install certbot python3-certbot-nginx
+    
+    # Generate certificate
+    sudo certbot --nginx -d your-domain.com
+    
+    # Auto-renew
+    sudo certbot renew --dry-run
+    ```
+  
+  
+    ```bash
+    # Verify certificate
+    openssl s_client -connect your-domain.com:443 -servername your-domain.com
+    
+    # Check expiry
+    echo | openssl s_client -servername your-domain.com -connect your-domain.com:443 2>/dev/null | openssl x509 -noout -dates
+    ```
+  
+  
+    For local testing only, use ngrok which provides valid HTTPS:
+    
+    ```bash
+    ngrok http 3000
+    # Use provided HTTPS URL
+    ```
+    
+    ⚠️ Never use self-signed certificates in production
+  
+
+
+---
+
+### Timeout (30 seconds)
+
+**Error Message:**
+```
+Error: Timeout of 30000ms exceeded
+```
+
+**Cause:** Endpoint takes too long to respond
+
+**Solution:** Implement async processing
+
+```javascript
+// ❌ Wrong - slow synchronous processing
+app.post('/webhooks', async (req, res) => {
+  const result = await slowOperation(); // 35 seconds
+  res.status(200).send('OK'); // Timeout already occurred!
+});
+
+// ✅ Correct - respond immediately
+const queue = new Queue('webhooks');
+
+app.post('/webhooks', async (req, res) => {
+  // Quick validation
+  if (!verifySignature(req)) {
+    return res.status(401).send('Unauthorized');
+  }
+  
+  const payload = JSON.parse(req.body.toString());
+  
+  // Queue for processing
+  await queue.add(payload);
+  
+  // Respond within 1 second
+  res.status(200).send('OK');
+});
+
+// Worker processes queue
+queue.process(async (job) => {
+  await slowOperation(job.data); // Can take as long as needed
+});
+```
+
+---
+
+### DNS Resolution Failed
+
+**Error Message:**
+```
+Error: getaddrinfo ENOTFOUND your-domain.com
+```
+
+**Causes:**
+- Domain doesn't exist
+- DNS not propagated
+- DNS server issues
+
+**Solutions:**
+
+```bash
+# Check DNS resolution
+dig your-domain.com
+
+# Check DNS propagation
+nslookup your-domain.com
+
+# Test from Field Nation perspective
+curl https://your-domain.com/webhooks
+```
+
+If domain is new, wait 24-48 hours for DNS propagation.
+
+---
+
+### 502 Bad Gateway
+
+**Error Message:**
+```
+HTTP 502 Bad Gateway
+```
+
+**Causes:**
+- Reverse proxy misconfiguration
+- Backend server down
+- Timeout at proxy level
+
+**Solutions:**
+
+
+  
+    ```nginx
+    # /etc/nginx/sites-available/your-site
+    server {
+      listen 443 ssl;
+      server_name your-domain.com;
+      
+      location /webhooks {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        
+        # Important timeout settings
+        proxy_connect_timeout 30s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+        
+        # Required headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      }
+    }
+    
+    # Test configuration
+    sudo nginx -t
+    
+    # Reload
+    sudo systemctl reload nginx
+    ```
+  
+  
+    ```apache
+    # /etc/apache2/sites-available/your-site.conf
+    <VirtualHost *:443>
+      ServerName your-domain.com
+      
+      ProxyPreserveHost On
+      ProxyTimeout 30
+      
+      ProxyPass /webhooks http://localhost:3000/webhooks
+      ProxyPassReverse /webhooks http://localhost:3000/webhooks
+      
+      # SSL configuration
+      SSLEngine on
+      SSLCertificateFile /path/to/cert.pem
+      SSLCertificateKeyFile /path/to/key.pem
+    </VirtualHost>
+    
+    # Test configuration
+    sudo apachectl configtest
+    
+    # Reload
+    sudo systemctl reload apache2
+    ```
+  
+  
+    ```javascript
+    // Ensure app is running and responsive
+    const app = express();
+    
+    app.post('/webhooks', (req, res) => {
+      console.log('Webhook received');
+      res.status(200).send('OK');
+    });
+    
+    const server = app.listen(3000, () => {
+      console.log('Server running on port 3000');
+    });
+    
+    // Health check endpoint
+    app.get('/health', (req, res) => {
+      res.status(200).send('OK');
+    });
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      server.close(() => {
+        console.log('Server closed');
+      });
+    });
+    ```
+  
+
+
+---
+
+### 500 Internal Server Error
+
+**Error Message:**
+```
+HTTP 500 Internal Server Error
+```
+
+**Cause:** Unhandled exception in your webhook handler
+
+**Solution:** Add comprehensive error handling
+
+```javascript
+app.post('/webhooks', async (req, res) => {
+  try {
+    // Verify signature
+    if (!verifySignature(req)) {
+      return res.status(401).send('Unauthorized');
+    }
+    
+    // Parse payload
+    const payload = JSON.parse(req.body.toString());
+    
+    // Process webhook
+    await processWebhook(payload);
+    
+    res.status(200).send('OK');
+    
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    
+    // Log error details
+    await logError({
+      error: error.message,
+      stack: error.stack,
+      payload: req.body.toString(),
+      headers: req.headers
+    });
+    
+    // Return 500 to trigger retry
+    res.status(500).send('Internal error');
+  }
+});
+
+// Global error handler
+app.use((error, req, res, next) => {
+  console.error('Unhandled error:', error);
+  res.status(500).send('Internal error');
+});
+```
+
+---
+
+## Retry Patterns
+
+### Manual Retry
+
+```bash
+curl -X PATCH https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs/del_xyz789/retry \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Bulk Retry Failed Deliveries
+
+```javascript
+async function retryFailedDeliveries(webhookId, hours = 24) {
+  // Get failed deliveries
+  const response = await fetch(
+    `https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?` +
+    `webhookId=${webhookId}&deliveryStatus=500`,
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  );
+  
+  const { result: logs } = await response.json();
+  
+  // Filter to recent failures
+  const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+  const recentFailures = logs.filter(log =>
+    new Date(log.createdAt) >= since
+  );
+  
+  console.log(`Retrying ${recentFailures.length} failed deliveries...`);
+  
+  // Retry each
+  for (const log of recentFailures) {
+    try {
+      await fetch(
+        `https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs/${log.deliveryId}/retry`,
+        {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        }
+      );
+      console.log(`✅ Retried ${log.deliveryId}`);
+    } catch (error) {
+      console.error(`❌ Failed to retry ${log.deliveryId}:`, error.message);
+    }
+  }
+}
+
+// Usage
+await retryFailedDeliveries('wh_abc123', 24);
+```
+
+---
+
+## Monitoring Delivery Health
+
+```javascript
+async function checkDeliveryHealth(webhookId) {
+  const response = await fetch(
+    `https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhookId=${webhookId}&perPage=100`,
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  );
+  
+  const { result: logs } = await response.json();
+  
+  if (logs.length === 0) {
+    return { status: 'no_data', message: 'No deliveries yet' };
+  }
+  
+  const successful = logs.filter(log =>
+    log.deliveryStatus >= 200 && log.deliveryStatus < 300
+  ).length;
+  
+  const successRate = (successful / logs.length) * 100;
+  
+  const health = {
+    total: logs.length,
+    successful,
+    failed: logs.length - successful,
+    successRate: successRate.toFixed(2) + '%',
+    status: successRate > 95 ? 'healthy' : successRate > 80 ? 'degraded' : 'unhealthy'
+  };
+  
+  return health;
+}
+```
+
+---

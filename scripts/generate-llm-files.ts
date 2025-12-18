@@ -263,10 +263,16 @@ async function generateLLMFiles() {
   for (const page of docsPages) {
     try {
       const content = await getLLMText(page);
-      // Create path: public/docs/getting-started/introduction.mdx
-      // URL: /docs/getting-started/introduction.mdx -> served as static file
+      // Create path: public/llms/docs/getting-started/introduction.txt
+      // URL: /llms/docs/getting-started/introduction.txt -> served as static file
+      // This matches what LLMActions component expects: /llms${page.url}.txt
       const relativePath = page.url.replace(LEADING_SLASH_REGEX, "");
-      const filePath = join(process.cwd(), "public", `${relativePath}.mdx`);
+      const filePath = join(
+        process.cwd(),
+        "public",
+        "llms",
+        `${relativePath}.txt`
+      );
       const fileDir = dirname(filePath);
 
       await mkdir(fileDir, { recursive: true });
@@ -285,10 +291,16 @@ async function generateLLMFiles() {
   for (const page of apiPages) {
     try {
       const content = await getLLMText(page);
-      // Create path: public/api-references/rest-api/v2/index.mdx
-      // URL: /api-references/rest-api/v2/index.mdx -> served as static file
+      // Create path: public/llms/api-references/rest-api/v2/index.txt
+      // URL: /llms/api-references/rest-api/v2/index.txt -> served as static file
+      // This matches what LLMActions component expects: /llms${page.url}.txt
       const relativePath = page.url.replace(LEADING_SLASH_REGEX, "");
-      const filePath = join(process.cwd(), "public", `${relativePath}.mdx`);
+      const filePath = join(
+        process.cwd(),
+        "public",
+        "llms",
+        `${relativePath}.txt`
+      );
       const fileDir = dirname(filePath);
 
       await mkdir(fileDir, { recursive: true });
@@ -305,7 +317,7 @@ async function generateLLMFiles() {
     console.log(`⚠️  ${errorCount} errors occurred`);
   }
   console.log(
-    "📁 Files generated to public/docs/ and public/api-references/\n"
+    "📁 Files generated to public/llms/docs/ and public/llms/api-references/\n"
   );
 }
 

@@ -1,0 +1,476 @@
+# Connectors: undefined
+URL: /docs/connectors/platforms/salesforce/configuration
+Source: content/docs/connectors/platforms/salesforce/configuration.mdx
+
+
+
+---
+title: Configuration
+description: Configure the Salesforce connector in Field Nation's Integration Broker to establish API connection and field mappings.
+---
+
+## Prerequisites Checklist
+
+Before starting, gather this information:
+
+- ☐ Salesforce username (email address)
+- ☐ Salesforce password
+- ☐ Salesforce security token ([how to generate](#security-token))
+- ☐ Salesforce object API name (e.g., `Case`, `Service_Ticket__c`)
+- ☐ Instance type (production vs sandbox)
+- ☐ Admin access to Field Nation integrations
+
+---
+
+## Step 1: Access Integration Broker
+
+Navigate to Field Nation's Integration Broker interface:
+
+**Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
+**Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
+
+### Log In
+
+Use your Field Nation buyer account credentials
+
+### Select Salesforce
+
+Find "Salesforce" in the list of available connectors
+
+### Click Configure
+
+Open the Salesforce configuration form
+
+---
+
+## Step 2: Basic Settings
+
+![Salesforce Settings](./salesforce_settings.png)
+
+### Instance Name
+
+**Optional but recommended** - Descriptive name to identify this integration.
+
+**Examples:**
+- "Production Salesforce"
+- "Service Cloud - NA"
+- "Customer Service Sandbox"
+
+**Use Case**: Helpful when managing multiple Salesforce integrations or distinguishing between sandbox and production.
+
+---
+
+### Instance Type
+
+**Required** - Specifies which Salesforce environment to connect to.
+
+**Value**: `production`
+
+**Connects to**: `login.salesforce.com`
+
+**When to use:**
+- Live Salesforce organization
+- Go-live / production deployment
+- Real customer data
+
+**Value**: `test`
+
+**Connects to**: `test.salesforce.com`
+
+**When to use:**
+- Salesforce sandbox environments
+- Development and testing
+- UAT (User Acceptance Testing)
+- Training environments
+
+> **Critical**: Incorrect instance type causes authentication failures. Verify your Salesforce environment type before configuring.
+
+---
+
+### Object Name
+
+**Required** - The Salesforce object API name for integration.
+
+**Standard Objects:**
+- `Case` - Service cases
+- `Opportunity` - Sales opportunities
+- `Account` - Customer accounts
+- `Contact` - Individual contacts
+
+**Custom Objects:**
+- `Service_Ticket__c` - Custom service ticket
+- `Field_Service_Request__c` - Custom FSM object
+- `Work_Request__c` - Custom work request
+
+**Format Rules:**
+- Use API name, not label
+- Standard objects: Same as label (`Case`)
+- Custom objects: End with `__c` (`My_Object__c`)
+
+**Field Access:**
+- All fields on the base object
+- Fields from directly related parent objects
+- Example: If object = `Case`, you can access `Case.Account.Name`, `Case.Contact.Email`, etc.
+
+---
+
+## Step 3: Messaging Configuration
+
+**Optional** - Enable bidirectional comment synchronization.
+
+  
+    Enable if you want:
+    - Field Nation technician messages to appear in Salesforce
+    - Salesforce user comments to sync to Field Nation
+    - Bidirectional communication between platforms
+    
+    **Common Use Cases:**
+    - Dispatchers adding notes for technicians
+    - Technicians providing status updates
+    - Customer service tracking all communications
+  
+  
+  
+    **Message Object**: API name of Salesforce comment object
+    
+    **Common Values:**
+    - `CaseComment` - For Case objects
+    - `FeedComment` - For Chatter-enabled objects
+    - Consult Salesforce docs for other standard objects
+    
+    **Limitations**: Field Nation can only connect to Salesforce's standard comment objects (custom comment objects not supported)
+  
+  
+  
+    **Object Body Field**: Field containing comment text
+    
+    **Common Values:**
+    - `CommentBody` - For CaseComment
+    - `Body` - For FeedComment
+    
+    This field stores the actual message text content.
+  
+
+**Example Configuration:**
+```
+Message Object: CaseComment
+Object Body Field: CommentBody
+```
+
+---
+
+## Step 4: Credentials
+
+Salesforce authentication requires three components:
+
+### Username
+
+Your Salesforce user's email address.
+
+**Format**: Full email (e.g., `integration@company.com`)
+
+**Best Practice**: Use dedicated integration user, not personal account
+- Better security and audit trails
+- Integration won't break if personal account deactivated
+- Easier permission management
+
+---
+
+### Password
+
+Your Salesforce user's password.
+
+**Security Notes:**
+- Field Nation encrypts passwords at rest (AES-256)
+- Never logged or exposed in error messages
+- Rotate periodically for security
+
+---
+
+### Security Token
+
+System-generated key from Salesforce for API authentication.
+
+#### How to Generate Security Token
+
+### Log into Salesforce
+
+Use the account you're configuring for integration
+
+### Navigate to Personal Settings
+
+Click your profile icon → Settings (or Setup → My Personal Information)
+
+### Reset Security Token
+
+Find "Reset My Security Token" and click it
+
+### Check Email
+
+Salesforce emails the token to your registered email address
+
+### Copy Token
+
+Copy the token from the email (entire string)
+
+### Enter in Field Nation
+
+Paste token in the Token field (do NOT append to password)
+
+**Token Behavior:**
+- Token is appended to password during API authentication
+- Field Nation handles this automatically
+- Enter as separate field, not concatenated with password
+
+**When Token Resets:**
+- Password change resets token automatically
+- Manual reset via "Reset My Security Token"
+- You'll need to update Field Nation configuration
+
+---
+
+## Step 5: Test Connection
+
+After entering all configuration details:
+
+### Save Configuration
+
+Click "Save" or "Test Connection" button
+
+### Authentication Test
+
+Integration Broker attempts to authenticate with Salesforce
+
+### Review Result
+
+- **Success**: Green confirmation, trigger URL generated
+- **Failure**: Error message with details
+
+### Common Authentication Errors
+
+  
+    **Error**: `INVALID_LOGIN: Invalid username, password, security token`
+    
+    **Causes:**
+    - Wrong username/password
+    - Outdated security token
+    - Password recently changed (resets token)
+    
+    **Solution:**
+    1. Verify credentials correct
+    2. Generate new security token
+    3. Update configuration
+    4. Test again
+  
+  
+  
+    **Error**: Connection timeout or authentication failure
+    
+    **Causes:**
+    - Instance type doesn't match Salesforce environment
+    - Trying to auth against `login.salesforce.com` with sandbox credentials
+    
+    **Solution:**
+    1. Verify Salesforce environment type
+    2. Update Instance Type setting
+    3. Test connection
+  
+  
+  
+    **Error**: `API_DISABLED_FOR_ORG`
+    
+    **Causes:**
+    - Salesforce org doesn't have API access
+    - User doesn't have "API Enabled" permission
+    
+    **Solution:**
+    1. Verify Salesforce license includes API access
+    2. Check user Profile has "API Enabled" permission
+    3. Contact Salesforce admin if needed
+  
+  
+  
+    **Error**: `LOGIN_MUST_USE_SECURITY_TOKEN` or login failure
+    
+    **Causes:**
+    - Salesforce org has IP restrictions
+    - Field Nation IP not whitelisted
+    
+    **Solution:**
+    1. Add Field Nation IPs to Salesforce trusted IP ranges
+    2. Or disable IP restrictions for integration user
+    3. See [Network Access](/docs/resources/environments)
+  
+
+---
+
+## Step 6: Get Trigger URL
+
+Once authentication succeeds, Field Nation generates your unique trigger URL.
+
+![Trigger Information](../../trigger_information.png)
+
+### Trigger URL Components
+
+```
+https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
+```
+
+- **Base URL**: Field Nation API endpoint
+- **Client Token**: Unique authentication token for your integration
+
+### Using the Trigger URL
+
+**Purpose**: Destination for Salesforce Outbound Messages
+
+**You'll need this URL when:**
+- Configuring Salesforce Outbound Message
+- Setting up Flow actions
+- Testing webhook connectivity
+
+**Copy the URL** - You'll paste this into Salesforce in the next step.
+
+> [INFO] **Security**: The client token in the URL authenticates incoming webhooks. Keep this URL secure (don't share publicly).
+
+---
+
+## Step 7: Field Mappings
+
+Configure how data maps between Salesforce and Field Nation.
+
+### Access Field Mapping UI
+
+1. From Salesforce connector settings
+2. Click "Field Mappings" tab
+3. Click "Refresh Fields" to discover Salesforce fields
+
+### Discover Available Fields
+
+**Automatic Discovery:**
+- Integration Broker queries Salesforce metadata API
+- Retrieves all fields on base object
+- Discovers related object fields
+- Populates mapping dropdown menus
+
+**Includes:**
+- Standard fields (Subject, Description, Status)
+- Custom fields (My_Custom_Field__c)
+- Related fields (Account.Name, Contact.Email)
+- Formula fields (calculated values)
+- Picklist fields (enum values)
+
+### Configure Mappings
+
+**Inbound (Salesforce → Field Nation):**
+
+Map Salesforce fields to Field Nation work order fields:
+- `Case.Subject` → `title`
+- `Case.Description` → `description`
+- `Case.Account.Name` → `location.company.name`
+- `Case.Priority` → `priority` (with array map)
+
+**Outbound (Field Nation → Salesforce):**
+
+Map Field Nation events to Salesforce updates:
+- Work order status → Case Status
+- Completion notes → Case Comments
+- Technician name → Custom field
+
+[Complete field mapping guide →](/docs/connectors/concepts/field-mappings)
+
+---
+
+## Step 8: Save & Test
+
+### Final Configuration Steps
+
+### Review Settings
+
+Verify all configuration values correct:
+- Instance type matches environment
+- Object name correct
+- Credentials valid
+- Field mappings complete
+
+### Save Configuration
+
+Click "Save" to persist settings
+
+### Test with Sample Record
+
+Create a test record in Salesforce:
+1. Create a simple Case/record
+2. Update to meet Flow trigger conditions
+3. Check Integration Broker logs
+4. Verify work order created in Field Nation
+
+### Monitor Initial Syncs
+
+Watch first few synchronizations:
+- Check for errors in logs
+- Verify field values correct
+- Confirm bidirectional sync works
+- Adjust mappings if needed
+
+---
+
+## Configuration Checklist
+
+Use this checklist to verify complete setup:
+
+### Field Nation Configuration
+- ☐ Instance name configured (optional)
+- ☐ Instance type matches Salesforce environment
+- ☐ Object name is correct API name
+- ☐ Messaging configured (if needed)
+- ☐ Credentials entered (username, password, token)
+- ☐ Connection tested successfully
+- ☐ Trigger URL copied
+- ☐ Fields refreshed and discovered
+- ☐ Inbound field mappings configured
+- ☐ Outbound field mappings configured (if needed)
+- ☐ Configuration saved
+
+### Salesforce Configuration (Next Steps)
+- ☐ Outbound Message created
+- ☐ Record-Triggered Flow created
+- ☐ Flow conditions defined
+- ☐ Flow activatedFlow tested with sample record
+
+[Salesforce workflow setup →](/docs/connectors/platforms/salesforce/workflow)
+
+---
+
+## Troubleshooting
+
+  
+    **Issue**: Expected fields not showing in mapping dropdowns
+    
+    **Solution:**
+    1. Click "Refresh Fields" to re-query Salesforce
+    2. Verify field exists on object (check API name)
+    3. Ensure API user has read permission on field
+    4. For related fields, confirm relationship exists
+  
+  
+  
+    **Issue**: Integration stops working after configuration
+    
+    **Solution:**
+    1. Check if password or token changed
+    2. Verify Salesforce user still active
+    3. Review Salesforce security settings (IP whitelist)
+    4. Test connection again, update credentials if needed
+  
+  
+  
+    **Issue**: Cannot save field mappings
+    
+    **Solution:**
+    1. Ensure all required FN fields mapped
+    2. Check data type compatibility
+    3. Add default values for optional fields
+    4. Review error messages for specific field issues
+  
+
+---

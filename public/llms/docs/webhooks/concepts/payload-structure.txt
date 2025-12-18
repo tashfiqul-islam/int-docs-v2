@@ -1,0 +1,533 @@
+# Webhooks: undefined
+URL: /docs/webhooks/concepts/payload-structure
+Source: content/docs/webhooks/concepts/payload-structure.mdx
+
+
+
+---
+title: Payload Structure
+description: Understanding webhook payloads - standard fields, work order data, headers, and how to parse webhook requests.
+---
+
+## HTTP Request Structure
+
+Field Nation sends webhooks as HTTP POST or PUT requests (configurable) to your endpoint:
+
+```http
+POST /webhooks/fieldnation HTTP/1.1
+Host: your-endpoint.com
+Content-Type: application/json
+x-fn-signature: sha256=abc123...
+x-fn-webhook-id: wh_abc123def456
+x-fn-event-name: workorder.status.published
+x-fn-delivery-id: del_xyz789
+x-fn-timestamp: 2025-01-15T10:30:00Z
+
+{
+  "eventName": "workorder.status.published",
+  "eventId": "evt_abc123",
+  "workOrderId": 12345,
+  "timestamp": "2025-01-15T10:30:00Z",
+  "data": {
+    // ... complete work order object
+  }
+}
+```
+
+---
+
+## Standard Headers
+
+Every webhook request includes these headers:
+
+`",
+      required: true
+    },
+    "x-fn-webhook-id": {
+      type: "string",
+      description: "Unique identifier of the webhook configuration that triggered this delivery",
+      required: true
+    },
+    "x-fn-event-name": {
+      type: "string",
+      description: "Name of the event (e.g., `workorder.created`, `workorder.status.published`)",
+      required: true
+    },
+    "x-fn-delivery-id": {
+      type: "string",
+      description: "Unique identifier for this specific delivery attempt. Use for idempotency and debugging",
+      required: true
+    },
+    "x-fn-timestamp": {
+      type: "string",
+      description: "ISO 8601 timestamp when the webhook was sent",
+      required: true
+    },
+    "content-type": {
+      type: "string",
+      description: "Always `application/json`",
+      required: true
+    }
+  }}
+/>
+
+### Custom Headers
+
+You can configure additional headers when creating the webhook:
+
+```json
+{
+  "webhookAttribute": {
+    "header": {
+      "Authorization": "Bearer your-api-token",
+      "X-Custom-ID": "your-identifier"
+    }
+  }
+}
+```
+
+> **Reserved Prefix**: Headers cannot start with `x-fn-` as this prefix is reserved for Field Nation system headers.
+
+---
+
+## JSON Payload Structure
+
+### Top-Level Fields
+
+
+
+### Example Complete Payload
+
+```json
+{
+  "eventName": "workorder.status.published",
+  "eventId": "evt_4a7f2b1c",
+  "workOrderId": 12345,
+  "timestamp": "2025-01-15T10:30:00.000Z",
+  "data": {
+    "id": 12345,
+    "title": "Router Installation - Site 42",
+    "description": "Install and configure Cisco router",
+    "status": "published",
+    "schedule": {
+      "serviceWindow": {
+        "start": "2025-01-20T09:00:00Z",
+        "end": "2025-01-20T17:00:00Z",
+        "mode": "hours"
+      }
+    },
+    "location": {
+      "address1": "123 Main Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94105",
+      "coordinates": {
+        "latitude": 37.7749,
+        "longitude": -122.4194
+      }
+    },
+    "pay": {
+      "type": "fixed",
+      "amount": 250.00,
+      "currency": "USD"
+    },
+    "buyer": {
+      "id": 456,
+      "name": "Acme Corporation",
+      "companyId": 789
+    },
+    "tags": ["priority", "router", "installation"],
+    "customFields": {
+      "ticketNumber": "INC-12345",
+      "customerPO": "PO-98765"
+    },
+    "createdAt": "2025-01-15T09:00:00Z",
+    "updatedAt": "2025-01-15T10:30:00Z"
+    // ... many more fields
+  }
+}
+```
+
+---
+
+## Work Order Data Object
+
+The `data` field contains the complete work order object, which matches the structure returned by the [REST API](/docs/rest-api/introduction).
+
+### Key Fields Overview
+
+
+  
+    ```json
+    {
+      "id": 12345,
+      "title": "Router Installation - Site 42",
+      "description": "Install and configure Cisco router",
+      "status": "published",
+      "type": "installation",
+      "priority": "normal",
+      "tags": ["priority", "router"],
+      "customFields": {
+        "ticketNumber": "INC-12345"
+      },
+      "createdAt": "2025-01-15T09:00:00Z",
+      "updatedAt": "2025-01-15T10:30:00Z"
+    }
+    ```
+  
+  
+    ```json
+    {
+      "schedule": {
+        "serviceWindow": {
+          "start": "2025-01-20T09:00:00Z",
+          "end": "2025-01-20T17:00:00Z",
+          "mode": "hours"
+        },
+        "estimatedHours": 3
+      },
+      "location": {
+        "address1": "123 Main Street",
+        "address2": "Suite 100",
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94105",
+        "country": "US",
+        "coordinates": {
+          "latitude": 37.7749,
+          "longitude": -122.4194
+        },
+        "notes": "Enter through main lobby"
+      }
+    }
+    ```
+  
+  
+    ```json
+    {
+      "pay": {
+        "type": "fixed",
+        "amount": 250.00,
+        "currency": "USD",
+        "hourlyRate": null
+      },
+      "expenses": {
+        "mileage": {
+          "allowed": true,
+          "rate": 0.655,
+          "units": "miles"
+        },
+        "additional": {
+          "allowed": true,
+          "maxAmount": 50.00
+        }
+      }
+    }
+    ```
+  
+  
+    ```json
+    {
+      "buyer": {
+        "id": 456,
+        "name": "Acme Corporation",
+        "companyId": 789
+      },
+      "provider": {
+        "id": 789,
+        "name": "John Smith",
+        "userId": 1011,
+        "rating": 4.8
+      },
+      "contacts": [
+        {
+          "name": "Jane Doe",
+          "phone": "+1-555-0123",
+          "email": "jane@example.com",
+          "role": "site_contact"
+        }
+      ]
+    }
+    ```
+  
+
+
+> [INFO] **Full Schema**: The complete work order schema includes 100+ fields. Refer to the [REST API documentation](/docs/rest-api/introduction) for the full specification.
+
+---
+
+## Parsing Webhooks
+
+### Essential Parsing Steps
+
+
+
+### Read Raw Body
+
+**Critical for signature verification** - read the raw request body before parsing:
+
+```javascript
+const express = require('express');
+const app = express();
+
+// Use raw body parser
+app.use(express.raw({ type: 'application/json' }));
+
+app.post('/webhooks', (req, res) => {
+  const rawBody = req.body; // Buffer
+  const payload = JSON.parse(rawBody.toString());
+  
+  // Now you can verify signature with rawBody
+  // and work with parsed payload
+});
+```
+
+### Verify Signature
+
+Always verify the `x-fn-signature` header before processing:
+
+```javascript
+const crypto = require('crypto');
+
+function verifySignature(rawBody, signature, secret) {
+  const [algorithm, hash] = signature.split('=');
+  const expectedHash = crypto
+    .createHmac(algorithm, secret)
+    .update(rawBody)
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedHash),
+    Buffer.from(hash)
+  );
+}
+```
+
+### Extract Event Details
+
+```javascript
+const {
+  eventName,
+  eventId,
+  workOrderId,
+  timestamp,
+  data
+} = payload;
+
+// Check idempotency
+if (await hasProcessedEvent(eventId)) {
+  return res.status(200).send('Already processed');
+}
+```
+
+### Process the Event
+
+```javascript
+// Handle based on event type
+switch (eventName) {
+  case 'workorder.status.published':
+    await handlePublished(data);
+    break;
+  case 'workorder.status.assigned':
+    await handleAssigned(data);
+    break;
+  // ... more handlers
+}
+```
+
+### Respond Quickly
+
+```javascript
+// Acknowledge receipt immediately
+res.status(200).send('OK');
+
+// Process asynchronously
+processWebhookAsync(payload);
+```
+
+
+
+---
+
+## Complete Processing Example
+
+```javascript title="webhook-handler.js"
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+// Use raw body for signature verification
+app.use(express.raw({ type: 'application/json' }));
+
+app.post('/webhooks/fieldnation', async (req, res) => {
+  try {
+    // 1. Verify signature
+    const signature = req.headers['x-fn-signature'];
+    const secret = process.env.WEBHOOK_SECRET;
+    
+    if (!verifySignature(req.body, signature, secret)) {
+      return res.status(401).send('Invalid signature');
+    }
+    
+    // 2. Parse payload
+    const payload = JSON.parse(req.body.toString());
+    const {
+      eventName,
+      eventId,
+      workOrderId,
+      timestamp,
+      data
+    } = payload;
+    
+    // 3. Check idempotency
+    if (await hasProcessedEvent(eventId)) {
+      console.log(`Duplicate event: ${eventId}`);
+      return res.status(200).send('Already processed');
+    }
+    
+    // 4. Respond immediately (< 5 seconds)
+    res.status(200).send('OK');
+    
+    // 5. Process asynchronously
+    await processEventAsync({
+      eventName,
+      eventId,
+      workOrderId,
+      timestamp,
+      data
+    });
+    
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    res.status(500).send('Internal error');
+  }
+});
+
+function verifySignature(rawBody, signature, secret) {
+  if (!signature) return false;
+  
+  const [algorithm, hash] = signature.split('=');
+  const expectedHash = crypto
+    .createHmac(algorithm, secret)
+    .update(rawBody)
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedHash),
+    Buffer.from(hash)
+  );
+}
+
+async function hasProcessedEvent(eventId) {
+  // Check your database or cache
+  return await redis.exists(`event:${eventId}`);
+}
+
+async function processEventAsync(event) {
+  // Mark as processing
+  await redis.setex(`event:${event.eventId}`, 86400, 'processed');
+  
+  // Handle based on event type
+  switch (event.eventName) {
+    case 'workorder.status.published':
+      await syncToSalesforce(event.data);
+      await notifyProviders(event.data);
+      break;
+      
+    case 'workorder.status.assigned':
+      await updateDispatchBoard(event.data);
+      await notifyTechnician(event.data);
+      break;
+      
+    case 'workorder.status.work_done':
+      await triggerApprovalFlow(event.data);
+      break;
+      
+    case 'workorder.status.approved':
+      await generateInvoice(event.data);
+      await updateAccounting(event.data);
+      break;
+  }
+}
+
+app.listen(3000);
+```
+
+---
+
+## Idempotency
+
+Webhooks may be delivered more than once (due to retries). Always check if you've already processed an event:
+
+### Use eventId for Deduplication
+
+```javascript
+// Redis example
+async function processWebhook(payload) {
+  const key = `webhook:${payload.eventId}`;
+  
+  // Try to set key with NX (only if not exists)
+  const wasSet = await redis.set(key, '1', 'EX', 86400, 'NX');
+  
+  if (!wasSet) {
+    console.log('Duplicate webhook, skipping');
+    return;
+  }
+  
+  // Process the webhook
+  await handleEvent(payload);
+}
+```
+
+### Database-Based Tracking
+
+```sql
+CREATE TABLE processed_webhooks (
+  event_id VARCHAR(255) PRIMARY KEY,
+  processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  event_name VARCHAR(255),
+  work_order_id INTEGER
+);
+
+CREATE INDEX idx_processed_at ON processed_webhooks(processed_at);
+```
+
+```javascript
+async function hasProcessedEvent(eventId) {
+  const result = await db.query(
+    'SELECT event_id FROM processed_webhooks WHERE event_id = $1',
+    [eventId]
+  );
+  return result.rows.length > 0;
+}
+
+async function markEventProcessed(eventId, eventName, workOrderId) {
+  await db.query(
+    'INSERT INTO processed_webhooks (event_id, event_name, work_order_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+    [eventId, eventName, workOrderId]
+  );
+}
+```
+
+---
+
+## Response Requirements
+
+Your endpoint must respond correctly to receive continued deliveries:
+
+### Success Response
+
+```http
+HTTP/1.1 200 OK
+Content-Type: text/plain
+
+OK
+```
+
+> [INFO] **Response Body**: Field Nation doesn't parse the response body. Any 2xx status code indicates success.
+
+### Response Time
+
+- ** **Security**: Never log webhooks in production—they contain sensitive data (PII, financial details, etc.)
+
+---

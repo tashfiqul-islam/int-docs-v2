@@ -1,9 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import logoDark from "~/assets/dark/logo_dark.png";
 import logoLight from "~/assets/light/logo_light.png";
 
 /**
@@ -12,7 +10,6 @@ import logoLight from "~/assets/light/logo_light.png";
  * Note: Fumadocs navbar already wraps the title in a Link, so we don't need to add one here.
  */
 export function ThemeLogo({ className }: { className?: string }) {
-  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch by only rendering after mount
@@ -25,8 +22,7 @@ export function ThemeLogo({ className }: { className?: string }) {
     return <div className={className} style={{ width: 100, height: 24 }} />;
   }
 
-  const isDark = resolvedTheme === "dark";
-  const logoSrc = isDark ? logoDark : logoLight;
+  const logoSrc = logoLight;
 
   return (
     <Image
@@ -35,7 +31,7 @@ export function ThemeLogo({ className }: { className?: string }) {
       height={24}
       priority
       src={logoSrc}
-      style={{ height: "auto", width: "auto", maxHeight: "24px" }}
+      style={{ width: "auto" }}
       width={100}
     />
   );

@@ -1,0 +1,640 @@
+# Connectors: undefined
+URL: /docs/connectors/concepts/troubleshooting
+Source: content/docs/connectors/concepts/troubleshooting.mdx
+
+
+
+---
+title: Troubleshooting
+description: Common issues with pre-built connectors and step-by-step solutions to debug integration problems.
+---
+
+## Quick Diagnosis
+
+
+
+
+
+**Work orders not creating or updating?**
+
+
+
+### Check Webhook
+
+Verify webhook triggering in external system:
+- Check webhook configuration
+- Review webhook logs/history
+- Test webhook manually
+
+### Verify Authentication
+
+Confirm credentials are valid:
+- API keys not expired
+- OAuth tokens refreshed
+- Correct instance/account ID
+- Sufficient permissions
+
+### Review Logs
+
+Check Integration Broker logs:
+- Navigate to Integrations → Logs
+- Filter by date/time of expected sync
+- Look for authentication or validation errors
+
+### Test Manually
+
+Trigger a test sync:
+- Create a simple test record
+- Verify it meets trigger conditions
+- Monitor logs for processing
+
+
+
+
+
+
+
+**Some fields syncing, others not?**
+
+
+
+### Check Field Mappings
+
+Review configured mappings:
+- Is the field mapped?
+- Is the mapping action correct?
+- Does source field exist in payload?
+
+### Verify Permissions
+
+Ensure API user can access fields:
+- Read permission on source fields
+- Write permission on target fields
+- Custom field API access enabled
+
+### Test Field Values
+
+Inspect actual data:
+- Check source field contains value
+- Verify data type matches expectation
+- Test transformation logic with sample data
+
+### Review Logs
+
+Look for field-specific errors:
+- Validation failures
+- Type conversion errors
+- JSONNET execution errors
+
+
+
+
+
+
+
+**Seeing errors in logs?**
+
+
+
+### Identify Error Category
+
+Determine error type:
+- Authentication (401, 403)
+- Validation (400, 422)
+- Rate Limiting (429)
+- Server Error (500, 502, 503)
+
+### Check Error Details
+
+Review error message and context:
+- Which API endpoint failed?
+- What data was being sent?
+- Is error consistent or intermittent?
+
+### Apply Solution
+
+Follow category-specific fix:
+- Authentication → Refresh credentials
+- Validation → Fix field mappings
+- Rate Limit → Add delays/batching
+- Server Error → Retry, contact support
+
+### Monitor Resolution
+
+Verify fix resolves issue:
+- Trigger test sync
+- Watch for successful processing
+- Confirm no new errors
+
+
+
+
+
+
+
+**Syncs are slow or delayed?**
+
+
+
+### Check Queue Depth
+
+Review message queue status:
+- Navigate to Integrations → Metrics
+- Check pending message count
+- Identify bottlenecks
+
+### Monitor API Response Times
+
+Review external API performance:
+- Check Integration Broker logs for latency
+- Test external API directly
+- Verify no rate limiting
+
+### Optimize Mappings
+
+Reduce transformation complexity:
+- Simplify custom JSONNET
+- Remove unnecessary field mappings
+- Batch operations where possible
+
+### Scale Resources
+
+If consistently slow:
+- Contact Field Nation Support
+- Request additional worker instances
+- Review architecture with support team
+
+
+
+
+
+
+
+---
+
+## Common Issues & Solutions
+
+### Authentication Problems
+
+
+  
+    **Symptoms**: All sync attempts fail with 401 error
+    
+    **Causes:**
+    - API credentials invalid or expired
+    - Wrong username/password
+    - OAuth token expired
+    - API key revoked
+    
+    **Solutions:**
+    1. Regenerate API credentials in external system
+    2. Update credentials in Integration Broker
+    3. For OAuth: Reauthorize integration
+    4. Verify account is active in external platform
+    
+    **Test:**
+    ```bash
+    # Test API credentials directly
+    curl -H "Authorization: Bearer YOUR_TOKEN" \
+         https://external-api.com/api/test
+    ```
+  
+  
+  
+    **Symptoms**: Authentication succeeds but API calls fail
+    
+    **Causes:**
+    - Insufficient API permissions
+    - User not assigned required role
+    - IP whitelisting blocking requests
+    - API feature not enabled for account
+    
+    **Solutions:**
+    1. Review API user permissions in external system
+    2. Grant required roles/permissions
+    3. Whitelist Field Nation IP addresses
+    4. Enable API access features
+    
+    **Field Nation IPs to Whitelist:**
+    - Sandbox: Check [Environments](/docs/resources/environments)
+    - Production: Check [Environments](/docs/resources/environments)
+  
+  
+  
+    **Symptoms**: Integration works initially, then stops
+    
+    **Causes:**
+    - Refresh token expired
+    - OAuth app configuration changed
+    - User revoked access
+    
+    **Solutions:**
+    1. Reauthorize integration in Integration Broker
+    2. Verify OAuth app still exists in external system
+    3. Check OAuth app client ID/secret unchanged
+    4. Ensure refresh token URL correct
+  
+
+
+---
+
+### Data Validation Errors
+
+
+  
+    **Symptoms**: 400 error - "Required field missing"
+    
+    **Causes:**
+    - Required field not mapped
+    - Source field empty/null
+    - Field mapping action incorrect
+    
+    **Solutions:**
+    1. Identify missing field from error message
+    2. Add field mapping for required field
+    3. Set default value if source may be empty
+    4. Use Set Static action for constant values
+    
+    **Example:**
+    ```jsonnet
+    {
+      "target": "required_field",
+      "action": "set_static",
+      "value": "Default Value"
+    }
+    ```
+  
+  
+  
+    **Symptoms**: 422 error - "Invalid value for field"
+    
+    **Causes:**
+    - String sent to numeric field
+    - Invalid date format
+    - Boolean as string ("true" vs true)
+    - Value outside allowed range
+    
+    **Solutions:**
+    1. Check target field expected type
+    2. Add type conversion in custom action:
+    
+    ```jsonnet
+    {
+      "action": "custom",
+      "target": "numeric_field",
+      "script": |||
+        local value = $.util.lookup_field($.input, 'source', '0');
+        std.parseInt(value)
+      |||
+    }
+    ```
+    
+    3. Use Date Convert action for dates
+    4. Use Range Map for numeric categories
+  
+  
+  
+    **Symptoms**: Field not accepting value - "Invalid option"
+    
+    **Causes:**
+    - Mapped value not in picklist
+    - Case sensitivity mismatch
+    - Picklist values changed in external system
+    
+    **Solutions:**
+    1. Refresh field metadata in Integration Broker
+    2. Review valid picklist values
+    3. Update array map definitions
+    4. Use exact case matching
+    
+    **Example:**
+    ```jsonnet
+    {
+      "action": "array_map",
+      "mappings": [
+        { "compare": "high", "value": "High" },  // External expects "High"
+        { "compare": "low", "value": "Low" }
+      ],
+      "default": "Medium"
+    }
+    ```
+  
+
+
+---
+
+### Webhook & Trigger Issues
+
+
+  
+    **Symptoms**: No events reaching Integration Broker
+    
+    **Causes:**
+    - Webhook not configured in external system
+    - Trigger conditions not met
+    - Webhook URL incorrect
+    - Firewall blocking outbound requests
+    
+    **Solutions:**
+    1. Verify webhook exists in external system
+    2. Check webhook URL matches Integration Broker trigger URL
+    3. Test webhook with manual trigger
+    4. Review external system webhook logs
+    5. Check network/firewall rules
+  
+  
+  
+    **Symptoms**: External system reports webhook timeout
+    
+    **Causes:**
+    - Integration Broker slow to respond
+    - High queue depth
+    - External API calls taking too long
+    
+    **Solutions:**
+    1. Integration Broker responds quickly (
+  
+  
+    **Symptoms**: Same external record creates multiple work orders
+    
+    **Causes:**
+    - Webhook triggering multiple times
+    - No correlation ID check
+    - Retry logic creating duplicates
+    
+    **Solutions:**
+    1. Implement idempotency using correlation ID
+    2. Check Integration Broker logs for duplicate triggers
+    3. Review webhook configuration (should trigger once per record)
+    4. Enable duplicate detection in Integration Broker
+  
+
+
+---
+
+### Field Mapping Problems
+
+
+  
+    **Symptoms**: Transformation fails, JSONNET syntax error
+    
+    **Common Errors:**
+    - Syntax error: Missing comma, bracket mismatch
+    - Runtime error: Null pointer, type mismatch
+    - Logic error: Wrong output, unexpected value
+    
+    **Debug Steps:**
+    1. Test JSONNET in isolation with sample payload
+    2. Add `std.trace()` statements to inspect values
+    3. Use local variables to break down complex logic
+    4. Check Integration Broker logs for error details
+    
+    **Debug Example:**
+    ```jsonnet
+    {
+      result:
+        local value = $.util.lookup_field($.input, 'field', 'default');
+        local traced = std.trace("Value: " + std.toString(value), value);
+        // Continue with traced value
+        traced
+    }
+    ```
+  
+  
+  
+    **Symptoms**: lookup_field returns default value
+    
+    **Causes:**
+    - Incorrect path syntax
+    - Field doesn't exist in payload
+    - Array access incorrect
+    
+    **Solutions:**
+    1. Check payload structure in logs
+    2. Verify dot notation path correct
+    3. Use array index for array fields:
+    
+    ```jsonnet
+    // Correct
+    $.util.lookup_field($.input, 'contacts[0].email', '')
+    
+    // Incorrect
+    $.util.lookup_field($.input, 'contacts.email', '')
+    ```
+  
+  
+  
+    **Symptoms**: Date field empty or error
+    
+    **Causes:**
+    - Input format doesn't match actual format
+    - Timezone string invalid
+    - Source date null/empty
+    
+    **Solutions:**
+    1. Validate date format in source data
+    2. Add null check before conversion:
+    
+    ```jsonnet
+    {
+      "action": "custom",
+      "target": "converted_date",
+      "script": |||
+        local date = $.util.lookup_field($.input, 'date_field', '');
+        if date != '' then
+          $.util.date_convert(date, 'YYYY-MM-DD', 'MM/DD/YYYY')
+        else
+          ''
+      |||
+    }
+    ```
+    
+    3. Use try-catch pattern for robust handling
+  
+
+
+---
+
+### Performance Issues
+
+
+  
+    **Symptoms**: Messages backing up in queue
+    
+    **Causes:**
+    - External API slow
+    - Complex field mappings
+    - High volume of events
+    - Worker instances insufficient
+    
+    **Solutions:**
+    1. Review external API performance
+    2. Simplify field mappings where possible
+    3. Batch operations if supported
+    4. Contact Field Nation Support for scaling
+  
+  
+  
+    **Symptoms**: 429 errors from external API
+    
+    **Causes:**
+    - Too many API calls per minute
+    - Burst limit exceeded
+    - Per-user limits hit
+    
+    **Solutions:**
+    1. Configure rate limits in Integration Broker
+    2. Reduce sync frequency
+    3. Batch updates where possible
+    4. Request rate limit increase from external platform
+  
+  
+  
+    **Symptoms**: Long delay between trigger and sync
+    
+    **Causes:**
+    - Queue backed up
+    - External API latency
+    - Complex transformations
+    - Network issues
+    
+    **Debug:**
+    1. Check Integration Broker metrics for bottleneck
+    2. Review logs for timing breakdown
+    3. Test external API directly for response time
+    4. Simplify field mappings as test
+  
+
+
+---
+
+## Debugging Checklist
+
+Use this systematic approach for any integration issue:
+
+### 1. Gather Information
+
+- ☐ When did the issue start?
+- ☐ Is it affecting all syncs or specific records?
+- ☐ What changed recently? (configuration, external system, Field Nation)
+- ☐ Can you reproduce the issue?
+
+### 2. Check Logs
+
+- ☐ Integration Broker logs for error messages
+- ☐ External system webhook logs
+- ☐ Field Nation work order history
+- ☐ Network/firewall logs if connectivity suspected
+
+### 3. Test Components
+
+- ☐ Test authentication (API credentials work?)
+- ☐ Test webhook (manual trigger works?)
+- ☐ Test field mappings (with sample data)
+- ☐ Test external API directly (outside integration)
+
+### 4. Isolate Problem
+
+- ☐ Is it authentication, validation, or transformation?
+- ☐ Is it specific field or all fields?
+- ☐ Is it inbound, outbound, or both?
+- ☐ Is it consistent or intermittent?
+
+### 5. Apply Fix
+
+- ☐ Update configuration based on findings
+- ☐ Test fix with sample sync
+- ☐ Monitor for successful processing
+- ☐ Document solution for future reference
+
+---
+
+## Getting Help
+
+### Before Contacting Support
+
+Gather this information to expedite support:
+
+1. **Integration Details**
+   - Connector name (Salesforce, ServiceNow, etc.)
+   - Company ID
+   - Environment (Sandbox or Production)
+
+2. **Issue Description**
+   - What you expected to happen
+   - What actually happened
+   - When the issue started
+   - Frequency (always, sometimes, once)
+
+3. **Relevant IDs**
+   - Work Order ID(s) affected
+   - External Record ID(s)
+   - Correlation ID(s)
+   - Error message timestamps
+
+4. **Troubleshooting Attempted**
+   - Steps you've already tried
+   - Results of each attempt
+   - Any temporary workarounds
+
+### Contact Support
+
+**Field Nation Support:**
+- **Portal**: [app.fieldnation.com/support-cases](https://app.fieldnation.com/support-cases)
+- **Phone**: +1 877-573-4353 (24/7)
+
+**Priority Levels:**
+- **P1 (Critical)**: Integration completely down, business impact
+- **P2 (High)**: Partial failure, workaround available
+- **P3 (Medium)**: Minor issue, low impact
+- **P4 (Low)**: Question, enhancement request
+
+[Complete support resources →](/docs/resources/support)
+
+---
+
+## Platform-Specific Troubleshooting
+
+Each platform has unique considerations:
+
+
+  
+    Flow and Outbound Message issues
+  
+  
+    Business Rule and REST Message debugging
+  
+  
+    OpenAPI spec and endpoint configuration
+  
+
+
+[View all platforms →](/docs/connectors/introduction)
+
+---
+
+## Preventive Measures
+
+### Monitoring
+
+- ✅ Set up error email notifications
+- ✅ Monitor queue depths daily
+- ✅ Review sync success rates weekly
+- ✅ Check external API health
+
+### Maintenance
+
+- ✅ Test integrations after external system upgrades
+- ✅ Rotate API credentials periodically
+- ✅ Review and update field mappings
+- ✅ Document configuration changes
+
+### Best Practices
+
+- ✅ Start simple, add complexity gradually
+- ✅ Test thoroughly in sandbox before production
+- ✅ Keep transformation logic simple
+- ✅ Use descriptive names for mappings
+- ✅ Document business logic in JSONNET comments
+
+---

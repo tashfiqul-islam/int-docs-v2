@@ -1,0 +1,662 @@
+# Webhooks: undefined
+URL: /docs/webhooks/api-reference/webhooks
+Source: content/docs/webhooks/api-reference/webhooks.mdx
+
+
+
+---
+title: Webhook Operations API
+description: Complete API reference for webhook CRUD operations - create, list, get, update, and delete webhooks programmatically.
+---
+
+## Endpoints Overview
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **POST** | `/api/v1/webhooks` | Create a new webhook |
+| **GET** | `/api/v1/webhooks` | List all webhooks |
+| **GET** | `/api/v1/webhooks/{webhookId}` | Get webhook details |
+| **PUT** | `/api/v1/webhooks/{webhookId}` | Update a webhook |
+| **DELETE** | `/api/v1/webhooks/{webhookId}` | Delete a webhook |
+
+---
+
+## Create Webhook
+
+Create a new webhook configuration.
+
+### Request
+
+**POST** `/api/v1/webhooks`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+- `Content-Type: application/json` (required)
+
+**Body Parameters:**
+
+",
+      description: "Array of event names to subscribe to. Must contain at least 1 event.",
+      required: true
+    },
+    "secret": {
+      type: "string (UUID)",
+      description: "Optional secret for HMAC-SHA256 signing. Auto-generated if omitted.",
+      required: false
+    },
+    "notificationEmail": {
+      type: "string (email)",
+      description: "Email address for delivery failure notifications.",
+      required: false
+    },
+    "isIntegrationOnly": {
+      type: "boolean",
+      description: "Whether webhook is restricted to API-only access.",
+      required: false,
+      default: false
+    },
+    "webhookAttribute": {
+      type: "object",
+      description: "Custom headers and legacy field mappings.",
+      required: false
+    }
+  }}
+/>
+
+### Example Request
+
+```bash
+curl -X POST https://api-sandbox.fndev.net/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "events": [
+      "workorder.status.published",
+      "workorder.status.assigned",
+      "workorder.status.work_done",
+      "workorder.status.approved"
+    ],
+    "notificationEmail": "webhook-alerts@example.com",
+    "webhookAttribute": {
+      "header": {
+        "Authorization": "Bearer your-api-token",
+        "X-Custom-ID": "prod-webhook-001"
+      }
+    }
+  }'
+```
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T10:30:00Z"
+  },
+  "result": {
+    "id": 123,
+    "webhookId": "wh_abc123def456",
+    "companyId": 789,
+    "userId": 456,
+    "url": "https://your-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "secret": "01999f51-5c66-4449-b441-6b4a053fee6a",
+    "events": [
+      "workorder.status.published",
+      "workorder.status.assigned",
+      "workorder.status.work_done",
+      "workorder.status.approved"
+    ],
+    "notificationEmail": "webhook-alerts@example.com",
+    "modelProperties": [],
+    "isIntegrationOnly": false,
+    "createdAt": "2025-01-15T10:30:00Z",
+    "updatedAt": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
+> **Save the secret!** The `secret` field is only returned during creation. Store it securely for signature verification.
+
+---
+
+## List Webhooks
+
+Retrieve a paginated list of webhooks.
+
+### Request
+
+**GET** `/api/v1/webhooks`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+
+**Query Parameters:**
+
+
+
+### Example Requests
+
+
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?status=active" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?search=production&sortBy=createdAt&sortDirection=DESC" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?fields=id,webhookId,url,status,events" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T11:00:00Z",
+    "count": 2,
+    "total": 2
+  },
+  "result": [
+    {
+      "id": 123,
+      "webhookId": "wh_abc123",
+      "companyId": 789,
+      "userId": 456,
+      "url": "https://your-endpoint.com/webhooks",
+      "method": "post",
+      "status": "active",
+      "secret": "01999f51-5c66-4449-b441-6b4a053fee6a",
+      "events": ["workorder.status.published", "workorder.status.assigned"],
+      "notificationEmail": "alerts@example.com",
+      "modelProperties": [],
+      "isIntegrationOnly": false,
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z"
+    },
+    {
+      "id": 124,
+      "webhookId": "wh_def456",
+      "companyId": 789,
+      "userId": 456,
+      "url": "https://staging.example.com/webhooks",
+      "method": "post",
+      "status": "inactive",
+      "secret": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "events": ["workorder.status.work_done"],
+      "notificationEmail": "staging@example.com",
+      "modelProperties": [],
+      "isIntegrationOnly": false,
+      "createdAt": "2025-01-14T15:00:00Z",
+      "updatedAt": "2025-01-15T09:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## Get Webhook Details
+
+Retrieve detailed information about a specific webhook.
+
+### Request
+
+**GET** `/api/v1/webhooks/{webhookId}`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+
+**Path Parameters:**
+- `webhookId` (string, required): Unique webhook identifier
+
+**Query Parameters:**
+
+
+
+### Example Requests
+
+
+  
+    ```bash
+    curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123?webhookAttribute=header" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T11:00:00Z"
+  },
+  "result": {
+    "id": 123,
+    "webhookId": "wh_abc123",
+    "companyId": 789,
+    "userId": 456,
+    "url": "https://your-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "secret": "01999f51-5c66-4449-b441-6b4a053fee6a",
+    "events": [
+      "workorder.status.published",
+      "workorder.status.assigned"
+    ],
+    "notificationEmail": "alerts@example.com",
+    "modelProperties": [],
+    "isIntegrationOnly": false,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T10:30:00Z"
+  }
+}
+```
+
+---
+
+## Update Webhook
+
+Update an existing webhook configuration. Only include fields you want to change.
+
+### Request
+
+**PUT** `/api/v1/webhooks/{webhookId}`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+- `Content-Type: application/json` (required)
+
+**Path Parameters:**
+- `webhookId` (string, required): Unique webhook identifier
+
+**Body Parameters** (all optional):
+
+",
+      description: "Updated array of event names (replaces existing list)",
+      required: false
+    },
+    "secret": {
+      type: "string (UUID)",
+      description: "Updated secret for signature verification",
+      required: false
+    },
+    "notificationEmail": {
+      type: "string (email)",
+      description: "Updated notification email",
+      required: false
+    },
+    "webhookAttribute": {
+      type: "object",
+      description: "Updated custom headers",
+      required: false
+    }
+  }}
+/>
+
+### Example Requests
+
+
+  
+    ```bash
+    curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "url": "https://new-endpoint.com/webhooks"
+      }'
+    ```
+  
+  
+    ```bash
+    curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "status": "inactive"
+      }'
+    ```
+  
+  
+    ```bash
+    curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "events": [
+          "workorder.status.published",
+          "workorder.status.assigned",
+          "workorder.status.work_done",
+          "workorder.status.approved"
+        ]
+      }'
+    ```
+  
+  
+    ```bash
+    curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "webhookAttribute": {
+          "header": {
+            "X-Environment": "production",
+            "X-Version": "v2"
+          }
+        }
+      }'
+    ```
+  
+
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T11:30:00Z"
+  },
+  "result": {
+    "id": 123,
+    "webhookId": "wh_abc123",
+    "companyId": 789,
+    "userId": 456,
+    "url": "https://new-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "secret": "01999f51-5c66-4449-b441-6b4a053fee6a",
+    "events": [
+      "workorder.status.published",
+      "workorder.status.assigned"
+    ],
+    "notificationEmail": "alerts@example.com",
+    "modelProperties": [],
+    "isIntegrationOnly": false,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T11:30:00Z"
+  }
+}
+```
+
+---
+
+## Delete Webhook
+
+Permanently delete a webhook configuration. Delivery logs are preserved.
+
+### Request
+
+**DELETE** `/api/v1/webhooks/{webhookId}`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+
+**Path Parameters:**
+- `webhookId` (string, required): Unique webhook identifier
+
+### Example Request
+
+```bash
+curl -X DELETE https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z"
+  },
+  "result": {
+    "id": 123,
+    "webhookId": "wh_abc123",
+    "companyId": 789,
+    "userId": 456,
+    "url": "https://your-endpoint.com/webhooks",
+    "method": "post",
+    "status": "active",
+    "secret": "01999f51-5c66-4449-b441-6b4a053fee6a",
+    "events": ["workorder.status.published"],
+    "notificationEmail": "alerts@example.com",
+    "modelProperties": [],
+    "isIntegrationOnly": false,
+    "createdAt": "2025-01-15T10:00:00Z",
+    "updatedAt": "2025-01-15T10:00:00Z"
+  }
+}
+```
+
+> **Irreversible**: Deleted webhooks cannot be recovered. Consider archiving (`status: "archived"`) instead if you want to preserve the configuration.
+
+---
+
+## Delete Webhook Attribute
+
+Remove a specific custom header or legacy field mapping.
+
+### Request
+
+**DELETE** `/api/v1/webhooks/{webhookId}/{attributeType}/{attributeName}`
+
+**Headers:**
+- `Authorization: Bearer {access_token}` (required)
+
+**Path Parameters:**
+- `webhookId` (string, required): Unique webhook identifier
+- `attributeType` (string, required): Type of attribute: `header`, `legacy_field`
+- `attributeName` (string, required): Name of the attribute to delete
+
+### Example Request
+
+```bash
+# Delete custom header
+curl -X DELETE https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123/header/X-Custom-ID \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "message": "Webhook attribute successfully removed"
+}
+```
+
+---
+
+## Error Responses
+
+### 400 Bad Request
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "path": "/api/v1/webhooks"
+  },
+  "errors": [
+    {
+      "code": 400,
+      "message": "Invalid request: 'url' must be a valid HTTPS URL"
+    }
+  ],
+  "result": {}
+}
+```
+
+### 401 Unauthorized
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "path": "/api/v1/webhooks"
+  },
+  "errors": [
+    {
+      "code": 401,
+      "message": "Invalid or expired access token"
+    }
+  ],
+  "result": {}
+}
+```
+
+### 404 Not Found
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "path": "/api/v1/webhooks/wh_invalid"
+  },
+  "errors": [
+    {
+      "code": 404,
+      "message": "Webhook not found"
+    }
+  ],
+  "result": {}
+}
+```
+
+---
+
+## Code Examples
+
+### Complete CRUD Operations
+
+```javascript
+class WebhookManager {
+  constructor(accessToken) {
+    this.accessToken = accessToken;
+    this.baseUrl = 'https://api-sandbox.fndev.net';
+  }
+  
+  async create(config) {
+    const response = await fetch(`${this.baseUrl}/api/v1/webhooks`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(config)
+    });
+    return await response.json();
+  }
+  
+  async list(filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks?${params}`,
+      {
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+  
+  async get(webhookId) {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/${webhookId}`,
+      {
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+  
+  async update(webhookId, updates) {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/${webhookId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updates)
+      }
+    );
+    return await response.json();
+  }
+  
+  async delete(webhookId) {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/${webhookId}`,
+      {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+}
+
+// Usage
+const manager = new WebhookManager(accessToken);
+
+// Create
+const webhook = await manager.create({
+  url: 'https://example.com/webhooks',
+  method: 'post',
+  status: 'active',
+  events: ['workorder.status.published']
+});
+
+// List
+const webhooks = await manager.list({ status: 'active' });
+
+// Get
+const details = await manager.get('wh_abc123');
+
+// Update
+const updated = await manager.update('wh_abc123', {
+  status: 'inactive'
+});
+
+// Delete
+const deleted = await manager.delete('wh_abc123');
+```
+
+---

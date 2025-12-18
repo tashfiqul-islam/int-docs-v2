@@ -8,7 +8,9 @@ import {
   Layers,
   Zap,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import pivital from "~/assets/companies/pivital.svg";
 
 const benefits = [
   {
@@ -35,7 +37,7 @@ const benefits = [
 
 export function PlatformStatement() {
   return (
-    <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-fd-background">
+    <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden bg-fd-background py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0">
       {/* Decorative background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--color-fd-primary)/0.06),transparent_70%)]" />
@@ -162,53 +164,53 @@ export function PlatformStatement() {
                   className="mb-6 border-l-2 pl-4 text-fd-foreground text-lg italic leading-relaxed"
                   style={{ borderColor: "var(--color-fd-primary)" }}
                 >
-                  "Pivital leverages Field Nation’s Salesforce integration to
-                  improve service efficiency and transparency."
+                  "Automatic syncing decreased manual work and improved
+                  operational flow."
                 </blockquote>
 
                 {/* Company info */}
-                <div className="mb-6 flex items-center gap-4">
-                  <div
-                    className="flex size-12 items-center justify-center rounded-xl font-bold text-lg"
-                    style={{
-                      backgroundColor: "hsl(var(--color-fd-primary) / 0.1)",
-                      color: "var(--color-fd-primary)",
-                    }}
-                  >
-                    P
-                  </div>
+                <div className="mb-6 flex items-center gap-3">
+                  <Image
+                    alt="Pivital"
+                    className="size-10 opacity-90 transition-opacity hover:opacity-100"
+                    height={40}
+                    src={pivital}
+                    width={40}
+                  />
                   <div>
                     <h4 className="font-semibold text-fd-foreground">
-                      PIVITAL
+                      Pivital, Inc.
                     </h4>
-                    <p className="text-fd-muted-foreground text-sm">
-                      Field Service Provider
+                    <p className="text-fd-muted-foreground text-xs">
+                      Field Nation Buyer
                     </p>
                   </div>
                 </div>
 
                 {/* Results */}
-                <div className="mb-6 grid grid-cols-2 gap-4 rounded-xl bg-fd-muted/30 p-4">
+                <div className="mb-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-xl border border-fd-border/50 bg-fd-muted/40 p-4 shadow-sm">
                   <div className="text-center">
                     <p
                       className="font-bold text-2xl"
                       style={{ color: "var(--color-fd-primary)" }}
                     >
-                      40%
+                      $6.6M+
                     </p>
-                    <p className="text-fd-muted-foreground text-xs">
-                      Less manual work
+                    <p className="font-medium text-fd-muted-foreground text-xs">
+                      Work enabled (12mo)
                     </p>
                   </div>
+                  {/* Vertical Separator */}
+                  <div className="h-10 w-px bg-fd-border/60" />
                   <div className="text-center">
                     <p
                       className="font-bold text-2xl"
                       style={{ color: "var(--color-fd-primary)" }}
                     >
-                      2x
+                      25%
                     </p>
-                    <p className="text-fd-muted-foreground text-xs">
-                      Faster turnaround
+                    <p className="font-medium text-fd-muted-foreground text-xs">
+                      Less manual updates
                     </p>
                   </div>
                 </div>

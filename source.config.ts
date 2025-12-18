@@ -10,7 +10,7 @@ import {
 import lastModified from "fumadocs-mdx/plugins/last-modified";
 import { transformerTwoslash } from "fumadocs-twoslash";
 import { createFileSystemTypesCache } from "fumadocs-twoslash/cache-fs";
-import z from "zod";
+import { z } from "zod";
 
 export const docs = defineDocs({
   dir: "content/docs",

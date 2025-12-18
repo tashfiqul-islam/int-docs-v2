@@ -3,34 +3,42 @@
 import { ArrowRight, BookOpen, Code2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import fujitsu from "~/assets/companies/fujitsu.svg";
+import pomeroy from "~/assets/companies/pomeroy.svg";
+import pomeroyLight from "~/assets/companies/pomeroy-light.svg";
+import worldlink from "~/assets/companies/worldlink.svg";
+import xtium from "~/assets/companies/xtium.svg";
+import xtiumDark from "~/assets/companies/xtium-dark.svg";
 import homeDark from "~/assets/home_dark.png";
 import homeLight from "~/assets/home_light.png";
 import { Button } from "~/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="overflow-hidden border-fd-border/50 border-b bg-fd-background py-20 pb-32 sm:py-32 lg:pb-32 xl:pb-36">
-      <div className="container relative z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.18),transparent_50%)]" />
-      </div>
+    <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden border-fd-border/50 border-b bg-fd-background py-12 md:py-16 xl:h-[calc(100vh-4rem)] xl:min-h-[calc(100vh-4rem)] xl:py-0">
+      {/* Background gradient */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.18),transparent_50%)]" />
 
       {/* Grid pattern overlay */}
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
-      <div className="relative mx-auto w-full max-w-[var(--fd-layout-width)] px-4 py-16 md:px-6 md:py-20 lg:px-8 lg:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      {/* Main content - this is the only flex child */}
+      <div className="relative z-10 mx-auto flex w-full max-w-[var(--fd-layout-width)] flex-col items-center justify-center px-4 md:px-6 lg:px-8">
+        <div className="grid w-full items-center gap-12 lg:grid-cols-[45%_55%] lg:gap-16">
           {/* Left: Text Content */}
           <div className="text-center lg:text-left">
             {/* Badge */}
             <div className="mb-6 flex animate-fade-in justify-center lg:justify-start">
               <Link
                 className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 font-medium text-sm backdrop-blur-sm transition-all hover:bg-fd-accent/50"
-                href="/blog/introducing-developer-platform"
+                href="https://fieldnation.com/resource-library?s=&fldn_content_type=6&fldn_content_category=&fldn_work_type="
+                rel="noopener noreferrer"
                 style={{
                   borderColor: "hsl(var(--color-fd-primary) / 0.3)",
                   backgroundColor: "hsl(var(--color-fd-primary) / 0.08)",
                   color: "var(--color-fd-primary)",
                 }}
+                target="_blank"
               >
                 <span className="text-base">✨</span>
                 <span>Refreshed Developer Portal</span>
@@ -104,42 +112,11 @@ export function HeroSection() {
                 </Link>
               </Button>
             </div>
-
-            {/* Stats */}
-            <div className="mt-12 flex animate-fade-in-delay flex-wrap items-center justify-center gap-6 text-fd-muted-foreground text-sm lg:justify-start lg:gap-8">
-              <div className="flex items-center gap-2">
-                <div
-                  className="size-2 animate-pulse rounded-full"
-                  style={{ backgroundColor: "var(--color-fd-primary)" }}
-                />
-                <span className="font-medium">200+ API Endpoints</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="size-2 animate-pulse rounded-full"
-                  style={{
-                    backgroundColor: "var(--color-fd-primary)",
-                    animationDelay: "0.3s",
-                  }}
-                />
-                <span className="font-medium">14 Pre-built Connectors</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="size-2 animate-pulse rounded-full"
-                  style={{
-                    backgroundColor: "var(--color-fd-primary)",
-                    animationDelay: "0.6s",
-                  }}
-                />
-                <span className="font-medium">Real-time Webhooks</span>
-              </div>
-            </div>
           </div>
 
           {/* Right: Visual - 3D Perspective Floating Effect */}
           <div
-            className="relative hidden animate-slide-in-right lg:block"
+            className="relative hidden animate-slide-in-right lg:block lg:-translate-x-16"
             style={{ perspective: "1500px" }}
           >
             {/* Glass surface behind - STATIC, no hover effect */}
@@ -199,7 +176,7 @@ export function HeroSection() {
                     height={600}
                     priority
                     src={homeLight}
-                    width={900}
+                    width={1000}
                   />
                   {/* Dark mode image */}
                   <Image
@@ -208,7 +185,7 @@ export function HeroSection() {
                     height={600}
                     priority
                     src={homeDark}
-                    width={900}
+                    width={1000}
                   />
                 </div>
               </div>
@@ -220,6 +197,75 @@ export function HeroSection() {
                   background:
                     "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
                 }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Trusted By - Company Logos */}
+        <div className="mt-36 animate-fade-in-delay">
+          <h3 className="mb-8 text-center font-semibold text-fd-muted-foreground text-sm uppercase tracking-widest">
+            Trusted by Industry Leaders
+          </h3>
+          <div className="flex flex-wrap items-center justify-center">
+            {/* Fujitsu */}
+            <div className="flex items-center px-6 lg:px-8">
+              <Image
+                alt="Fujitsu"
+                className="h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:brightness-0 dark:invert hover:dark:brightness-100 hover:dark:invert-0"
+                height={40}
+                src={fujitsu}
+                width={120}
+              />
+            </div>
+            {/* Separator */}
+            <div className="h-8 w-px bg-fd-border/50 md:h-10" />
+            {/* Pomeroy - light/dark variants */}
+            <div className="flex items-center px-6 lg:px-8">
+              <Image
+                alt="Pomeroy"
+                className="h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:hidden"
+                height={40}
+                src={pomeroyLight}
+                width={120}
+              />
+              <Image
+                alt="Pomeroy"
+                className="hidden h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:block"
+                height={40}
+                src={pomeroy}
+                width={120}
+              />
+            </div>
+            {/* Separator */}
+            <div className="h-8 w-px bg-fd-border/50 md:h-10" />
+            {/* WorldLink */}
+            <div className="flex items-center px-6 lg:px-8">
+              <Image
+                alt="WorldLink"
+                className="h-8 w-auto opacity-70 grayscale invert transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:invert-0"
+                height={40}
+                src={worldlink}
+                width={120}
+              />
+            </div>
+            {/* Separator */}
+            <div className="h-8 w-px bg-fd-border/50 md:h-10" />
+            {/* Xtium - light/dark variants */}
+            <div className="flex items-center px-6 lg:px-8">
+              <Image
+                alt="Xtium"
+                className="h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:hidden"
+                height={40}
+                src={xtium}
+                width={120}
+              />
+              <Image
+                alt="Xtium"
+                className="hidden h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:block"
+                height={40}
+                src={xtiumDark}
+                width={120}
               />
             </div>
           </div>

@@ -18,7 +18,7 @@ const mainFeatures = [
     description:
       "Event-driven updates for work order status changes, assignments, completions, and custom events.",
     href: "/docs/webhooks/introduction",
-    badge: "25+ Events",
+    badge: "30+ Events",
   },
 ] as const;
 
@@ -48,7 +48,7 @@ const secondaryFeatures = [
 
 export function Features() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center bg-fd-card/30">
+    <section className="relative flex min-h-[600px] items-center justify-center bg-fd-card/30 py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0">
       {/* Top gradient line */}
       <div
         aria-hidden="true"
