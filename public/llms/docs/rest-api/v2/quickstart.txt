@@ -1,0 +1,408 @@
+# REST API: undefined
+URL: /docs/rest-api/v2/quickstart
+Source: content/docs/rest-api/v2/quickstart.mdx
+
+
+
+---
+title: Quickstart
+description: Create your first work order using the Field Nation REST API in under 5 minutes.
+icon: Rocket
+---
+
+This quickstart guide will walk you through creating your first work order using the REST API.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- ☐ Field Nation buyer account (Sandbox or Production)
+- ☐ API credentials (Client ID and Client Secret)
+- ☐ HTTP client (curl, Postman, or programming language HTTP library)
+
+[Get prerequisites →](/docs/getting-started/prerequisites)
+
+---
+
+## Step 1: Obtain Access Token
+
+First, authenticate to get an access token:
+
+  
+```bash
+curl -X POST "https://api-sandbox.fndev.net/authentication/api/oauth/token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "client_credentials",
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "scope": "api"
+  }'
+```
+  
+  
+  
+```javascript
+const response = await fetch(
+  'https://api-sandbox.fndev.net/authentication/api/oauth/token',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'client_credentials',
+      client_id: 'YOUR_CLIENT_ID',
+      client_secret: 'YOUR_CLIENT_SECRET',
+      scope: 'api'
+    })
+  }
+);
+
+const { access_token } = await response.json();
+console.log('Access Token:', access_token);
+```
+  
+  
+  
+```python
+import requests
+
+response = requests.post(
+    'https://api-sandbox.fndev.net/authentication/api/oauth/token',
+    json={
+        'grant_type': 'client_credentials',
+        'client_id': 'YOUR_CLIENT_ID',
+        'client_secret': 'YOUR_CLIENT_SECRET',
+        'scope': 'api'
+    }
+)
+
+access_token = response.json()['access_token']
+print(f'Access Token: {access_token}')
+```
+  
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+> [INFO] **Save the `access_token`** - You'll use it in subsequent requests. Tokens typically expire after 1 hour.
+
+---
+
+## Step 2: Create a Simple Work Order
+
+Now create a work order with minimal required fields:
+
+  
+```bash
+curl -X POST "https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token=YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Network Equipment Installation",
+    "description": "Install and configure network switch at customer site",
+    "schedule": {
+      "service_window": {
+        "start": "2024-12-15T09:00:00Z",
+        "end": "2024-12-15T17:00:00Z"
+      }
+    },
+    "location": {
+      "address1": "123 Main St",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94102",
+      "country": "US"
+    },
+    "pay": {
+      "base": 150.00
+    }
+  }'
+```
+  
+  
+  
+```javascript
+const workOrder = await fetch(
+  `https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token=${accessToken}`,
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Network Equipment Installation',
+      description: 'Install and configure network switch at customer site',
+      schedule: {
+        service_window: {
+          start: '2024-12-15T09:00:00Z',
+          end: '2024-12-15T17:00:00Z'
+        }
+      },
+      location: {
+        address1: '123 Main St',
+        city: 'San Francisco',
+        state: 'CA',
+        zip: '94102',
+        country: 'US'
+      },
+      pay: {
+        base: 150.00
+      }
+    })
+  }
+);
+
+const workOrderData = await workOrder.json();
+console.log('Work Order Created:', workOrderData.id);
+```
+  
+  
+  
+```python
+work_order = requests.post(
+    f'https://api-sandbox.fndev.net/api/rest/v2/workorders?access_token={access_token}',
+    json={
+        'title': 'Network Equipment Installation',
+        'description': 'Install and configure network switch at customer site',
+        'schedule': {
+            'service_window': {
+                'start': '2024-12-15T09:00:00Z',
+                'end': '2024-12-15T17:00:00Z'
+            }
+        },
+        'location': {
+            'address1': '123 Main St',
+            'city': 'San Francisco',
+            'state': 'CA',
+            'zip': '94102',
+            'country': 'US'
+        },
+        'pay': {
+            'base': 150.00
+        }
+    }
+)
+
+work_order_data = work_order.json()
+print(f"Work Order Created: {work_order_data['id']}")
+```
+  
+
+**Response:**
+```json
+{
+  "id": 12345,
+  "title": "Network Equipment Installation",
+  "description": "Install and configure network switch at customer site",
+  "status": {
+    "id": 0,
+    "name": "Draft"
+  },
+  "schedule": {
+    "service_window": {
+      "start": "2024-12-15T09:00:00Z",
+      "end": "2024-12-15T17:00:00Z"
+    }
+  },
+  "location": {
+    "address1": "123 Main St",
+    "city": "San Francisco",
+    "state": "CA",
+    "zip": "94102",
+    "country": "US"
+  },
+  "pay": {
+    "base": 150.00
+  },
+  "created": "2024-12-07T10:30:00Z",
+  // ... other fields
+}
+```
+
+> [INFO] **Work Order Created!** The work order is in "Draft" status. Save the `id` (12345 in this example) for next steps.
+
+---
+
+## Step 3: Publish the Work Order
+
+Publish the work order to make it available to providers:
+
+  
+```bash
+curl -X POST "https://api-sandbox.fndev.net/api/rest/v2/workorders/12345/publish?access_token=YOUR_ACCESS_TOKEN"
+```
+  
+  
+  
+```javascript
+const publish = await fetch(
+  `https://api-sandbox.fndev.net/api/rest/v2/workorders/12345/publish?access_token=${accessToken}`,
+  { method: 'POST' }
+);
+
+console.log('Work Order Published!');
+```
+  
+  
+  
+```python
+publish = requests.post(
+    f'https://api-sandbox.fndev.net/api/rest/v2/workorders/12345/publish?access_token={access_token}'
+)
+
+print('Work Order Published!')
+```
+  
+
+**Response:**
+```json
+{
+  "id": 12345,
+  "status": {
+    "id": 1,
+    "name": "Published"
+  },
+  "published": "2024-12-07T10:35:00Z",
+  // ... other fields
+}
+```
+
+---
+
+## Step 4: Retrieve Work Order Details
+
+Check the work order status:
+
+  
+```bash
+curl "https://api-sandbox.fndev.net/api/rest/v2/workorders/12345?access_token=YOUR_ACCESS_TOKEN"
+```
+  
+  
+  
+```javascript
+const details = await fetch(
+  `https://api-sandbox.fndev.net/api/rest/v2/workorders/12345?access_token=${accessToken}`
+);
+
+const workOrderDetails = await details.json();
+console.log('Status:', workOrderDetails.status.name);
+```
+  
+  
+  
+```python
+details = requests.get(
+    f'https://api-sandbox.fndev.net/api/rest/v2/workorders/12345?access_token={access_token}'
+)
+
+work_order_details = details.json()
+print(f"Status: {work_order_details['status']['name']}")
+```
+  
+
+---
+
+## 🎉 Congratulations!
+
+You've successfully:
+- ✅ Obtained an access token
+- ✅ Created a work order
+- ✅ Published it to the marketplace
+- ✅ Retrieved work order details
+
+---
+
+## Common Enhancements
+
+### Add More Details
+
+Enhance your work order with:
+
+**Type of Work:**
+```json
+{
+  "type_of_work": {
+    "id": 123,
+    "name": "Network Installation"
+  }
+}
+```
+
+**Contact Information:**
+```json
+{
+  "contacts": [{
+    "name": "John Doe",
+    "phone": "+1-555-0123",
+    "email": "john@example.com"
+  }]
+}
+```
+
+**Custom Fields:**
+```json
+{
+  "custom_fields": [{
+    "id": 456,
+    "value": "Switch Model: Cisco 2960"
+  }]
+}
+```
+
+**Tasks/Checklist:**
+```json
+{
+  "tasks": [{
+    "label": "Power on equipment",
+    "description": "Verify all LEDs are green"
+  }]
+}
+```
+
+---
+
+## Error Handling
+
+Handle common errors gracefully:
+
+```javascript
+try {
+  const response = await fetch(url, options);
+  
+  if (!response.ok) {
+    const error = await response.json();
+    console.error('API Error:', error.message);
+    
+    if (response.status === 401) {
+      // Token expired - refresh token
+    } else if (response.status === 400) {
+      // Invalid request - check payload
+    }
+  }
+  
+  return await response.json();
+} catch (error) {
+  console.error('Network Error:', error);
+}
+```
+
+---
+
+## Production Checklist
+
+Before going to production:
+
+- ☐ Switch to production API URL
+- ☐ Use production credentials
+- ☐ Implement token refresh logic
+- ☐ Add proper error handling
+- ☐ Implement retry logic with exponential backoff
+- ☐ Log API requests for debugging
+- ☐ Monitor API usage and rate limits
+- ☐ Test with various work order scenarios
+
+---

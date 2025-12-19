@@ -1,18 +1,25 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-
 import autotask from "~/assets/connectors/autotask.svg";
+import autotaskLightBlue from "~/assets/connectors/autotask-light-blue.svg";
 import connectwise from "~/assets/connectors/connectwise.svg";
+import connectwiseLightBlue from "~/assets/connectors/connectwise-light-blue.svg";
 import freshdesk from "~/assets/connectors/freshdesk.svg";
+import freshdeskWhite from "~/assets/connectors/freshdesk-white.svg";
 import netsuite from "~/assets/connectors/netsuite.svg";
+import netsuiteWhite from "~/assets/connectors/netsuite-white.svg";
 import quickbase from "~/assets/connectors/quickbase.svg";
-import restDark from "~/assets/connectors/rest-dark.svg";
-import restLight from "~/assets/connectors/rest-light.svg";
+import quickbaseWhite from "~/assets/connectors/quickbase-white.svg";
+import rest from "~/assets/connectors/rest.svg";
+import restConnectorWhite from "~/assets/connectors/rest-connector-white.svg";
 import salesforce from "~/assets/connectors/salesforce.svg";
 import serviceNow from "~/assets/connectors/service-now.svg";
+import serviceNowWhite from "~/assets/connectors/service-now-white.svg";
 import smartsheet from "~/assets/connectors/smartsheet.svg";
+import smartsheetLightBlue from "~/assets/connectors/smartsheet-light-blue.svg";
+import { HoverEffect } from "~/components/ui/card-hover-effect";
+import { ConnectorCard } from "./connector-card";
 
 const connectors = [
   {
@@ -23,55 +30,56 @@ const connectors = [
   {
     name: "ServiceNow",
     logo: serviceNow,
+    logoDark: serviceNowWhite,
     href: "/docs/connectors/platforms/servicenow/overview",
-    needsDarkEnhance: true,
   },
   {
     name: "ConnectWise",
     logo: connectwise,
+    logoDark: connectwiseLightBlue,
     href: "/docs/connectors/platforms/connectwise/overview",
-    needsDarkEnhance: true,
   },
   {
     name: "Autotask",
     logo: autotask,
+    logoDark: autotaskLightBlue,
     href: "/docs/connectors/platforms/autotask/overview",
   },
   {
     name: "Freshdesk",
     logo: freshdesk,
+    logoDark: freshdeskWhite,
     href: "/docs/connectors/platforms/freshdesk/overview",
   },
   {
     name: "NetSuite",
     logo: netsuite,
+    logoDark: netsuiteWhite,
     href: "/docs/connectors/platforms/netsuite/overview",
-    needsDarkEnhance: true,
   },
   {
     name: "Quickbase",
     logo: quickbase,
+    logoDark: quickbaseWhite,
     href: "/docs/connectors/platforms/quickbase/overview",
-    needsDarkEnhance: true,
-    needsLargerSize: true,
   },
   {
     name: "Smartsheet",
     logo: smartsheet,
+    logoDark: smartsheetLightBlue,
     href: "/docs/connectors/platforms/smartsheet/overview",
-    needsDarkEnhance: true,
   },
   {
     name: "REST Connector",
-    logo: restLight,
-    logoDark: restDark,
+    logo: rest,
+    logoDark: restConnectorWhite,
     href: "/docs/connectors/platforms/rest-connector/overview",
   },
 ] as const;
 
 export function ConnectorsShowcase() {
   return (
-    <section className="relative flex min-h-[600px] items-center justify-center bg-fd-card/30 py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0">
+    <section className="relative flex min-h-[600px] items-center justify-center bg-slate-50 py-12 lg:py-24 xl:h-screen xl:min-h-0 xl:py-0 dark:bg-neutral-900/40">
       {/* Top gradient line */}
       <div
         aria-hidden="true"
@@ -91,60 +99,16 @@ export function ConnectorsShowcase() {
           </p>
         </div>
 
-        {/* Connectors grid - 3 columns, 3 rows */}
-        <div className="mx-auto mb-12 grid max-w-4xl grid-cols-3 gap-6 md:gap-8">
-          {connectors.map((connector) => (
-            <Link
-              className="group relative flex aspect-[3/2] items-center justify-center overflow-hidden rounded-2xl border border-fd-border/50 bg-fd-card p-6 transition-all duration-300 hover:border-fd-primary/40 hover:shadow-fd-primary/10 hover:shadow-xl md:p-8"
-              href={connector.href}
-              key={connector.name}
-              title={connector.name}
-            >
-              {"logoDark" in connector ? (
-                <>
-                  {/* Light mode logo */}
-                  <Image
-                    alt={`${connector.name} logo`}
-                    className="h-12 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-16 lg:h-20 dark:hidden"
-                    height={80}
-                    src={connector.logo}
-                    width={160}
-                  />
-                  {/* Dark mode logo */}
-                  <Image
-                    alt={`${connector.name} logo`}
-                    className="hidden h-12 w-auto max-w-full object-contain brightness-125 contrast-125 transition-all duration-300 group-hover:scale-110 md:h-16 lg:h-20 dark:block"
-                    height={80}
-                    src={connector.logoDark}
-                    width={160}
-                  />
-                </>
-              ) : (
-                <Image
-                  alt={`${connector.name} logo`}
-                  className={`h-12 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-16 lg:h-20 ${
-                    "needsDarkEnhance" in connector &&
-                    connector.needsDarkEnhance
-                      ? "dark:brightness-125 dark:contrast-125"
-                      : ""
-                  } ${"needsLargerSize" in connector && connector.needsLargerSize ? "!h-16 md:!h-20 lg:!h-24" : ""}`}
-                  height={80}
-                  src={connector.logo}
-                  width={160}
-                />
-              )}
-
-              {/* Hover overlay - slides up from bottom */}
-              <div className="absolute right-0 bottom-0 left-0 flex translate-y-full items-center justify-center bg-gradient-to-t from-fd-card via-fd-card/95 to-transparent px-4 py-3 transition-transform duration-300 ease-out group-hover:translate-y-0">
-                <span
-                  className="font-medium text-xs tracking-wide md:text-sm"
-                  style={{ color: "var(--color-fd-primary)" }}
-                >
-                  View Details →
-                </span>
-              </div>
-            </Link>
-          ))}
+        {/* Connectors grid - Fluid columns */}
+        <div className="mx-auto mb-12 max-w-4xl">
+          <HoverEffect
+            className="grid-cols-2 py-0 md:grid-cols-3"
+            items={[...connectors]}
+            keyExtractor={(connector) => connector.name}
+            renderItem={(connector, handlers) => (
+              <ConnectorCard connector={connector} {...handlers} />
+            )}
+          />
         </div>
 
         {/* "More connectors" message */}

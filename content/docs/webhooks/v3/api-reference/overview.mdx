@@ -1,0 +1,586 @@
+---
+title: API Reference Overview
+description: Complete API documentation for Field Nation Webhooks v3 including authentication, base URLs, endpoints, and best practices.
+---
+
+## Base Information
+
+### API Version
+
+**Current Version**: v3.0
+
+**Base URL (Sandbox)**: `https://api-sandbox.fndev.net`
+
+**Base URL (Production)**: Contact Field Nation support for production access
+
+### OpenAPI Specification
+
+- **Swagger UI (Sandbox)**: [https://ui-sandbox.fndev.net/integrations/webhooks/_api](https://ui-sandbox.fndev.net/integrations/webhooks/_api)
+- **JSON Spec (Sandbox)**: [https://ui-sandbox.fndev.net/integrations/webhooks/_api-json](https://ui-sandbox.fndev.net/integrations/webhooks/_api-json)
+
+---
+
+## Authentication
+
+The Webhooks API uses OAuth 2.0 Bearer tokens for authentication.
+
+### Getting an Access Token
+
+<Steps>
+
+### Obtain Credentials
+
+Request API credentials from Field Nation:
+- `client_id`
+- `client_secret`
+
+### Generate Access Token
+
+```bash
+curl -X POST https://api-sandbox.fndev.net/authentication/api/oauth/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=YOUR_CLIENT_ID" \
+  -d "client_secret=YOUR_CLIENT_SECRET"
+```
+
+**Response:**
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+### Use Token in Requests
+
+```bash
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+</Steps>
+
+<Callout type="warn">
+**Token Expiration**: Access tokens expire after 1 hour. Implement token refresh logic for production applications.
+</Callout>
+
+### Token Refresh
+
+```javascript
+class FieldNationAuth {
+  constructor(clientId, clientSecret) {
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.accessToken = null;
+    this.tokenExpiry = null;
+  }
+  
+  async getAccessToken() {
+    // Return cached token if still valid
+    if (this.accessToken && this.tokenExpiry > Date.now()) {
+      return this.accessToken;
+    }
+    
+    // Request new token
+    const response = await fetch(
+      'https://api-sandbox.fndev.net/authentication/api/oauth/token',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: this.clientId,
+          client_secret: this.clientSecret
+        })
+      }
+    );
+    
+    const data = await response.json();
+    
+    this.accessToken = data.access_token;
+    // Refresh 5 minutes before expiry
+    this.tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
+    
+    return this.accessToken;
+  }
+}
+
+// Usage
+const auth = new FieldNationAuth(CLIENT_ID, CLIENT_SECRET);
+const token = await auth.getAccessToken();
+```
+
+---
+
+## API Endpoints
+
+The Webhooks API is organized into 5 main categories:
+
+### Core Operations
+
+Manage webhook lifecycle (CRUD operations):
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/v1/webhooks` | List all webhooks |
+| **POST** | `/api/v1/webhooks` | Create a webhook |
+| **GET** | `/api/v1/webhooks/{webhookId}` | Get webhook details |
+| **PUT** | `/api/v1/webhooks/{webhookId}` | Update a webhook |
+| **DELETE** | `/api/v1/webhooks/{webhookId}` | Delete a webhook |
+
+[Complete reference →](/docs/webhooks/v3/api-reference/webhooks)
+
+### Events
+
+Discover available webhook events:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/v1/webhooks/events` | List available events |
+
+[Complete reference →](/docs/webhooks/v3/api-reference/events)
+
+### Delivery Logs
+
+Monitor webhook deliveries:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/v1/webhooks/delivery-logs` | List delivery logs |
+| **GET** | `/api/v1/webhooks/delivery-logs/{deliveryId}` | Get delivery details |
+| **PATCH** | `/api/v1/webhooks/delivery-logs/{deliveryId}/retry` | Retry failed delivery |
+
+[Complete reference →](/docs/webhooks/v3/api-reference/delivery-logs)
+
+### History
+
+Audit webhook changes:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/v1/webhooks/{webhookId}/history` | Get webhook change history |
+
+[Complete reference →](/docs/webhooks/v3/api-reference/history)
+
+### Attributes
+
+Manage custom headers and legacy fields:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **DELETE** | `/api/v1/webhooks/{webhookId}/{attributeType}/{attributeName}` | Delete webhook attribute |
+
+---
+
+## Common Request Patterns
+
+### Pagination
+
+List endpoints support pagination:
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?page=1&perPage=25" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Parameters:**
+- `page` (integer): Page number, starts at 1. Default: 1
+- `perPage` (integer): Items per page. Default: 25
+
+**Response includes pagination metadata:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "count": 25,
+    "total": 150
+  },
+  "result": [...]
+}
+```
+
+### Filtering
+
+Filter results by specific fields:
+
+```bash
+# Filter by status
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?status=active" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+
+# Filter by webhook ID
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhookId=wh_abc123" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Sorting
+
+Sort results by specific fields:
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?sortBy=createdAt&sortDirection=DESC" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Parameters:**
+- `sortBy` (string): Field to sort by (e.g., `id`, `createdAt`, `updatedAt`)
+- `sortDirection` (string): `ASC` or `DESC`
+
+### Field Selection
+
+Request only specific fields:
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/{webhookId}?fields=id,webhookId,url,status,events" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Searching
+
+Search across searchable fields:
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks?search=production" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+---
+
+## Response Format
+
+### Success Response
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "count": 1,
+    "total": 1
+  },
+  "result": {
+    // Response data
+  }
+}
+```
+
+### Error Response
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "path": "/api/v1/webhooks"
+  },
+  "errors": [
+    {
+      "code": 400,
+      "message": "Invalid request: missing required field 'url'"
+    }
+  ],
+  "result": {}
+}
+```
+
+### HTTP Status Codes
+
+| Status | Meaning |
+|--------|---------|
+| **200** | Success |
+| **201** | Created |
+| **400** | Bad Request - Invalid parameters |
+| **401** | Unauthorized - Invalid or missing token |
+| **403** | Forbidden - Insufficient permissions |
+| **404** | Not Found - Resource doesn't exist |
+| **422** | Unprocessable Entity - Validation failed |
+| **429** | Too Many Requests - Rate limit exceeded |
+| **500** | Internal Server Error |
+| **503** | Service Unavailable |
+
+---
+
+## Rate Limiting
+
+The API enforces rate limits to ensure fair usage:
+
+- **Rate Limit**: 100 requests per minute per client
+- **Burst**: 20 requests
+
+**Rate limit headers:**
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 85
+X-RateLimit-Reset: 1642252800
+```
+
+### Handling Rate Limits
+
+```javascript
+async function makeAPIRequest(url, options) {
+  const response = await fetch(url, options);
+  
+  if (response.status === 429) {
+    const resetTime = parseInt(response.headers.get('X-RateLimit-Reset'));
+    const waitTime = (resetTime * 1000) - Date.now();
+    
+    console.log(`Rate limit exceeded. Waiting ${waitTime}ms...`);
+    await sleep(waitTime);
+    
+    // Retry
+    return await makeAPIRequest(url, options);
+  }
+  
+  return response;
+}
+```
+
+---
+
+## Best Practices
+
+### Error Handling
+
+Always handle API errors gracefully:
+
+```javascript
+async function createWebhook(config) {
+  try {
+    const response = await fetch(
+      'https://api-sandbox.fndev.net/api/v1/webhooks',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(config)
+      }
+    );
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API Error: ${error.errors[0].message}`);
+    }
+    
+    return await response.json();
+    
+  } catch (error) {
+    console.error('Failed to create webhook:', error);
+    throw error;
+  }
+}
+```
+
+### Retry Logic
+
+Implement exponential backoff for transient errors:
+
+```javascript
+async function apiRequestWithRetry(url, options, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Retry on 5xx errors
+      if (response.status >= 500) {
+        if (attempt === maxRetries) {
+          throw new Error(`Max retries exceeded: ${response.status}`);
+        }
+        
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
+        await sleep(delay);
+        continue;
+      }
+      
+      return response;
+      
+    } catch (error) {
+      if (attempt === maxRetries) throw error;
+      
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
+      await sleep(delay);
+    }
+  }
+}
+```
+
+### Caching Tokens
+
+Cache access tokens to reduce authentication requests:
+
+```javascript
+const tokenCache = {
+  token: null,
+  expiry: 0
+};
+
+async function getToken() {
+  const now = Date.now();
+  
+  // Return cached token if valid
+  if (tokenCache.token && tokenCache.expiry > now) {
+    return tokenCache.token;
+  }
+  
+  // Fetch new token
+  const response = await fetch(/* auth request */);
+  const data = await response.json();
+  
+  tokenCache.token = data.access_token;
+  tokenCache.expiry = now + (data.expires_in - 300) * 1000;
+  
+  return tokenCache.token;
+}
+```
+
+### Logging Requests
+
+Log API requests for debugging:
+
+```javascript
+async function loggedAPIRequest(url, options) {
+  const requestId = generateRequestId();
+  
+  console.log(`[${requestId}] Request: ${options.method} ${url}`);
+  console.log(`[${requestId}] Headers:`, options.headers);
+  
+  const startTime = Date.now();
+  const response = await fetch(url, options);
+  const duration = Date.now() - startTime;
+  
+  console.log(`[${requestId}] Response: ${response.status} (${duration}ms)`);
+  
+  return response;
+}
+```
+
+---
+
+## SDK Example
+
+Wrapper class for cleaner API interactions:
+
+```javascript title="fieldnation-webhooks-sdk.js"
+class FieldNationWebhooksAPI {
+  constructor(clientId, clientSecret, baseUrl) {
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.baseUrl = baseUrl || 'https://api-sandbox.fndev.net';
+    this.accessToken = null;
+    this.tokenExpiry = null;
+  }
+  
+  async getAccessToken() {
+    if (this.accessToken && this.tokenExpiry > Date.now()) {
+      return this.accessToken;
+    }
+    
+    const response = await fetch(
+      `${this.baseUrl}/authentication/api/oauth/token`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: this.clientId,
+          client_secret: this.clientSecret
+        })
+      }
+    );
+    
+    const data = await response.json();
+    this.accessToken = data.access_token;
+    this.tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
+    
+    return this.accessToken;
+  }
+  
+  async request(method, path, body = null) {
+    const token = await this.getAccessToken();
+    
+    const options = {
+      method,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+    
+    const response = await fetch(`${this.baseUrl}${path}`, options);
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`API Error: ${JSON.stringify(error.errors)}`);
+    }
+    
+    return await response.json();
+  }
+  
+  // Webhook Operations
+  async listWebhooks(params = {}) {
+    const query = new URLSearchParams(params);
+    return await this.request('GET', `/api/v1/webhooks?${query}`);
+  }
+  
+  async getWebhook(webhookId) {
+    return await this.request('GET', `/api/v1/webhooks/${webhookId}`);
+  }
+  
+  async createWebhook(config) {
+    return await this.request('POST', '/api/v1/webhooks', config);
+  }
+  
+  async updateWebhook(webhookId, updates) {
+    return await this.request('PUT', `/api/v1/webhooks/${webhookId}`, updates);
+  }
+  
+  async deleteWebhook(webhookId) {
+    return await this.request('DELETE', `/api/v1/webhooks/${webhookId}`);
+  }
+  
+  // Delivery Logs
+  async getDeliveryLogs(params = {}) {
+    const query = new URLSearchParams(params);
+    return await this.request('GET', `/api/v1/webhooks/delivery-logs?${query}`);
+  }
+  
+  async retryDelivery(deliveryId) {
+    return await this.request('PATCH', `/api/v1/webhooks/delivery-logs/${deliveryId}/retry`);
+  }
+  
+  // Events
+  async getAvailableEvents(model = null) {
+    const query = model ? `?model=${model}` : '';
+    return await this.request('GET', `/api/v1/webhooks/events${query}`);
+  }
+}
+
+// Usage
+const api = new FieldNationWebhooksAPI(CLIENT_ID, CLIENT_SECRET);
+
+// List webhooks
+const webhooks = await api.listWebhooks({ status: 'active' });
+
+// Create webhook
+const webhook = await api.createWebhook({
+  url: 'https://example.com/webhooks',
+  method: 'post',
+  status: 'active',
+  events: ['workorder.status.published']
+});
+
+// Get delivery logs
+const logs = await api.getDeliveryLogs({ webhookId: webhook.result.webhookId });
+```
+
+---

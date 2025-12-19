@@ -1,0 +1,17 @@
+# REST API: undefined
+URL: /docs/rest-api/v2/api-playground
+Source: content/docs/rest-api/v2/api-playground.mdx
+
+
+
+---
+title: API Playground
+description: Jump to the REST API v2 playground to explore requests and responses.
+icon: SatelliteDish
+---
+
+import Link from "next/link";
+
+Visit the REST API v2 playground to try requests, view examples, and inspect responses:
+
+  Open REST API Playground

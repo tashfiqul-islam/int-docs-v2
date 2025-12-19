@@ -1,0 +1,383 @@
+---
+title: Common Issues
+description: Quick solutions for frequently encountered webhook problems including signature verification, payload parsing, and connectivity issues.
+---
+
+## Signature Verification Failures
+
+### Issue
+
+```
+❌ Signature verification failed
+❌ Unauthorized (401)
+```
+
+### Causes & Solutions
+
+<Accordions type="multiple">
+  <Accordion title="Wrong secret used">
+    **Solution**: Verify you're using the correct webhook secret.
+    
+    ```javascript
+    // ❌ Wrong - using wrong secret
+    const secret = 'wrong-secret';
+    
+    // ✅ Correct - use secret from webhook creation
+    const secret = process.env.WEBHOOK_SECRET; // From webhook creation response
+    ```
+  </Accordion>
+  
+  <Accordion title="Body modified before verification">
+    **Solution**: Verify signature using raw request body, before parsing.
+    
+    ```javascript
+    // ❌ Wrong - body already parsed
+    app.use(express.json());
+    app.post('/webhooks', (req, res) => {
+      verifySignature(req.body, signature, secret); // Will fail!
+    });
+    
+    // ✅ Correct - use raw body
+    app.post('/webhooks', express.raw({type: 'application/json'}), (req, res) => {
+      verifySignature(req.body, signature, secret); // Works!
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Wrong signature format">
+    **Solution**: Extract hash from `sha256=...` format.
+    
+    ```javascript
+    // ❌ Wrong - using full signature string
+    const valid = expectedHash === req.headers['x-fn-signature'];
+    
+    // ✅ Correct - extract hash portion
+    const [algorithm, hash] = req.headers['x-fn-signature'].split('=');
+    const valid = expectedHash === hash;
+    ```
+  </Accordion>
+  
+  <Accordion title="Character encoding issues">
+    **Solution**: Ensure raw bytes are used for verification.
+    
+    ```javascript
+    // ✅ Correct approach
+    const signature = req.headers['x-fn-signature'];
+    const [algorithm, providedHash] = signature.split('=');
+    
+    const expectedHash = crypto
+      .createHmac(algorithm, secret)
+      .update(req.body) // Raw buffer
+      .digest('hex');
+    
+    const valid = crypto.timingSafeEqual(
+      Buffer.from(expectedHash),
+      Buffer.from(providedHash)
+    );
+    ```
+  </Accordion>
+</Accordions>
+
+[Complete security guide →](/docs/webhooks/v3/guides/security)
+
+---
+
+## Webhooks Not Arriving
+
+### Issue
+
+```
+❌ No webhooks received
+❌ Events triggering but no delivery
+```
+
+### Diagnostic Steps
+
+<Steps>
+
+### Check Webhook Status
+
+```bash
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Verify `status: "active"` in response.
+
+### Test Endpoint Accessibility
+
+```bash
+curl -X POST https://your-endpoint.com/webhooks \
+  -H "Content-Type: application/json" \
+  -d '{"test": "data"}'
+```
+
+Should return 200 OK.
+
+### Check SSL Certificate
+
+```bash
+curl -v https://your-endpoint.com/webhooks
+```
+
+Look for `SSL certificate verify ok`.
+
+### Review Delivery Logs
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhookId=wh_abc123" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+Look for error patterns in failed deliveries.
+
+### Verify Event Subscription
+
+Ensure webhook is subscribed to the events you're triggering:
+
+```javascript
+const webhook = await getWebhook('wh_abc123');
+console.log('Subscribed events:', webhook.result.events);
+```
+
+</Steps>
+
+---
+
+## Timeout Errors
+
+### Issue
+
+```
+❌ Request timeout after 30 seconds
+❌ Connection timeout
+```
+
+### Solution
+
+Respond immediately, process asynchronously:
+
+```javascript
+// ❌ Wrong - slow synchronous processing
+app.post('/webhooks', async (req, res) => {
+  await verifySignature(req);
+  await syncToSalesforce(req.body); // Slow operation
+  await updateDatabase(req.body);    // Slow operation
+  await sendEmail(req.body);         // Slow operation
+  res.status(200).send('OK');        // Too late!
+});
+
+// ✅ Correct - respond immediately
+app.post('/webhooks', async (req, res) => {
+  await verifySignature(req);
+  
+  // Respond immediately
+  res.status(200).send('OK');
+  
+  // Process asynchronously
+  processWebhookAsync(req.body)
+    .catch(error => console.error('Processing error:', error));
+});
+```
+
+[Complete handling guide →](/docs/webhooks/v3/guides/handling-events)
+
+---
+
+## Duplicate Events
+
+### Issue
+
+```
+❌ Same event received multiple times
+❌ Duplicate processing
+```
+
+### Solution
+
+Implement idempotency using `eventId`:
+
+```javascript
+const processedEvents = new Set(); // Or Redis/Database
+
+app.post('/webhooks', async (req, res) => {
+  const payload = JSON.parse(req.body.toString());
+  const { eventId } = payload;
+  
+  // Check if already processed
+  if (processedEvents.has(eventId)) {
+    console.log(`Duplicate event ${eventId}, skipping`);
+    return res.status(200).send('Already processed');
+  }
+  
+  // Mark as processing
+  processedEvents.add(eventId);
+  
+  try {
+    // Process event
+    await handleEvent(payload);
+    res.status(200).send('OK');
+  } catch (error) {
+    // Remove on failure to allow retry
+    processedEvents.delete(eventId);
+    throw error;
+  }
+});
+```
+
+[Complete idempotency guide →](/docs/webhooks/v3/guides/handling-events)
+
+---
+
+## JSON Parsing Errors
+
+### Issue
+
+```
+❌ SyntaxError: Unexpected token
+❌ Invalid JSON
+```
+
+### Solution
+
+Handle raw body correctly:
+
+```javascript
+// For signature verification
+app.use(express.raw({ type: 'application/json' }));
+
+app.post('/webhooks', (req, res) => {
+  try {
+    // 1. Verify signature with raw body
+    const signature = req.headers['x-fn-signature'];
+    verifySignature(req.body, signature, secret);
+    
+    // 2. Parse JSON
+    const payload = JSON.parse(req.body.toString());
+    
+    // 3. Process
+    processWebhook(payload);
+    
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('Webhook error:', error);
+    res.status(400).send('Bad request');
+  }
+});
+```
+
+---
+
+## Environment-Specific Issues
+
+### Local Development (ngrok)
+
+**Issue**: ngrok tunnel not accessible
+
+```bash
+# ❌ Problem
+Error: ngrok tunnel not found
+
+# ✅ Solution
+ngrok http 3000 --log=stdout
+```
+
+**Issue**: ngrok free tier URL changes
+
+```bash
+# ✅ Solution: Use ngrok authtoken for persistent URLs
+ngrok authtoken YOUR_TOKEN
+ngrok http 3000 --hostname=your-subdomain.ngrok-free.app
+```
+
+### Staging/Production
+
+**Issue**: Firewall blocking Field Nation IPs
+
+**Solution**: Whitelist Field Nation IPs:
+
+**Sandbox:**
+```
+18.215.51.196
+3.223.100.250
+44.199.193.222
+```
+
+**Production:** Contact Field Nation support
+
+[Complete security guide →](/docs/webhooks/v3/guides/security)
+
+---
+
+## Error Response Codes
+
+### Issue
+
+Webhooks retrying when they shouldn't.
+
+### Solution
+
+Return appropriate status codes:
+
+```javascript
+app.post('/webhooks', async (req, res) => {
+  try {
+    // Signature verification failure
+    if (!verifySignature(req)) {
+      return res.status(401).send('Unauthorized'); // Won't retry
+    }
+    
+    // Invalid payload format
+    if (!validatePayload(req.body)) {
+      return res.status(400).send('Bad request'); // Won't retry
+    }
+    
+    // Process webhook
+    await processEvent(req.body);
+    
+    // Success
+    return res.status(200).send('OK');
+    
+  } catch (error) {
+    if (error.retriable) {
+      // Temporary issue - allow retry
+      return res.status(500).send('Internal error');
+    } else {
+      // Permanent issue - don't retry
+      return res.status(422).send('Unprocessable');
+    }
+  }
+});
+```
+
+| Status | Retry? | Use Case |
+|--------|--------|----------|
+| 200-299 | No | Success |
+| 400 | No | Invalid request |
+| 401 | No | Invalid signature |
+| 404 | No | Endpoint not found |
+| 410 | No | Endpoint gone |
+| 422 | No | Unprocessable |
+| 500-599 | Yes | Server error |
+| Timeout | Yes | Network issue |
+
+[Complete delivery mechanics →](/docs/webhooks/v3/concepts/delivery)
+
+---
+
+## Quick Diagnostic Checklist
+
+When webhooks aren't working, check:
+
+- ☐ Webhook status is `active`
+- ☐ Events are subscribed
+- ☐ Endpoint is HTTPS (not HTTP)
+- ☐ Endpoint is publicly accessible
+- ☐ SSL certificate is valid
+- ☐ Signature verification is correct
+- ☐ Response time &lt; 30 seconds
+- ☐ Correct status codes returned
+- ☐ Firewall allows Field Nation IPs
+- ☐ Delivery logs show no errors
+
+---

@@ -203,7 +203,7 @@ Yes. Using templates and projects is strongly recommended:
 - Use **REST API** for pushing data to Field Nation
 - Use **Webhooks** for pulling data and receiving real-time updates
 
-[Webhooks documentation →](/docs/webhooks/introduction)
+[Explore Webhooks →](/docs/webhooks/v3/introduction)
 
 ---
 
@@ -220,7 +220,7 @@ Webhook payloads include the **complete work order model**, not just snippets. W
 
 The payload structure matches the REST API v2 work order model.
 
-[Payload Structure →](/docs/webhooks/concepts/payload-structure)
+[Payload Structure →](/docs/webhooks/v3/concepts/payload-structure)
 
 ---
 
@@ -248,7 +248,7 @@ To test webhooks in a local development environment:
    - Review any error responses from your endpoint
    - Verify retry behavior for failed deliveries
 
-[Testing Guide →](/docs/webhooks/guides/testing)
+[Testing Guide →](/docs/webhooks/v3/guides/testing)
 
 ---
 
@@ -353,7 +353,7 @@ When an integration stops syncing, check these common issues in order:
 4. **Rate Limits** - Check if you've exceeded API rate limits in either platform.
 5. **Network Connectivity** - Verify network connectivity between systems and check firewall rules.
 
-[Troubleshooting Guide →](/docs/webhooks/troubleshooting/common-issues)
+[Troubleshooting Guide →](/docs/webhooks/v3/troubleshooting/common-issues)
 
 
 
@@ -404,9 +404,9 @@ Comprehensive technical documentation is available:
 - [Choosing Your Approach](/docs/getting-started/choosing-your-approach) - Select integration method
 
 **Webhooks:**
-- [Introduction](/docs/webhooks/introduction) - Overview and features
-- [Quickstart](/docs/webhooks/quickstart) - 15-minute setup guide
-- [API Reference](/docs/webhooks/api-reference/overview) - Complete API documentation
+- [Introduction](/docs/webhooks/v3/introduction) - Overview and features
+- [Quickstart](/docs/webhooks/v3/quickstart) - 15-minute setup guide
+- [API Reference](/docs/webhooks/v3/api-reference/overview) - Complete API documentation
 
 **Resources:**
 - [Glossary](/docs/resources/glossary) - Platform terminology

@@ -48,7 +48,7 @@ const secondaryFeatures = [
 
 export function Features() {
   return (
-    <section className="relative flex min-h-[600px] items-center justify-center bg-fd-card/30 py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0">
+    <section className="relative flex min-h-[600px] items-center justify-center bg-fd-background py-12 lg:py-24 xl:h-screen xl:min-h-0 xl:py-0">
       {/* Top gradient line */}
       <div
         aria-hidden="true"
@@ -75,12 +75,12 @@ export function Features() {
         </div>
 
         {/* Main features - Large cards */}
-        <div className="mb-8 grid gap-6 md:grid-cols-2 lg:gap-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
           {mainFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
               <Link
-                className="group relative overflow-hidden rounded-2xl border border-fd-border bg-fd-card p-6 transition-all duration-300 hover:border-fd-primary/30 hover:shadow-fd-primary/5 hover:shadow-lg lg:p-8"
+                className="group relative overflow-hidden rounded-2xl border border-fd-border bg-fd-card p-6 pb-14 transition-all duration-300 hover:border-fd-primary/30 hover:shadow-fd-primary/5 hover:shadow-lg lg:p-8 lg:pb-16"
                 href={feature.href}
                 key={feature.title}
               >
@@ -122,6 +122,16 @@ export function Features() {
                   <p className="text-base text-fd-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
+                </div>
+
+                {/* Hover overlay - slides up from bottom */}
+                <div className="absolute right-0 bottom-0 left-0 flex translate-y-full items-center justify-start bg-gradient-to-t from-fd-card via-fd-card/95 to-transparent px-6 py-4 transition-transform duration-300 ease-out group-hover:translate-y-0 lg:px-8">
+                  <span
+                    className="font-medium text-xs tracking-wide md:text-sm"
+                    style={{ color: "var(--color-fd-primary)" }}
+                  >
+                    View Details →
+                  </span>
                 </div>
               </Link>
             );

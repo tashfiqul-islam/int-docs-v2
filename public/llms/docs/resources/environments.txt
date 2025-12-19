@@ -52,7 +52,7 @@ Whitelist these IPs if your webhook endpoint uses IP filtering:
 44.199.193.222
 ```
 
-[Security Guide →](/docs/webhooks/guides/security)
+[Security Guide →](/docs/webhooks/v3/guides/security)
 
 
 
@@ -226,7 +226,7 @@ graph LR
 - Test individual endpoints first
 - Verify signature validation
 
-[Testing Guide →](/docs/webhooks/guides/testing)
+[Testing Guide →](/docs/webhooks/v3/guides/testing)
 
 ---
 
@@ -303,7 +303,7 @@ Based on results:
    echo $FN_CLIENT_ID
    echo $FN_CLIENT_SECRET
    echo $FN_BASE_URL
-   
+
    # Test connectivity
    curl https://api.fieldnation.com/health
    ```
@@ -333,11 +333,11 @@ const metrics = {
   webhookSuccessRate: '>99%',
   webhookLatency: '<2s p95',
   deliveryFailures: '<1%',
-  
+
   // API health
   apiErrorRate: '<1%',
   apiLatency: '<500ms p95',
-  
+
   // Business metrics
   workOrdersCreated: 'track daily',
   syncFailures: 'alert immediately'
@@ -350,7 +350,7 @@ const metrics = {
 - Slow response times
 - Authentication failures
 
-[Monitoring Guide →](/docs/webhooks/guides/monitoring)
+[Monitoring Guide →](/docs/webhooks/v3/guides/monitoring)
 
 
 
@@ -364,7 +364,7 @@ const metrics = {
    curl -X PUT https://api.fieldnation.com/api/v1/webhooks/wh_prod \
      -H "Authorization: Bearer $TOKEN" \
      -d '{"status": "inactive"}'
-   
+
    # Stop API calls
    # Revert to previous version
    ```

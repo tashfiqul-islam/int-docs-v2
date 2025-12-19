@@ -268,3 +268,39 @@ pre {
   animation-delay: 0.3s;
   opacity: 0;
 }
+
+/* Sidebar footer inline layout - make version switcher appear on same line as theme toggle */
+#nd-sidebar > div:last-child,
+.nd-sidebar > div:last-child,
+[data-sidebar] > div:last-child {
+  display: flex !important;
+  flex-direction: row-reverse !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.5rem !important;
+  padding: 0.75rem 1rem !important;
+  border-top: 1px solid var(--color-fd-border) !important;
+}
+
+/* Make footer children not take full width */
+#nd-sidebar > div:last-child > *,
+.nd-sidebar > div:last-child > *,
+[data-sidebar] > div:last-child > * {
+  flex-shrink: 0 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+/* Force full-width header with centered content */
+header {
+  max-width: none !important;
+  width: 100% !important;
+  border-bottom: 1px solid var(--color-fd-border);
+}
+
+header > div {
+  max-width: var(--fd-layout-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}

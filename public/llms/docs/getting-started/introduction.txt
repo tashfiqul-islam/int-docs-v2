@@ -83,19 +83,19 @@ Automatically sync photos, documentation, and completion notes from Field Nation
   
     Manage every aspect of work orders—creation, scheduling, pay, assignments, tasks, messages, and more—through our REST API with 150+ endpoints.
   
-  
+
   
     Subscribe to 45+ work order events and status changes via webhooks. Get notified instantly when something happens, not after the fact.
   
-  
+
   
     Pre-built integrations with leading platforms mean you can connect in hours, not weeks. No custom development required for standard workflows.
   
-  
+
   
     Test your integration safely in our sandbox environment before going live. Full parity with production for confident deployments.
   
-  
+
   
     OAuth 2.0 authentication, HMAC-SHA256 webhook signatures, IP whitelisting, and AES-256 credential encryption keep your data secure.
   

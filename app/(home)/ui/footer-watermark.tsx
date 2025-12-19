@@ -69,14 +69,14 @@ export function FooterWatermark({
   }, []);
 
   return (
-    <div className="relative hidden overflow-hidden bg-fd-background sm:block">
+    <div className="relative block overflow-hidden bg-slate-50 dark:bg-neutral-900/40">
       <div
         className="mx-auto w-full px-4 md:px-6 lg:px-8"
         style={{ maxWidth: "var(--fd-layout-width)" }}
       >
         <div
           className="overflow-hidden"
-          style={{ height: "clamp(55px, 8vw, 110px)" }}
+          style={{ height: "clamp(40px, 8vw, 110px)" }}
         >
           <svg
             aria-hidden="true"

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250">
+  <style>
+    .text {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 140px;
+      fill: #B3B3B3;
+    }
+  </style>
+  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" class="text">REST Connector</text>
+</svg>

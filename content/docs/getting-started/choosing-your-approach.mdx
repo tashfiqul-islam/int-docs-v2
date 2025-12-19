@@ -9,43 +9,43 @@ icon: GitBranch
 <Tabs items={["REST API + Webhooks", "Pre-built Connectors"]}>
   <Tab value="REST API + Webhooks">
     ### Code-Based Integration
-    
+
     **Best for:** Custom integrations, unique workflows, maximum control
-    
+
     **What you build:**
     - REST API calls to create/manage work orders (inbound)
     - Webhook listeners to receive events (outbound)
     - Custom business logic and transformations
-    
+
     **Requirements:**
     - Developer resources
     - Programming knowledge (any language)
     - OAuth 2.0 implementation
     - HTTPS webhook endpoint
-    
+
     **Time to deploy:** Days to weeks (depending on complexity)
-    
+
     **Flexibility:** ⭐⭐⭐⭐⭐ Complete control
   </Tab>
-  
+
   <Tab value="Pre-built Connectors">
     ### No-Code Integration
-    
+
     **Best for:** Standard workflows, ERP/CRM/PSA platforms, quick deployment
-    
+
     **What you get:**
     - Out-of-the-box integration
     - Pre-configured field mappings
     - Managed authentication
     - Built-in error handling
-    
+
     **Requirements:**
     - Supported platform (Salesforce, ServiceNow, etc.)
     - Platform admin access
     - Field Nation integration contract
-    
+
     **Time to deploy:** Hours to days
-    
+
     **Flexibility:** ⭐⭐⭐ Configurable within connector capabilities
   </Tab>
 </Tabs>
@@ -118,25 +118,25 @@ The combination of **REST API + Webhooks** provides powerful and flexible integr
 <Steps>
   <Step>
     ### Inbound: REST API
-    
+
     Use the REST API to **push data to Field Nation**:
     - Create work orders from your system
     - Update work order details
     - Manage provider assignments
     - Handle tasks and deliverables
-    
+
     **Example:** When a ticket is created in your system, call the REST API to create a corresponding Field Nation work order.
   </Step>
-  
+
   <Step>
     ### Outbound: Webhooks
-    
+
     Configure webhooks to **receive events from Field Nation**:
     - Work order status changes
     - Provider assignments
     - Task completions
     - Deliverable uploads
-    
+
     **Example:** When a provider completes work, Field Nation sends a webhook to your endpoint, triggering ticket closure in your system.
   </Step>
 </Steps>
@@ -170,7 +170,8 @@ We currently support **33 events** across work order lifecycle, assignments, tas
 ### Getting Started with Code-Based
 
 1. Review [Prerequisites](/docs/getting-started/prerequisites)
-2. Follow [REST API Quickstart](/docs/rest-api/quickstart)
+2.- **Start with**: [REST API Quickstart](/docs/rest-api/v2/quickstart)
+- **Use when**: You need full control and have improved developer resources.
 3. Set up [Webhooks](/docs/webhooks/quickstart)
 4. Explore [REST API Introduction](/docs/rest-api/introduction) for all capabilities
 
@@ -183,44 +184,44 @@ Pre-built connectors provide **turnkey integrations** with leading platforms, re
 ### Supported Platforms
 
 <Cards>
-  <Card 
-    href="/docs/connectors/platforms/salesforce/overview" 
-    title="Salesforce" 
+  <Card
+    href="/docs/connectors/platforms/salesforce/overview"
+    title="Salesforce"
     description="CRM and Service Cloud integration"
   />
-  <Card 
-    href="/docs/connectors/platforms/servicenow/overview" 
-    title="ServiceNow" 
+  <Card
+    href="/docs/connectors/platforms/servicenow/overview"
+    title="ServiceNow"
     description="ITSM incident and request management"
   />
-  <Card 
-    href="/docs/connectors/platforms/autotask/overview" 
-    title="Autotask" 
+  <Card
+    href="/docs/connectors/platforms/autotask/overview"
+    title="Autotask"
     description="Datto PSA integration"
   />
-  <Card 
-    href="/docs/connectors/platforms/connectwise/overview" 
-    title="ConnectWise" 
+  <Card
+    href="/docs/connectors/platforms/connectwise/overview"
+    title="ConnectWise"
     description="PSA service ticket management"
   />
-  <Card 
-    href="/docs/connectors/platforms/freshdesk/overview" 
-    title="Freshdesk" 
+  <Card
+    href="/docs/connectors/platforms/freshdesk/overview"
+    title="Freshdesk"
     description="Customer support ticketing"
   />
-  <Card 
-    href="/docs/connectors/platforms/netsuite/overview" 
-    title="NetSuite" 
+  <Card
+    href="/docs/connectors/platforms/netsuite/overview"
+    title="NetSuite"
     description="ERP system integration"
   />
-  <Card 
-    href="/docs/connectors/platforms/quickbase/overview" 
-    title="Quickbase" 
+  <Card
+    href="/docs/connectors/platforms/quickbase/overview"
+    title="Quickbase"
     description="Low-code application platform"
   />
-  <Card 
-    href="/docs/connectors/platforms/smartsheet/overview" 
-    title="Smartsheet" 
+  <Card
+    href="/docs/connectors/platforms/smartsheet/overview"
+    title="Smartsheet"
     description="Project management and sheets"
   />
 </Cards>
@@ -284,15 +285,15 @@ graph TD
     A[Need Field Nation Integration?] --> B{Using Salesforce, ServiceNow,<br/>Autotask, or other<br/>supported platform?}
     B -->|Yes| C{Standard workflow<br/>sufficient?}
     B -->|No| D{Have OpenAPI spec<br/>for your system?}
-    
+
     C -->|Yes| E[Use Pre-built Connector]
     C -->|No| F[Use Connector + REST API]
-    
+
     D -->|Yes| G[Consider REST Connector]
     D -->|No| H[Use REST API + Webhooks]
-    
+
     G --> I[Contact Support]
-    
+
     E --> J[Quick deployment<br/>Hours to days]
     F --> K[Hybrid approach<br/>Days to weeks]
     H --> L[Full custom<br/>Days to weeks]
@@ -305,7 +306,10 @@ graph TD
 
 ### For Code-Based Integration
 
-- **Documentation:** [REST API](/docs/rest-api/introduction) and [Webhooks](/docs/webhooks/introduction)
+- **Documentation:**
+  - [REST API](/docs/rest-api/v2/introduction) - Programmatic access to data and operations
+  - [Webhooks](/docs/webhooks/v3/introduction) - Real-time event notifications
+  - [Connectors](/docs/connectors/introduction) - Pre-built integrations for specific platforms
 - **Support Portal:** [Submit a case](https://app.fieldnation.com/support-cases) for technical questions
 - **Sales Team:** Contact your Field Nation representative
 

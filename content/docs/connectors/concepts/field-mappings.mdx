@@ -264,7 +264,7 @@ For logic that can't be expressed through standard actions, write custom JSONNET
   "script": |||
     local hours = $.util.lookup_field($.input, 'time_logs.hours', 0);
     local is_urgent = $.util.lookup_field($.input, 'priority', '') == 'urgent';
-    
+
     if is_urgent && hours > 2 then
       "Critical"
     else if is_urgent then
@@ -348,7 +348,7 @@ Field Nation custom fields require special handling:
 
 The `lookup_custom_field` function handles Field Nation's custom field structure automatically.
 
-[Learn about custom field IDs →](/docs/rest-api/introduction)
+[Explore Webhooks →](/docs/webhooks/v3/introduction)
 
 ---
 
@@ -359,15 +359,15 @@ The `lookup_custom_field` function handles Field Nation's custom field structure
 <Accordions type="multiple">
   <Accordion title="Start Simple, Add Complexity">
     Begin with essential fields using Sync actions. Add complex transformations only after core synchronization works.
-    
-    **Phase 1**: Required fields (title, description, dates)  
-    **Phase 2**: Status and assignment mapping  
+
+    **Phase 1**: Required fields (title, description, dates)
+    **Phase 2**: Status and assignment mapping
     **Phase 3**: Custom fields and advanced logic
   </Accordion>
-  
+
   <Accordion title="Use Default Values">
     Always provide default values for optional fields to prevent sync failures from missing data.
-    
+
     ```jsonnet
     {
       "source": "optional_field",
@@ -377,10 +377,10 @@ The `lookup_custom_field` function handles Field Nation's custom field structure
     }
     ```
   </Accordion>
-  
+
   <Accordion title="Document Complex Mappings">
     Add comments to JSONNET scripts explaining business logic:
-    
+
     ```jsonnet
     // Priority calculation:
     // - Urgent + >2 hours = Critical
@@ -389,7 +389,7 @@ The `lookup_custom_field` function handles Field Nation's custom field structure
     // - Otherwise = Low
     ```
   </Accordion>
-  
+
   <Accordion title="Test Each Mapping Individually">
     When adding new mappings:
     1. Test the mapping in isolation
@@ -519,7 +519,7 @@ The Integration Broker automatically discovers available fields from external sy
     - Source field empty/null (add default value)
     - Target field not writable (check permissions)
     - Data type mismatch (add conversion logic)
-    
+
     **Debug:**
     ```jsonnet
     // Log the source value
@@ -533,14 +533,14 @@ The Integration Broker automatically discovers available fields from external sy
     }
     ```
   </Accordion>
-  
+
   <Accordion title="Array Map Not Matching">
     **Possible Causes:**
     - Case sensitivity (compare: "new" vs "New")
     - Extra whitespace in source value
     - Numeric vs string comparison
     - Missing default value
-    
+
     **Solution:**
     ```jsonnet
     {
@@ -554,13 +554,13 @@ The Integration Broker automatically discovers available fields from external sy
     }
     ```
   </Accordion>
-  
+
   <Accordion title="Date Conversion Failing">
     **Possible Causes:**
     - Input format doesn't match actual data format
     - Timezone string invalid
     - Null/empty date value
-    
+
     **Solution:**
     Add validation before conversion:
     ```jsonnet

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, BookOpen, Code2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import fujitsu from "~/assets/companies/fujitsu.svg";
@@ -11,11 +11,13 @@ import xtium from "~/assets/companies/xtium.svg";
 import xtiumDark from "~/assets/companies/xtium-dark.svg";
 import homeDark from "~/assets/home_dark.png";
 import homeLight from "~/assets/home_light.png";
-import { Button } from "~/components/ui/button";
+import { buttonVariants } from "~/components/ui/button";
+import { IconCode, IconFolderOpen } from "~/components/ui/icons";
+import { cn } from "~/lib/utils";
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden border-fd-border/50 border-b bg-fd-background py-12 md:py-16 xl:h-[calc(100vh-4rem)] xl:min-h-[calc(100vh-4rem)] xl:py-0">
+    <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden border-fd-border/50 border-b bg-fd-background py-12 lg:py-24 xl:h-[calc(100vh-4rem)] xl:min-h-[calc(100vh-4rem)] xl:py-0">
       {/* Background gradient */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.18),transparent_50%)]" />
 
@@ -84,33 +86,32 @@ export function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex animate-fade-in-up-3 flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-              <Button
-                asChild
-                className="group h-12 gap-2 rounded-lg px-8 font-semibold text-base shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-                size="lg"
+              <Link
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "group h-12 gap-2 rounded-lg px-8 font-semibold text-base shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+                )}
+                href="/docs/getting-started/introduction"
                 style={{
                   backgroundColor: "var(--color-fd-primary)",
                   color: "var(--color-fd-primary-foreground)",
                   boxShadow: "0 8px 24px -4px hsl(var(--color-fd-primary)/0.3)",
                 }}
               >
-                <Link href="/docs/getting-started/introduction">
-                  <BookOpen className="size-4" />
-                  View Documentation
-                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                className="h-12 gap-2 rounded-lg border-2 px-8 font-semibold text-base backdrop-blur-sm transition-all duration-300 hover:border-fd-primary/40 hover:bg-fd-accent/50"
-                size="lg"
-                variant="outline"
+                <IconFolderOpen className="size-4" />
+                View Documentation
+                <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+              <Link
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "h-12 gap-2 rounded-lg border-2 px-8 font-semibold text-base backdrop-blur-sm transition-all duration-300 hover:border-fd-primary/40 hover:bg-fd-accent/50"
+                )}
+                href="/api-references/rest-api/v2"
               >
-                <Link href="/api-references/rest-api/v2">
-                  <Code2 className="size-4" />
-                  Explore API
-                </Link>
-              </Button>
+                <IconCode className="size-4" />
+                Explore API
+              </Link>
             </div>
           </div>
 
@@ -203,44 +204,46 @@ export function HeroSection() {
         </div>
 
         {/* Trusted By - Company Logos */}
-        <div className="mt-36 animate-fade-in-delay">
+        <div className="mt-20 animate-fade-in-delay md:mt-36">
           <h3 className="mb-8 text-center font-semibold text-fd-muted-foreground text-sm uppercase tracking-widest">
             Trusted by Industry Leaders
           </h3>
-          <div className="flex flex-wrap items-center justify-center">
+          <div className="grid grid-cols-2 gap-x-12 gap-y-10 md:flex md:gap-0">
             {/* Fujitsu */}
-            <div className="flex items-center px-6 lg:px-8">
+            <div className="flex items-center justify-center px-0 md:px-8 lg:px-12">
               <Image
                 alt="Fujitsu"
-                className="h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:brightness-0 dark:invert hover:dark:brightness-100 hover:dark:invert-0"
-                height={40}
+                className="h-10 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-14 dark:brightness-0 dark:invert hover:dark:brightness-100 hover:dark:invert-0"
+                height={56}
                 src={fujitsu}
-                width={120}
+                width={160}
               />
             </div>
-            {/* Separator */}
-            <div className="h-8 w-px bg-fd-border/50 md:h-10" />
+            {/* Separator - Hidden on Mobile */}
+            <div className="hidden h-8 w-px bg-fd-border/50 md:block md:h-12" />
+
             {/* Pomeroy - light/dark variants */}
-            <div className="flex items-center px-6 lg:px-8">
+            <div className="flex items-center justify-center px-0 md:px-8 lg:px-12">
               <Image
                 alt="Pomeroy"
-                className="h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:hidden"
-                height={40}
+                className="h-7 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-9 dark:hidden"
+                height={36}
                 src={pomeroyLight}
                 width={120}
               />
               <Image
                 alt="Pomeroy"
-                className="hidden h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:block"
-                height={40}
+                className="hidden h-7 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-9 dark:block"
+                height={36}
                 src={pomeroy}
                 width={120}
               />
             </div>
-            {/* Separator */}
-            <div className="h-8 w-px bg-fd-border/50 md:h-10" />
+            {/* Separator - Hidden on Mobile */}
+            <div className="hidden h-8 w-px bg-fd-border/50 md:block md:h-12" />
+
             {/* WorldLink */}
-            <div className="flex items-center px-6 lg:px-8">
+            <div className="flex items-center justify-center px-0 md:px-8 lg:px-12">
               <Image
                 alt="WorldLink"
                 className="h-8 w-auto opacity-70 grayscale invert transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:invert-0"
@@ -249,21 +252,22 @@ export function HeroSection() {
                 width={120}
               />
             </div>
-            {/* Separator */}
-            <div className="h-8 w-px bg-fd-border/50 md:h-10" />
+            {/* Separator - Hidden on Mobile */}
+            <div className="hidden h-8 w-px bg-fd-border/50 md:block md:h-12" />
+
             {/* Xtium - light/dark variants */}
-            <div className="flex items-center px-6 lg:px-8">
+            <div className="flex items-center justify-center px-0 md:px-8 lg:px-12">
               <Image
                 alt="Xtium"
-                className="h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:hidden"
-                height={40}
+                className="h-6 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-8 dark:hidden"
+                height={32}
                 src={xtium}
                 width={120}
               />
               <Image
                 alt="Xtium"
-                className="hidden h-8 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-10 dark:block"
-                height={40}
+                className="hidden h-6 w-auto opacity-70 grayscale transition-all hover:opacity-100 hover:grayscale-0 md:h-8 dark:block"
+                height={32}
                 src={xtiumDark}
                 width={120}
               />

@@ -1,16 +1,4 @@
 {
   "title": "REST API",
-  "description": "Programmatic access to Field Nation",
-  "icon": "CodeXml",
-  "root": true,
-  "defaultOpen": true,
-  "pages": [
-    "introduction",
-    "quickstart",
-    "api-playground",
-    "---Implementation---",
-    "authentication",
-    "common-patterns",
-    "error-handling"
-  ]
+  "pages": ["v2"]
 }

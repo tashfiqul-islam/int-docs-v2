@@ -37,13 +37,13 @@ const benefits = [
 
 export function PlatformStatement() {
   return (
-    <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden bg-fd-background py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0">
+    <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden bg-slate-50 py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0 dark:bg-neutral-900/40">
       {/* Decorative background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--color-fd-primary)/0.06),transparent_70%)]" />
         {/* Animated gradient orbs */}
         <div
-          className="absolute top-1/4 left-1/3 size-72 animate-pulse rounded-full opacity-20 blur-3xl"
+          className="absolute top-1/4 left-1/3 size-72 animate-pulse rounded-full opacity-10 blur-3xl lg:opacity-20"
           style={{ backgroundColor: "var(--color-fd-primary)" }}
         />
         <div
@@ -55,7 +55,7 @@ export function PlatformStatement() {
         />
       </div>
 
-      <div className="mx-auto w-full max-w-[var(--fd-layout-width)] px-4 py-16 md:px-6 md:py-20 lg:px-8 lg:py-24">
+      <div className="mx-auto w-full max-w-[var(--fd-layout-width)] px-4 py-12 lg:px-8 lg:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Left: Value proposition */}
           <div>
@@ -94,7 +94,7 @@ export function PlatformStatement() {
             </p>
 
             {/* Benefits grid */}
-            <div className="mb-8 grid grid-cols-2 gap-4">
+            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {benefits.map((benefit) => {
                 const Icon = benefit.icon;
                 return (

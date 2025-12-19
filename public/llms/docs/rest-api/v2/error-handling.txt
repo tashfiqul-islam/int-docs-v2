@@ -1,0 +1,595 @@
+# REST API: undefined
+URL: /docs/rest-api/v2/error-handling
+Source: content/docs/rest-api/v2/error-handling.mdx
+
+
+
+---
+title: Error Handling
+description: Handle API errors gracefully and implement robust error recovery strategies.
+icon: CircleAlert
+---
+
+Learn how to handle errors, implement retry logic, and build resilient integrations with the Field Nation REST API.
+
+## HTTP Status Codes
+
+The API uses standard HTTP status codes:
+
+| Code | Meaning | Description |
+|------|---------|-------------|
+| **2xx** | **Success** | Request succeeded |
+| 200 | OK | Request successful, response contains data |
+| 201 | Created | Resource created successfully |
+| 204 | No Content | Request successful, no response body |
+| **4xx** | **Client Errors** | Problem with request |
+| 400 | Bad Request | Invalid request parameters or payload |
+| 401 | Unauthorized | Invalid or expired access token |
+| 403 | Forbidden | Insufficient permissions |
+| 404 | Not Found | Resource doesn't exist |
+| 422 | Unprocessable Entity | Validation error |
+| 429 | Too Many Requests | Rate limit exceeded |
+| **5xx** | **Server Errors** | Problem on Field Nation's side |
+| 500 | Internal Server Error | Unexpected server error |
+| 502 | Bad Gateway | Temporary server issue |
+| 503 | Service Unavailable | Server temporarily unavailable |
+
+---
+
+## Error Response Format
+
+All API errors return JSON with consistent structure:
+
+```json
+{
+  "error": {
+    "code": "ValidationError",
+    "message": "Missing required field: title",
+    "details": {
+      "field": "title",
+      "constraint": "required"
+    }
+  }
+}
+```
+
+---
+
+## Common Error Codes
+
+### Authentication Errors (401)
+
+  
+    **Cause**: Access token expired or invalid
+    
+    **Response:**
+    ```json
+    {
+      "error": "invalid_token",
+      "error_description": "The access token expired"
+    }
+    ```
+    
+    **Solution:**
+    - Request new access token
+    - Implement automatic token refresh
+  
+  
+  
+    **Cause**: Invalid client credentials
+    
+    **Response:**
+    ```json
+    {
+      "error": "invalid_client",
+      "error_description": "Client authentication failed"
+    }
+    ```
+    
+    **Solution:**
+    - Verify `client_id` and `client_secret` are correct
+    - Check environment (sandbox vs production)
+  
+
+---
+
+### Validation Errors (400/422)
+
+  
+    **Response:**
+    ```json
+    {
+      "error": {
+        "code": "ValidationError",
+        "message": "Missing required field: schedule.service_window.start",
+        "field": "schedule.service_window.start"
+      }
+    }
+    ```
+    
+    **Solution:**
+    - Check API documentation for required fields
+    - Validate payload before sending
+  
+  
+  
+    **Response:**
+    ```json
+    {
+      "error": {
+        "code": "ValidationError",
+        "message": "Invalid date format for schedule.service_window.start",
+        "field": "schedule.service_window.start",
+        "expected": "ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)"
+      }
+    }
+    ```
+    
+    **Solution:**
+    - Use ISO 8601 date format
+    - Validate data types match expected values
+  
+
+---
+
+### Resource Errors (404)
+
+```json
+{
+  "error": {
+    "code": "NotFound",
+    "message": "Work order with ID 99999 not found"
+  }
+}
+```
+
+**Common Causes:**
+- Invalid work order ID
+- Resource was deleted
+- No access to resource (permissions)
+
+---
+
+### Rate Limiting (429)
+
+```json
+{
+  "error": {
+    "code": "RateLimitExceeded",
+    "message": "Too many requests. Please retry after 60 seconds.",
+    "retry_after": 60
+  }
+}
+```
+
+**Solution:** Implement exponential backoff and respect `Retry-After` header
+
+---
+
+## Error Handling Strategies
+
+### Comprehensive Error Handler
+
+```javascript
+class APIError extends Error {
+  constructor(status, code, message, details) {
+    super(message);
+    this.status = status;
+    this.code = code;
+    this.details = details;
+    this.name = 'APIError';
+  }
+}
+
+async function handleAPIResponse(response) {
+  if (response.ok) {
+    return response.json();
+  }
+  
+  let error;
+  try {
+    error = await response.json();
+  } catch {
+    // Response body not JSON
+    error = { message: response.statusText };
+  }
+  
+  throw new APIError(
+    response.status,
+    error.error?.code || error.error || 'UnknownError',
+    error.error?.message || error.error_description || error.message || 'An error occurred',
+    error.error?.details
+  );
+}
+
+// Usage
+try {
+  const response = await fetch(url, options);
+  const data = await handleAPIResponse(response);
+  return data;
+} catch (error) {
+  if (error instanceof APIError) {
+    console.error(`API Error [${error.code}]:`, error.message);
+    
+    // Handle specific error types
+    if (error.status === 401) {
+      // Refresh token and retry
+    } else if (error.status === 429) {
+      // Rate limited - back off
+    } else if (error.status >= 500) {
+      // Server error - retry with backoff
+    }
+  } else {
+    console.error('Network Error:', error);
+  }
+  
+  throw error;
+}
+```
+
+---
+
+### Retry Logic with Exponential Backoff
+
+```javascript
+async function retryWithBackoff(fn, options = {}) {
+  const {
+    maxRetries = 3,
+    baseDelay = 1000,
+    maxDelay = 30000,
+    retryableStatuses = [408, 429, 500, 502, 503, 504]
+  } = options;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const isLastAttempt = attempt === maxRetries - 1;
+      const isRetryable = error instanceof APIError && 
+                          retryableStatuses.includes(error.status);
+      
+      if (isLastAttempt || !isRetryable) {
+        throw error;
+      }
+      
+      // Calculate delay with exponential backoff and jitter
+      const exponentialDelay = baseDelay * Math.pow(2, attempt);
+      const jitter = Math.random() * 1000;
+      const delay = Math.min(exponentialDelay + jitter, maxDelay);
+      
+      // Respect Retry-After header if present
+      const retryAfter = error.details?.retry_after;
+      const finalDelay = retryAfter ? retryAfter * 1000 : delay;
+      
+      console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${finalDelay}ms`);
+      await new Promise(resolve => setTimeout(resolve, finalDelay));
+    }
+  }
+}
+
+// Usage
+const workOrder = await retryWithBackoff(async () => {
+  const response = await fetch(
+    `https://api-sandbox.fndev.net/api/rest/v2/workorders/12345?access_token=${token}`
+  );
+  return handleAPIResponse(response);
+});
+```
+
+---
+
+### Token Refresh on 401
+
+```javascript
+let accessToken = null;
+let tokenExpiry = null;
+let refreshPromise = null;
+
+async function getValidToken() {
+  // Check if token is still valid
+  if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+    return accessToken;
+  }
+  
+  // If refresh already in progress, wait for it
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+  
+  // Start token refresh
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(
+        'https://api-sandbox.fndev.net/authentication/api/oauth/token',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grant_type: 'client_credentials',
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            scope: 'api'
+          })
+        }
+      );
+      
+      const data = await response.json();
+      accessToken = data.access_token;
+      tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000; // Refresh 1 min early
+      
+      return accessToken;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  
+  return refreshPromise;
+}
+
+async function makeAuthenticatedRequest(url, options = {}) {
+  const token = await getValidToken();
+  const urlWithToken = `${url}?access_token=${token}`;
+  
+  try {
+    const response = await fetch(urlWithToken, options);
+    return await handleAPIResponse(response);
+  } catch (error) {
+    // If 401, force token refresh and retry once
+    if (error instanceof APIError && error.status === 401) {
+      accessToken = null;
+      tokenExpiry = null;
+      
+      const newToken = await getValidToken();
+      const retryUrl = `${url}?access_token=${newToken}`;
+      const retryResponse = await fetch(retryUrl, options);
+      return await handleAPIResponse(retryResponse);
+    }
+    
+    throw error;
+  }
+}
+```
+
+---
+
+### Circuit Breaker Pattern
+
+Prevent cascading failures:
+
+```javascript
+class CircuitBreaker {
+  constructor(options = {}) {
+    this.failureThreshold = options.failureThreshold || 5;
+    this.resetTimeout = options.resetTimeout || 60000; // 1 minute
+    this.state = 'CLOSED'; // CLOSED, OPEN, HALF_OPEN
+    this.failureCount = 0;
+    this.nextAttempt = null;
+  }
+  
+  async execute(fn) {
+    if (this.state === 'OPEN') {
+      if (Date.now() < this.nextAttempt) {
+        throw new Error('Circuit breaker is OPEN');
+      }
+      this.state = 'HALF_OPEN';
+    }
+    
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+  
+  onSuccess() {
+    this.failureCount = 0;
+    this.state = 'CLOSED';
+  }
+  
+  onFailure() {
+    this.failureCount++;
+    
+    if (this.failureCount >= this.failureThreshold) {
+      this.state = 'OPEN';
+      this.nextAttempt = Date.now() + this.resetTimeout;
+      console.warn(`Circuit breaker OPEN. Will retry after ${this.resetTimeout}ms`);
+    }
+  }
+}
+
+// Usage
+const breaker = new CircuitBreaker({
+  failureThreshold: 5,
+  resetTimeout: 60000
+});
+
+async function getWorkOrder(workOrderId) {
+  return breaker.execute(async () => {
+    const response = await fetch(
+      `https://api-sandbox.fndev.net/api/rest/v2/workorders/${workOrderId}?access_token=${token}`
+    );
+    return handleAPIResponse(response);
+  });
+}
+```
+
+---
+
+## Validation Before API Calls
+
+Validate data before sending to avoid 400 errors:
+
+```javascript
+function validateWorkOrder(workOrder) {
+  const errors = [];
+  
+  // Required fields
+  if (!workOrder.title) {
+    errors.push('title is required');
+  }
+  
+  if (!workOrder.schedule?.service_window?.start) {
+    errors.push('schedule.service_window.start is required');
+  }
+  
+  if (!workOrder.schedule?.service_window?.end) {
+    errors.push('schedule.service_window.end is required');
+  }
+  
+  if (!workOrder.location?.address1) {
+    errors.push('location.address1 is required');
+  }
+  
+  if (!workOrder.location?.city) {
+    errors.push('location.city is required');
+  }
+  
+  // Date validation
+  if (workOrder.schedule?.service_window) {
+    const start = new Date(workOrder.schedule.service_window.start);
+    const end = new Date(workOrder.schedule.service_window.end);
+    
+    if (start >= end) {
+      errors.push('service_window.start must be before service_window.end');
+    }
+    
+    if (start < new Date()) {
+      errors.push('service_window.start cannot be in the past');
+    }
+  }
+  
+  // Pay validation
+  if (workOrder.pay?.base && workOrder.pay.base < 0) {
+    errors.push('pay.base must be positive');
+  }
+  
+  if (errors.length > 0) {
+    throw new Error(`Validation failed: ${errors.join(', ')}`);
+  }
+}
+
+// Usage
+try {
+  validateWorkOrder(workOrderData);
+  const response = await createWorkOrder(workOrderData);
+} catch (error) {
+  console.error('Validation Error:', error.message);
+}
+```
+
+---
+
+## Logging & Monitoring
+
+Implement comprehensive logging:
+
+```javascript
+class APILogger {
+  static log(level, message, metadata = {}) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      ...metadata
+    };
+    
+    // Send to logging service (e.g., CloudWatch, Datadog)
+    console.log(JSON.stringify(logEntry));
+  }
+  
+  static request(method, url, options = {}) {
+    this.log('info', 'API Request', {
+      method,
+      url: url.replace(/access_token=[^&]+/, 'access_token=REDACTED'),
+      headers: options.headers,
+      body: options.body ? JSON.parse(options.body) : null
+    });
+  }
+  
+  static response(url, status, data) {
+    this.log('info', 'API Response', {
+      url: url.replace(/access_token=[^&]+/, 'access_token=REDACTED'),
+      status,
+      dataSize: JSON.stringify(data).length
+    });
+  }
+  
+  static error(error, context = {}) {
+    this.log('error', 'API Error', {
+      error: error.message,
+      code: error.code,
+      status: error.status,
+      stack: error.stack,
+      ...context
+    });
+  }
+}
+
+// Usage
+async function apiCall(url, options) {
+  APILogger.request(options.method || 'GET', url, options);
+  
+  try {
+    const response = await fetch(url, options);
+    const data = await handleAPIResponse(response);
+    
+    APILogger.response(url, response.status, data);
+    return data;
+  } catch (error) {
+    APILogger.error(error, { url, options });
+    throw error;
+  }
+}
+```
+
+---
+
+## Best Practices Summary
+
+### Error Handling Checklist
+
+- ☐ Implement comprehensive error handling for all API calls
+- ☐ Use retry logic with exponential backoff for transient errors
+- ☐ Implement token refresh on 401 errors
+- ☐ Validate data before API calls to prevent 400 errors
+- ☐ Log all API requests and errors for debugging
+- ☐ Monitor error rates and set up alerts
+- ☐ Implement circuit breaker for cascading failure prevention
+- ☐ Handle rate limiting (429) gracefully
+- ☐ Provide user-friendly error messages
+- ☐ Test error scenarios in development
+
+### When to Retry
+
+**✅ Retry these errors:**
+- 408 Request Timeout
+- 429 Too Many Requests
+- 500 Internal Server Error
+- 502 Bad Gateway
+- 503 Service Unavailable
+- 504 Gateway Timeout
+- Network errors (ECONNRESET, ETIMEDOUT)
+
+**❌ Don't retry these errors:**
+- 400 Bad Request (fix payload)
+- 401 Unauthorized (refresh token)
+- 403 Forbidden (check permissions)
+- 404 Not Found (resource doesn't exist)
+- 422 Unprocessable Entity (fix validation)
+
+---
+
+## Production Monitoring
+
+Set up monitoring for:
+
+- **Error Rate**: Track 4xx and 5xx errors
+- **Latency**: Monitor API response times
+- **Token Refresh**: Track authentication failures
+- **Rate Limits**: Monitor 429 responses
+- **Circuit Breaker**: Track open/closed state
+
+**Tools**: CloudWatch, Datadog, New Relic, Sentry

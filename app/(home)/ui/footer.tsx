@@ -20,7 +20,7 @@ type FooterLink = {
 const footerLinks: Record<string, FooterLink[]> = {
   resources: [
     { text: "Client API", href: "/api-references/rest-api/v2" },
-    { text: "Webhooks", href: "/docs/webhooks/introduction" },
+    { text: "Webhooks", href: "/docs/webhooks/v3/introduction" },
     { text: "FSM Connectors", href: "/docs/connectors/introduction" },
   ],
   support: [
@@ -101,13 +101,23 @@ const socialLinks = [
 
 const complianceLogos = [
   {
+    src: ccpaLogo,
+    alt: "CCPA Compliant",
+    name: "ccpa",
+    className: "p-0 h-9 w-auto",
+  },
+  {
+    src: pciLogo,
+    alt: "PCI Compliant",
+    name: "pci",
+    className: "p-0 h-9 w-auto",
+  },
+  {
     src: soc2Logo,
     alt: "SOC 2 Certified",
     name: "soc2",
-    className: "p-0 h-18",
+    className: "p-0 h-11 w-auto",
   },
-  { src: pciLogo, alt: "PCI Compliant", name: "pci", className: "p-0 h-12" },
-  { src: ccpaLogo, alt: "CCPA Compliant", name: "ccpa", className: "p-0 h-14" },
 ] as const;
 
 export function Footer() {
@@ -129,8 +139,18 @@ export function Footer() {
           className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-fd-border/50 to-transparent"
         />
 
-        <div className="mx-auto max-w-[var(--fd-layout-width)] px-4 py-4 md:px-6 lg:px-8 lg:py-6">
-          <div className="grid gap-8 md:grid-cols-2 lg:flex lg:justify-between lg:gap-0">
+        {/* Top spotlight spill */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 left-1/2 h-40 w-3/4 -translate-x-1/2 opacity-50 blur-3xl lg:w-1/2"
+          style={{
+            background:
+              "radial-gradient(50% 100% at 50% 0%, hsl(var(--color-fd-primary) / 0.4) 0%, transparent 100%)",
+          }}
+        />
+
+        <div className="mx-auto max-w-[var(--fd-layout-width)] px-4 py-6 md:px-6 lg:px-8 lg:py-8">
+          <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3 lg:flex lg:justify-between lg:gap-0">
             {/* Brand */}
             <div>
               <Link className="mb-4 inline-block" href="/">
@@ -302,7 +322,12 @@ export function Footer() {
             </p>
 
             {/* Compliance Logos */}
-            <div className="flex items-center gap-8 rounded-lg bg-white px-4 py-2 dark:bg-neutral-800">
+            <Link
+              className="flex items-center gap-6 rounded-lg bg-black/5 px-4 py-1 transition-colors hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10"
+              href="https://trust.fieldnation.com/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               {complianceLogos.map((logo, index) => (
                 <Fragment key={logo.name}>
                   <div
@@ -318,11 +343,11 @@ export function Footer() {
                     />
                   </div>
                   {index < complianceLogos.length - 1 && (
-                    <div className="h-8 w-px bg-fd-border" />
+                    <div className="h-4 w-px bg-fd-border" />
                   )}
                 </Fragment>
               ))}
-            </div>
+            </Link>
 
             <p className="text-fd-muted-foreground text-xs">
               Built with{" "}

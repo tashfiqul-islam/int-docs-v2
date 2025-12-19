@@ -15,6 +15,10 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: ["/"],
       },
+      {
+        userAgent: ["GPTBot", "CCBot", "Google-Extended"],
+        allow: ["/"],
+      },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL.replace(TRAILING_SLASH_REGEX, ""),

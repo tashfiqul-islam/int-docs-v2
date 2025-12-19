@@ -1,3 +1,5 @@
+import { lstat, readdir, readFile, writeFile } from "node:fs/promises";
+import { join, relative } from "node:path";
 import { generateFiles } from "fumadocs-openapi";
 import { openapi } from "../lib/openapi";
 
@@ -7,6 +9,61 @@ function sanitizeForFileSystem(str: string): string {
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9-]/g, "");
+}
+
+// Helper function to ensure forward slashes in paths, including encoded ones
+function normalizePath(p: string): string {
+  return p.replace(/\\/g, "/").replace(/%5C/g, "/");
+}
+
+// Helper to clean and normalize a single href
+function resolveRelativePath(href: string): string {
+  // Normalize backslashes and encoded backslashes
+  let normalized = normalizePath(href);
+
+  // Fix the redundant /api-references/../../api-references pattern
+  // This happens because of how fumadocs calculates relative paths on Windows
+  if (normalized.includes("/../")) {
+    const parts = normalized.split("/");
+    const cleanParts: string[] = [];
+    for (const part of parts) {
+      if (part === "..") {
+        cleanParts.pop();
+      } else if (part !== "." && part !== "") {
+        cleanParts.push(part);
+      }
+    }
+    normalized = `/${cleanParts.join("/")}`;
+  }
+  return normalized;
+}
+
+// Recursive function to walk directory and fix backslashes in MDX files
+async function fixBackslashes(dir: string) {
+  const files = await readdir(dir);
+  for (const file of files) {
+    const fullPath = join(dir, file);
+    const stat = await lstat(fullPath);
+    if (stat.isDirectory()) {
+      await fixBackslashes(fullPath);
+    } else if (file.endsWith(".mdx")) {
+      const content = await readFile(fullPath, "utf8");
+      if (
+        content.includes("\\") ||
+        content.includes("%5C") ||
+        content.includes("/..")
+      ) {
+        const fixedContent = content.replace(
+          /href="([^"]+)"/g,
+          (_match, href) => `href="${resolveRelativePath(href)}"`
+        );
+        if (fixedContent !== content) {
+          await writeFile(fullPath, fixedContent);
+          console.log(`✅ Fixed paths in ${relative(process.cwd(), fullPath)}`);
+        }
+      }
+    }
+  }
 }
 
 // Helper function to determine API type from schema ID and path
@@ -76,70 +133,80 @@ function generateOperationPath(
     operationItem.method
   );
 
-  if (apiType === "rest") {
-    return `api-references/rest-api/v2/${sanitizedTag}/${sanitizedOpId}`;
-  }
+  const basePath =
+    apiType === "rest"
+      ? `api-references/rest-api/v2/${sanitizedTag}`
+      : `api-references/webhooks/v3/${sanitizedTag}`;
 
-  return `api-references/webhooks/v3/${sanitizedTag}/${sanitizedOpId}`;
+  return `${basePath}/${sanitizedOpId}`;
 }
 
-generateFiles({
-  input: openapi,
-  output: "./content",
-  // Generate one file per operation
-  per: "operation",
-  // Don't use groupBy - we'll handle folder structure in name function
-  groupBy: "none",
-  // Custom name function to organize files by API type and version
-  name: (output) => {
-    if (output.type !== "operation") {
-      // Handle webhook output
-      if ("name" in output.item) {
-        return `api-references/webhooks/v3/${sanitizeForFileSystem(output.item.name)}`;
+async function main() {
+  await generateFiles({
+    input: openapi,
+    output: "./content",
+    // Generate one file per operation
+    per: "operation",
+    // Don't use groupBy - we'll handle folder structure in name function
+    groupBy: "none",
+    // Custom name function to organize files by API type and version
+    name: (output) => {
+      if (output.type !== "operation") {
+        // Handle webhook output
+        if ("name" in output.item) {
+          return `api-references/webhooks/v3/${sanitizeForFileSystem(output.item.name)}`;
+        }
+        return "api";
       }
-      return "api";
-    }
 
-    // output.item is OperationItem for operations
-    const operationItem = output.item as {
-      path: string;
-      method: string;
-      tags?: string[];
-      operationId?: string;
-    };
+      // output.item is OperationItem for operations
+      const operationItem = output.item as {
+        path: string;
+        method: string;
+        tags?: string[];
+        operationId?: string;
+      };
 
-    const tag = operationItem.tags?.[0] ?? "api";
+      const tag = operationItem.tags?.[0] ?? "api";
 
-    return generateOperationPath(output.schemaId, {
-      path: operationItem.path,
-      method: operationItem.method,
-      tag,
-      operationId: operationItem.operationId,
-    });
-  },
-  // Include descriptions in generated files
-  includeDescription: true,
-  // Add generated comment
-  addGeneratedComment: true,
-  // Generate index pages for REST API and Webhooks
-  index: {
-    url: {
-      baseUrl: "/api-references",
-      contentDir: "./content/api-references",
+      return generateOperationPath(output.schemaId, {
+        path: operationItem.path,
+        method: operationItem.method,
+        tag,
+        operationId: operationItem.operationId,
+      });
     },
-    items: [
-      {
-        path: "api-references/rest-api/v2/index.mdx",
-        only: ["rest_v2", "./openapi/rest/v2/openapi.yaml"],
-        description:
-          "Complete REST API v2 reference with interactive playground",
+    // Include descriptions in generated files
+    includeDescription: true,
+    // Add generated comment
+    addGeneratedComment: true,
+    // Generate index pages for REST API and Webhooks
+    index: {
+      url: {
+        baseUrl: "/api-references",
+        contentDir: "content/api-references",
       },
-      {
-        path: "api-references/webhooks/v3/index.mdx",
-        only: ["webhooks_v3", "./openapi/webhooks/v3/openapi.yaml"],
-        description:
-          "Complete Webhooks v3 reference with interactive playground",
-      },
-    ],
-  },
-});
+      items: [
+        {
+          path: "api-references/rest-api/v2/index.mdx",
+          only: ["./openapi/rest/v2/openapi.yaml"],
+          description:
+            "Complete REST API v2 reference with interactive playground",
+        },
+        {
+          path: "api-references/webhooks/v3/index.mdx",
+          only: ["./openapi/webhooks/v3/openapi.yaml"],
+          description:
+            "Complete Webhooks v3 reference with interactive playground",
+        },
+      ],
+    },
+  });
+
+  // Post-process to fix Windows backslashes in generated links
+  console.log("🛠️ Normalizing paths in generated files...");
+  await fixBackslashes(join(process.cwd(), "content/api-references"));
+  console.log("✅ Done!");
+}
+
+main().catch(console.error);

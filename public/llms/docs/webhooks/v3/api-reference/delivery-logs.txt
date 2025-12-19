@@ -1,0 +1,244 @@
+# Webhooks: undefined
+URL: /docs/webhooks/v3/api-reference/delivery-logs
+Source: content/docs/webhooks/v3/api-reference/delivery-logs.mdx
+
+
+
+---
+title: Delivery Logs API
+description: Monitor webhook delivery attempts, access detailed logs, and retry failed deliveries programmatically.
+---
+
+## Endpoints Overview
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **GET** | `/api/v1/webhooks/delivery-logs` | List delivery logs |
+| **GET** | `/api/v1/webhooks/delivery-logs/{deliveryId}` | Get delivery details |
+| **PATCH** | `/api/v1/webhooks/delivery-logs/{deliveryId}/retry` | Retry failed delivery |
+
+---
+
+## List Delivery Logs
+
+Retrieve paginated list of webhook delivery attempts.
+
+### Request
+
+**GET** `/api/v1/webhooks/delivery-logs`
+
+**Query Parameters:**
+
+### Example Requests
+
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?perPage=50" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?deliveryStatus=500" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhookId=wh_abc123" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+  
+    ```bash
+    curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?workOrderId=12345" \
+      -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+    ```
+  
+
+### Response
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z",
+    "query": {
+      "webhookId": "wh_abc123",
+      "page": 1,
+      "perPage": 50
+    }
+  },
+  "result": [
+    {
+      "deliveryId": "del_xyz789",
+      "webhookId": "wh_abc123",
+      "workOrderId": 12345,
+      "eventName": "workorder.status.published",
+      "deliveryStatus": 200,
+      "deliveryAttempt": 1,
+      "createdAt": "2025-01-15T11:59:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## Get Delivery Details
+
+Retrieve detailed information including pre-signed URL to complete log file.
+
+### Request
+
+**GET** `/api/v1/webhooks/delivery-logs/{deliveryId}`
+
+### Example
+
+```bash
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs/del_xyz789 \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Response
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z"
+  },
+  "result": {
+    "deliveryId": "del_xyz789",
+    "webhookId": "wh_abc123",
+    "eventName": "workorder.status.published",
+    "deliveryStatus": 200,
+    "deliveryAttempt": 1,
+    "createdAt": "2025-01-15T11:59:00Z",
+    "delivery_log": "https://s3.amazonaws.com/fn-logs/del_xyz789?AWSAccessKeyId=...&Expires=1642252800&Signature=..."
+  }
+}
+```
+
+![Delivery Logs Dashboard](../images/delivery-logs.png)
+
+---
+
+## Retry Failed Delivery
+
+Manually retry a failed delivery attempt.
+
+### Request
+
+**PATCH** `/api/v1/webhooks/delivery-logs/{deliveryId}/retry`
+
+### Example
+
+```bash
+curl -X PATCH https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs/del_xyz789/retry \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Response
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T12:00:00Z"
+  },
+  "result": {
+    "job_id": "job_abc123"
+  }
+}
+```
+
+![Retry Delivery](../images/delivery-log-retry.png)
+
+> [INFO] The `job_id` can be used to track the retry attempt in delivery logs.
+
+---
+
+## Code Examples
+
+```javascript
+class DeliveryLogMonitor {
+  constructor(accessToken) {
+    this.accessToken = accessToken;
+    this.baseUrl = 'https://api-sandbox.fndev.net';
+  }
+  
+  async getLogs(filters = {}) {
+    const params = new URLSearchParams(filters);
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/delivery-logs?${params}`,
+      {
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+  
+  async getDeliveryDetails(deliveryId) {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/delivery-logs/${deliveryId}`,
+      {
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+  
+  async retryDelivery(deliveryId) {
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/webhooks/delivery-logs/${deliveryId}/retry`,
+      {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
+      }
+    );
+    return await response.json();
+  }
+  
+  async getFailedDeliveries(webhookId, hours = 24) {
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    
+    const logs = await this.getLogs({
+      webhookId,
+      sortBy: 'createdAt',
+      sortDirection: 'DESC'
+    });
+    
+    return logs.result.filter(log =>
+      log.deliveryStatus >= 400 &&
+      new Date(log.createdAt) >= new Date(since)
+    );
+  }
+  
+  async retryAllFailed(webhookId) {
+    const failed = await this.getFailedDeliveries(webhookId);
+    
+    const results = [];
+    for (const log of failed) {
+      try {
+        const result = await this.retryDelivery(log.deliveryId);
+        results.push({ deliveryId: log.deliveryId, success: true, jobId: result.result.job_id });
+      } catch (error) {
+        results.push({ deliveryId: log.deliveryId, success: false, error: error.message });
+      }
+    }
+    
+    return results;
+  }
+}
+
+// Usage
+const monitor = new DeliveryLogMonitor(accessToken);
+
+// Get failed deliveries
+const failed = await monitor.getFailedDeliveries('wh_abc123', 24);
+console.log(`${failed.length} failed deliveries in last 24 hours`);
+
+// Retry all failed
+const results = await monitor.retryAllFailed('wh_abc123');
+console.log(`Retried ${results.length} deliveries`);
+```
+
+---

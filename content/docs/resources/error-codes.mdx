@@ -311,7 +311,7 @@ These indicate problems on Field Nation's side. Implement retry logic for these 
 | **Connection Timeout** | Endpoint too slow to respond | Yes | Optimize response time, use async processing |
 | **Signature Verification Failed** | Wrong secret or body modified | No | Use correct secret, verify with raw body |
 
-[Complete webhook troubleshooting →](/docs/webhooks/troubleshooting/delivery-failures)
+[Complete webhook troubleshooting →](/docs/webhooks/v3/troubleshooting/delivery-failures)
 
 ---
 
@@ -351,33 +351,33 @@ async function apiRequestWithRetry(url, options, maxRetries = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const response = await fetch(url, options);
-      
+
       // Success
       if (response.ok) {
         return await response.json();
       }
-      
+
       // Client errors - don't retry
       if (response.status >= 400 && response.status < 500) {
         const error = await response.json();
         throw new Error(`Client error: ${JSON.stringify(error.errors)}`);
       }
-      
+
       // Server errors - retry with backoff
       if (response.status >= 500) {
         if (attempt === maxRetries) {
           throw new Error(`Max retries exceeded: ${response.status}`);
         }
-        
+
         const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
         console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
         await sleep(delay);
         continue;
       }
-      
+
     } catch (error) {
       if (attempt === maxRetries) throw error;
-      
+
       const delay = Math.pow(2, attempt) * 1000;
       await sleep(delay);
     }

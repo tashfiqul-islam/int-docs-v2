@@ -1,0 +1,17 @@
+# Webhooks: undefined
+URL: /docs/webhooks/v3/api-playground
+Source: content/docs/webhooks/v3/api-playground.mdx
+
+
+
+---
+title: API Playground
+description: Jump to the Webhooks v3 playground to explore requests and responses.
+icon: SatelliteDish
+---
+
+import Link from "next/link";
+
+Visit the Webhooks v3 playground to test payloads, signatures, and responses:
+
+  Open Webhooks Playground

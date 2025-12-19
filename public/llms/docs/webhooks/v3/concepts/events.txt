@@ -1,0 +1,737 @@
+# Webhooks: undefined
+URL: /docs/webhooks/v3/concepts/events
+Source: content/docs/webhooks/v3/concepts/events.mdx
+
+
+
+---
+title: Webhook Events
+description: Complete catalog of all 33 webhook events covering the work order lifecycle, status changes, and activity events.
+---
+
+## Event Categories
+
+Events are organized into three main categories:
+
+  
+    **13 events** - Core work order actions like creation, routing, assignment, and completion.
+  
+  
+    **19 events** - Work order status transitions (draft, published, assigned, approved, paid, etc.)
+  
+  
+    Overlaps with lifecycle - Messages, uploads, task updates, schedule changes, and tags.
+  
+
+---
+
+## Complete Event Catalog
+
+### Lifecycle Events
+
+These events track the primary actions in a work order's journey:
+
+#### `workorder.created`
+
+**Triggered when**: A new work order is created in the system
+
+**Typical Use Cases**:
+- Log new work orders in your database
+- Trigger initial workflows or notifications
+- Auto-assign to preferred providers based on criteria
+
+**Event Name**: `workorder.created`
+
+**Model**: `WorkOrder`
+
+```json
+{
+  "eventName": "workorder.created",
+  "eventId": "evt_abc123",
+  "workOrderId": 12345,
+  "timestamp": "2025-01-15T10:30:00Z",
+  "data": {
+    "id": 12345,
+    "title": "Router Installation",
+    "status": "draft",
+    // ... full work order details
+  }
+}
+```
+
+---
+
+#### `workorder.routed`
+
+**Triggered when**: A work order is routed to specific provider(s)
+
+**Typical Use Cases**:
+- Notify selected providers
+- Track routing patterns
+- Update dispatch boards
+
+**Event Name**: `workorder.routed`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.requested`
+
+**Triggered when**: A provider requests assignment to a work order
+
+**Typical Use Cases**:
+- Notify managers of provider interest
+- Auto-approve based on provider rating/history
+- Track request patterns
+
+**Event Name**: `workorder.requested`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.declined`
+
+**Triggered when**: A provider declines a work order assignment
+
+**Typical Use Cases**:
+- Alert managers to find replacement
+- Re-route to other providers
+- Track decline reasons
+
+**Event Name**: `workorder.declined`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.undeclined`
+
+**Triggered when**: A declined assignment is reversed
+
+**Typical Use Cases**:
+- Update provider availability
+- Re-evaluate assignment
+- Log status reversals
+
+**Event Name**: `workorder.undeclined`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.task_completed`
+
+**Triggered when**: A task within a work order is marked complete
+
+**Typical Use Cases**:
+- Track task-level progress
+- Calculate completion percentage
+- Trigger next-step workflows
+
+**Event Name**: `workorder.task_completed`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.task_incomplete`
+
+**Triggered when**: A task is marked as incomplete
+
+**Typical Use Cases**:
+- Alert managers to incomplete tasks
+- Adjust work order timeline
+- Track quality issues
+
+**Event Name**: `workorder.task_incomplete`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.provider_upload`
+
+**Triggered when**: A provider uploads a document (photo, PDF, etc.)
+
+**Typical Use Cases**:
+- Archive documents in your system
+- Trigger review workflows
+- Notify stakeholders of completion evidence
+
+**Event Name**: `workorder.provider_upload`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.message_posted`
+
+**Triggered when**: A message is posted or replied to on a work order
+
+**Typical Use Cases**:
+- Send email/SMS notifications
+- Log communication history
+- Alert on specific keywords
+
+**Event Name**: `workorder.message_posted`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.custom_field_value_updated`
+
+**Triggered when**: A custom field value is changed
+
+**Typical Use Cases**:
+- Sync custom data to external systems
+- Trigger workflows based on field values
+- Track data changes
+
+**Event Name**: `workorder.custom_field_value_updated`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.schedule_updated`
+
+**Triggered when**: The work order schedule is modified
+
+**Typical Use Cases**:
+- Update calendar systems
+- Notify providers and clients of changes
+- Track schedule volatility
+
+**Event Name**: `workorder.schedule_updated`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.tag_added`
+
+**Triggered when**: A tag is added to a work order
+
+**Typical Use Cases**:
+- Categorize work orders dynamically
+- Trigger tag-based routing
+- Track work order classifications
+
+**Event Name**: `workorder.tag_added`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.tag_removed`
+
+**Triggered when**: A tag is removed from a work order
+
+**Typical Use Cases**:
+- Update categorizations
+- Log tag history
+- Sync taxonomy changes
+
+**Event Name**: `workorder.tag_removed`
+
+**Model**: `WorkOrder`
+
+---
+
+### Status Change Events
+
+These events fire when a work order transitions between statuses:
+
+#### `workorder.status.draft`
+
+**Triggered when**: Work order status changes to **Draft**
+
+**Description**: Initial state when a work order is created but not yet published
+
+**Event Name**: `workorder.status.draft`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.routed`
+
+**Triggered when**: Work order status changes to **Routed**
+
+**Description**: Work order has been routed to specific provider(s)
+
+**Event Name**: `workorder.status.routed`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.published`
+
+**Triggered when**: Work order status changes to **Published**
+
+**Description**: Work order is published to the marketplace and visible to providers
+
+**Typical Use Cases**:
+- Notify provider network
+- Start SLA timers
+- Update dispatch boards
+
+**Event Name**: `workorder.status.published`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.confirmed`
+
+**Triggered when**: Work order status changes to **Confirmed**
+
+**Description**: Provider has confirmed they will take the assignment
+
+**Event Name**: `workorder.status.confirmed`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.assigned`
+
+**Triggered when**: Work order status changes to **Assigned**
+
+**Description**: Work order has been assigned to a provider
+
+**Typical Use Cases**:
+- Notify provider of assignment
+- Update dispatch board
+- Sync to scheduling systems
+- Start work order timeline
+
+**Event Name**: `workorder.status.assigned`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.assigned_cancelled`
+
+**Triggered when**: Work order status changes to **Assigned Cancelled**
+
+**Description**: An assigned work order has been cancelled
+
+**Event Name**: `workorder.status.assigned_cancelled`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.at_risk`
+
+**Triggered when**: Work order status changes to **At Risk**
+
+**Description**: Work order is flagged as at risk of not completing on time
+
+**Typical Use Cases**:
+- Alert managers
+- Escalate to senior technicians
+- Prepare backup plans
+
+**Event Name**: `workorder.status.at_risk`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.delayed`
+
+**Triggered when**: Work order status changes to **Delayed**
+
+**Description**: Work order is delayed beyond scheduled time
+
+**Typical Use Cases**:
+- Notify clients of delay
+- Adjust schedules
+- Track on-time performance
+
+**Event Name**: `workorder.status.delayed`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.on_my_way`
+
+**Triggered when**: Work order status changes to **On My Way**
+
+**Description**: Provider is en route to the work location
+
+**Typical Use Cases**:
+- Notify client of provider ETA
+- Track travel time
+- Update real-time dashboards
+
+**Event Name**: `workorder.status.on_my_way`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.checked_in`
+
+**Triggered when**: Work order status changes to **Checked In**
+
+**Description**: Provider has arrived on site and checked in
+
+**Typical Use Cases**:
+- Log start time
+- Start work timer
+- Notify stakeholders work has begun
+
+**Event Name**: `workorder.status.checked_in`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.checked_out`
+
+**Triggered when**: Work order status changes to **Checked Out**
+
+**Description**: Provider has finished on-site work and checked out
+
+**Typical Use Cases**:
+- Calculate work duration
+- Trigger documentation review
+- Update time tracking systems
+
+**Event Name**: `workorder.status.checked_out`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.work_done`
+
+**Triggered when**: Work order status changes to **Work Done**
+
+**Description**: Provider has completed the work and submitted for approval
+
+**Typical Use Cases**:
+- Trigger approval workflows
+- Notify managers/clients
+- Calculate completion metrics
+
+**Event Name**: `workorder.status.work_done`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.approved`
+
+**Triggered when**: Work order status changes to **Approved**
+
+**Description**: Buyer has approved the completed work
+
+**Typical Use Cases**:
+- Generate invoices
+- Release payments
+- Close work orders in external systems
+- Calculate approval times
+
+**Event Name**: `workorder.status.approved`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.paid`
+
+**Triggered when**: Work order status changes to **Paid**
+
+**Description**: Provider has been paid for the work order
+
+**Typical Use Cases**:
+- Update accounting systems
+- Archive completed work orders
+- Calculate payment cycles
+- Generate financial reports
+
+**Event Name**: `workorder.status.paid`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.cancelled`
+
+**Triggered when**: Work order status changes to **Cancelled**
+
+**Description**: Work order has been cancelled before completion
+
+**Typical Use Cases**:
+- Update availability calendars
+- Notify affected parties
+- Track cancellation reasons
+- Calculate cancellation rates
+
+**Event Name**: `workorder.status.cancelled`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.deleted`
+
+**Triggered when**: Work order status changes to **Deleted**
+
+**Description**: Work order has been deleted from the system
+
+**Event Name**: `workorder.status.deleted`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.status.postponed`
+
+**Triggered when**: Work order status changes to **Postponed**
+
+**Description**: Work order has been postponed to a future date
+
+**Typical Use Cases**:
+- Update schedules
+- Notify providers of new dates
+- Track postponement patterns
+
+**Event Name**: `workorder.status.postponed`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.problem_reported`
+
+**Triggered when**: A problem is reported or reopened on a work order
+
+**Description**: Issue flagged that requires attention or resolution
+
+**Typical Use Cases**:
+- Alert quality assurance teams
+- Escalate to managers
+- Track problem frequency
+- Trigger resolution workflows
+
+**Event Name**: `workorder.problem_reported`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.problem_resolved`
+
+**Triggered when**: A reported problem is resolved
+
+**Description**: Previously reported issue has been addressed
+
+**Typical Use Cases**:
+- Close problem tickets
+- Calculate resolution times
+- Resume normal workflows
+- Update quality metrics
+
+**Event Name**: `workorder.problem_resolved`
+
+**Model**: `WorkOrder`
+
+---
+
+#### `workorder.part_updated`
+
+**Triggered when**: Parts/materials on a work order are updated
+
+**Description**: Inventory or parts list has been modified
+
+**Typical Use Cases**:
+- Sync inventory systems
+- Track parts usage
+- Update cost estimates
+- Manage supply chain
+
+**Event Name**: `workorder.part_updated`
+
+**Model**: `WorkOrder`
+
+---
+
+## Event Filtering
+
+When creating a webhook, you can subscribe to:
+
+### All Events
+
+```json
+{
+  "events": [
+    "workorder.created",
+    "workorder.routed",
+    // ... all 33 events
+  ]
+}
+```
+
+### Specific Categories
+
+**Lifecycle events only:**
+
+```json
+{
+  "events": [
+    "workorder.created",
+    "workorder.routed",
+    "workorder.requested",
+    "workorder.declined",
+    "workorder.task_completed"
+  ]
+}
+```
+
+**Status changes only:**
+
+```json
+{
+  "events": [
+    "workorder.status.published",
+    "workorder.status.assigned",
+    "workorder.status.checked_in",
+    "workorder.status.work_done",
+    "workorder.status.approved",
+    "workorder.status.paid"
+  ]
+}
+```
+
+### Critical Events
+
+For minimal integration, start with these high-value events:
+
+```json
+{
+  "events": [
+    "workorder.status.published",    // Work order available
+    "workorder.status.assigned",     // Provider assigned
+    "workorder.status.work_done",    // Work completed
+    "workorder.status.approved"      // Ready for payment
+  ]
+}
+```
+
+---
+
+## List Available Events via API
+
+Retrieve the complete, up-to-date event catalog programmatically:
+
+```bash
+curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/events \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "metadata": {
+    "timestamp": "2025-01-15T10:30:00Z"
+  },
+  "result": [
+    {
+      "name": "workorder.created",
+      "label": "Work Order created",
+      "description": "Triggered when a work order is created.",
+      "model": "WorkOrder"
+    },
+    {
+      "name": "workorder.status.published",
+      "label": "Work Order status published",
+      "description": "Triggered when a work order status changes to published.",
+      "model": "WorkOrder"
+    }
+    // ... all 33 events
+  ]
+}
+```
+
+### Filter by Model
+
+```bash
+curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/events?model=WorkOrder" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+---
+
+## Event Naming Convention
+
+Events follow a consistent pattern:
+
+```plaintext
+{resource}.{action or status}.{optional_sub_status}
+```
+
+**Examples:**
+
+- `workorder.created` - Resource: workorder, Action: created
+- `workorder.status.published` - Resource: workorder, Category: status, Status: published
+- `workorder.task_completed` - Resource: workorder, Action: task_completed
+
+---
+
+## Best Practices
+
+### Start Small, Expand Later
+
+### Begin with Core Events
+
+Subscribe to 4-6 critical events initially:
+- `workorder.created`
+- `workorder.status.assigned`
+- `workorder.status.work_done`
+- `workorder.status.approved`
+
+### Test Thoroughly
+
+Verify your system handles events correctly before adding more.
+
+### Add Events Incrementally
+
+Expand to additional events as you build new features.
+
+### Filter Strategically
+
+Don't subscribe to events you won't use:
+
+- ❌ **Bad**: Subscribe to all 33 events "just in case"
+- ✅ **Good**: Subscribe only to events your system processes
+
+Unnecessary events increase:
+- Processing overhead
+- Delivery log volume
+- Potential for bugs
+
+### Document Your Event Handling
+
+Maintain internal documentation:
+
+```markdown
+| Event                       | Handler          | Purpose                 |
+|-----------------------------|------------------|-------------------------|
+| workorder.status.published  | publishHandler() | Notify provider network |
+| workorder.status.assigned   | assignHandler()  | Update dispatch board   |
+| workorder.status.work_done  | completeHandler()| Trigger approval flow   |
+```
+
+---
