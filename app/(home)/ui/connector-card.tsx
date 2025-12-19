@@ -1,3 +1,4 @@
+import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -5,8 +6,8 @@ type ConnectorCardProps = {
   connector: {
     name: string;
     href: string;
-    logo: string;
-    logoDark?: string;
+    logo: string | StaticImageData;
+    logoDark?: string | StaticImageData;
     needsDarkEnhance?: boolean;
     needsLargerSize?: boolean;
   };
