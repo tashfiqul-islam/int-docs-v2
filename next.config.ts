@@ -15,8 +15,6 @@ const config: NextConfig = {
 
   // Required for GitHub Pages to resolve routes correctly (e.g. /docs -> /docs/index.html)
   trailingSlash: true,
-  // Optimization: skip middleware redirects for trailing slashes since we are static
-  skipTrailingSlashRedirect: true,
 
   // Base path for GitHub Pages deployment
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
