@@ -231,16 +231,18 @@ async function generateLLMFiles() {
   let generatedCount = 0;
   let errorCount = 0;
 
-  // Generate root /llms and /llms/llms-full files for static export
+  // Generate root /llms/llms.txt and /llms/llms-full.txt files for static export
   // These are needed because route handlers with optional catch-all cause conflicts
   try {
     const outlineContent = buildOutline();
-    const outlinePath = join(process.cwd(), "public", "llms.txt");
+    const llmsDir = join(process.cwd(), "public", "llms");
+    await mkdir(llmsDir, { recursive: true });
+    const outlinePath = join(llmsDir, "llms.txt");
     await writeFile(outlinePath, outlineContent, "utf-8");
     generatedCount += 1;
-    console.log("✅ Generated /llms.txt");
+    console.log("✅ Generated /llms/llms.txt");
   } catch (error) {
-    console.error("❌ Error generating /llms.txt:", error);
+    console.error("❌ Error generating /llms/llms.txt:", error);
     errorCount += 1;
   }
 
