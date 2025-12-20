@@ -22,7 +22,6 @@ The REST Connector enables integration with **any REST API** that has an OpenAPI
 
 ## Key Features
 
-
   
     Works with ANY system that has an OpenAPI spec
   
@@ -36,12 +35,9 @@ The REST Connector enables integration with **any REST API** that has an OpenAPI
     Use familiar field mapping UI and transformations
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Upload OpenAPI Spec
 
@@ -71,8 +67,6 @@ Configure standard field mappings using discovered fields
 ### Test & Deploy
 
 Test with sample data, then activate for production use
-
-
 
 ---
 
@@ -112,7 +106,6 @@ sequenceDiagram
 ## When to Use REST Connector
 
 ### ✅ Use REST Connector When
-
 
   
     Your platform doesn't have a pre-built connector but has an OpenAPI spec.
@@ -159,14 +152,11 @@ sequenceDiagram
     - Standard field mapping UI
   
 
-
 ---
 
 ### ⚠️ Limitations
 
 The REST Connector is built for **standard CRUD operations**. It may not support:
-
-
 
 > [INFO] **Extensibility**: The REST Connector was built for specific use cases and can be extended with additional functionality as needed. Contact [Field Nation Support](https://app.fieldnation.com/support-cases) to discuss feature requirements.
 
@@ -215,7 +205,6 @@ Industry-specific platform (healthcare, retail, manufacturing) with custom data 
 ## Prerequisites
 
 ### External System Requirements
-
 
   
     **Required**: Valid OpenAPI/Swagger specification file
@@ -290,7 +279,6 @@ Industry-specific platform (healthcare, retail, manufacturing) with custom data 
     
     [Field Nation IP addresses →](/docs/resources/environments)
   
-
 
 ### Field Nation Requirements
 

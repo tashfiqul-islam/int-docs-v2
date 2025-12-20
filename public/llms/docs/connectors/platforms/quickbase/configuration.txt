@@ -20,8 +20,6 @@ description: Configure the Quickbase connector in Field Nation with user token a
 
 ## Step 1: Generate Quickbase User Token
 
-
-
 ### Log into Quickbase
 
 Use admin or dedicated integration user account
@@ -42,13 +40,9 @@ Click "+ New User Token"
 
 **Token**: Copy immediately (shown once!)
 
-
-
 ---
 
 ## Step 2: Get App & Table Information
-
-
 
 ### Find App ID
 
@@ -76,8 +70,6 @@ https://{realm}.quickbase.com
 ```
 
 Example: If URL is `acme.quickbase.com`, realm is `acme`
-
-
 
 ---
 
@@ -128,7 +120,6 @@ Click "Test Connection"
 
 **Failure** ❌: Check:
 
-
   
     - Verify token copied correctly
     - Ensure token not revoked/expired
@@ -146,7 +137,6 @@ Click "Test Connection"
     - Check user has table read/write permissions
     - Verify field-level permissions
   
-
 
 ---
 
@@ -184,7 +174,6 @@ Review → Save → Copy trigger URL for Quickbase automation
 
 ## Troubleshooting
 
-
   
     - Verify token has table access
     - Check Table ID correct
@@ -198,6 +187,5 @@ Review → Save → Copy trigger URL for Quickbase automation
     - Use proper transformation actions
     - Test with sample data
   
-
 
 ---

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** SVG viewBox dimensions for coordinate calculations */
 const VIEWBOX = { width: 750, height: 100 } as const;
@@ -15,9 +16,6 @@ const SPOTLIGHT = {
   },
 } as const;
 
-/** Base text color when not hovered */
-const BASE_FILL = "rgba(128, 128, 128, 0.08)";
-
 type FooterWatermarkProps = {
   /** Text to display as the watermark. Defaults to "FIELD NATION" */
   text?: string;
@@ -30,6 +28,14 @@ type FooterWatermarkProps = {
 export function FooterWatermark({
   text = "FIELD NATION",
 }: FooterWatermarkProps) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const isDark = mounted ? resolvedTheme === "dark" : true; // Default to dark aesthetic before mount
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const svgRef = useRef<SVGSVGElement>(null);
   const textRef = useRef<SVGTextElement>(null);
   const [cursorPos, setCursorPos] = useState({
@@ -88,6 +94,23 @@ export function FooterWatermark({
             viewBox={`0 0 ${VIEWBOX.width} ${VIEWBOX.height}`}
           >
             <defs>
+              {/* Glassy fill gradient */}
+              <linearGradient id="watermark-glass" x1="0" x2="0" y1="0" y2="1">
+                <stop
+                  offset="0%"
+                  stopColor={
+                    isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.04)"
+                  }
+                />
+                <stop
+                  offset="100%"
+                  stopColor={
+                    isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.04)"
+                  }
+                />
+              </linearGradient>
+
+              {/* Spotlight gradient */}
               <radialGradient
                 cx={cursorPos.x}
                 cy={cursorPos.y}
@@ -95,31 +118,90 @@ export function FooterWatermark({
                 id="watermark-spotlight"
                 r={SPOTLIGHT.radius}
               >
-                <stop offset="0%" stopColor={SPOTLIGHT.colors.center} />
-                <stop offset="40%" stopColor={SPOTLIGHT.colors.mid} />
-                <stop offset="100%" stopColor={SPOTLIGHT.colors.edge} />
+                <stop
+                  offset="0%"
+                  stopColor={
+                    isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.1)"
+                  }
+                />
+                <stop
+                  offset="60%"
+                  stopColor={
+                    isDark
+                      ? "rgba(120, 120, 120, 0.08)"
+                      : "rgba(120, 120, 120, 0.05)"
+                  }
+                />
+                <stop
+                  offset="100%"
+                  stopColor={
+                    isDark
+                      ? "rgba(128, 128, 128, 0.03)"
+                      : "rgba(128, 128, 128, 0.01)"
+                  }
+                />
               </radialGradient>
+
+              {/* Inner glow/glass filter */}
+              <filter
+                height="140%"
+                id="glass-filter"
+                width="140%"
+                x="-20%"
+                y="-20%"
+              >
+                <feGaussianBlur
+                  in="SourceAlpha"
+                  result="blur"
+                  stdDeviation="0.5"
+                />
+                <feOffset dx="0.5" dy="0.5" in="blur" result="offset" />
+                <feComposite
+                  in="SourceAlpha"
+                  in2="offset"
+                  operator="out"
+                  result="inner-glow"
+                />
+                <feFlood
+                  floodColor={
+                    isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+                  }
+                  result="color"
+                />
+                <feComposite in="color" in2="inner-glow" operator="in" />
+                <feMerge>
+                  <feMergeNode />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
-            {/* Base text layer - always visible */}
+
+            {/* Base "Glass" Layer */}
             <text
-              className="pointer-events-none"
+              className="pointer-events-none transition-all duration-500"
               dominantBaseline="alphabetic"
               style={{
                 fontSize: "105px",
                 fontWeight: 900,
                 fontFamily: "var(--font-sans), system-ui, sans-serif",
                 letterSpacing: "-0.04em",
-                fill: BASE_FILL,
+                fill: "url(#watermark-glass)",
+                stroke: isDark
+                  ? "rgba(255, 255, 255, 0.03)"
+                  : "rgba(0, 0, 0, 0.04)",
+                strokeWidth: "0.2px",
+                filter: "url(#glass-filter)",
               }}
               textAnchor="middle"
               x={VIEWBOX.width / 2}
-              y="88"
+              y="80"
             >
               {text}
             </text>
-            {/* Glow layer - fades in/out smoothly */}
+
+            {/* Interaction Layer (Spotlight) */}
             <text
-              className="pointer-events-none transition-opacity duration-300 ease-out"
+              className="pointer-events-none transition-opacity duration-500 ease-out"
               dominantBaseline="alphabetic"
               ref={textRef}
               style={{
@@ -128,27 +210,18 @@ export function FooterWatermark({
                 fontFamily: "var(--font-sans), system-ui, sans-serif",
                 letterSpacing: "-0.04em",
                 fill: "url(#watermark-spotlight)",
-                opacity: glowOpacity,
+                opacity: glowOpacity * 0.6,
+                filter: "blur(0.8px)", // Soften the interaction spotlight even more
               }}
               textAnchor="middle"
               x={VIEWBOX.width / 2}
-              y="88"
+              y="80"
             >
               {text}
             </text>
           </svg>
         </div>
       </div>
-
-      {/* Bottom edge glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
-        style={{
-          background:
-            "radial-gradient(ellipse 50% 100% at 50% 100%, rgba(128, 128, 128, 0.1) 0%, transparent 70%)",
-        }}
-      />
     </div>
   );
 }

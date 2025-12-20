@@ -19,8 +19,6 @@ description: Configure the Freshdesk connector in Field Nation with API key and 
 
 ## Step 1: Get Freshdesk API Key
 
-
-
 ### Log into Freshdesk
 
 Use admin account
@@ -33,8 +31,6 @@ Click profile icon → Profile Settings
 
 Right sidebar → "Your API Key"  
 Click to reveal and copy
-
-
 
 ---
 
@@ -106,7 +102,6 @@ Save → Copy trigger URL for Freshdesk webhook
 
 ## Troubleshooting
 
-
   
     - Verify API key correct
     - Check subdomain spelling
@@ -118,6 +113,5 @@ Save → Copy trigger URL for Freshdesk webhook
     - Verify custom fields accessible
     - Try "Refresh Fields" again
   
-
 
 ---

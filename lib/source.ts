@@ -7,6 +7,7 @@ import { createElement } from "react";
 
 // Regex for detecting emoji icons (Unicode emoji range)
 const EMOJI_REGEX = /^[\u{1F300}-\u{1F9FF}]/u;
+const VERSION_REGEX = /^v\d+$/;
 
 // Shared icon resolver function that can be used by both loader and components
 export function resolveIcon(icon: string | undefined): React.ReactNode {
@@ -82,4 +83,42 @@ ${processed}`;
 
 export function getAllPages(): AnyPage[] {
   return [...source.getPages(), ...apiReferencesSource.getPages()];
+}
+
+/**
+ * Dynamically discovers available versions from the file structure.
+ * Scans slugs for patterns like ['rest-api', 'v2', ...] or ['webhooks', 'v3', ...].
+ */
+export function getAvailableVersions(): Record<string, string[]> {
+  const versions: Record<string, Set<string>> = {
+    "rest-api": new Set(),
+    webhooks: new Set(),
+  };
+
+  const allPages = getAllPages();
+
+  for (const page of allPages) {
+    const { slugs } = page;
+    // We expect slugs like ['rest-api', 'v2', 'introduction']
+    if (slugs.length >= 2) {
+      const section = slugs[0];
+      const version = slugs[1];
+
+      // Check if version segment matches v[number] pattern
+      if (
+        (section === "rest-api" || section === "webhooks") &&
+        VERSION_REGEX.test(version)
+      ) {
+        versions[section].add(version);
+      }
+    }
+  }
+
+  // Convert Sets to sorted Arrays
+  return Object.fromEntries(
+    Object.entries(versions).map(([section, versionSet]) => [
+      section,
+      Array.from(versionSet).sort((a, b) => b.localeCompare(a)), // Sort v3, v2, v1
+    ])
+  );
 }

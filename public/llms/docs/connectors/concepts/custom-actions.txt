@@ -33,8 +33,6 @@ JSONNET is a data templating language developed by Google that generates JSON th
 
 Every custom action executes within a special context providing access to data and utilities:
 
-
-
 ---
 
 ## Basic Custom Action
@@ -637,7 +635,6 @@ Trace output appears in integration logs.
 
 ## Troubleshooting
 
-
   
     **Common Issues:**
     - Missing commas between object properties
@@ -669,6 +666,5 @@ Trace output appears in integration logs.
     if std.isNumber(value) then value else std.parseInt(value)
     ```
   
-
 
 ---

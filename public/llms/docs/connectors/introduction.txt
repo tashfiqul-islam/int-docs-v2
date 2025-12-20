@@ -16,7 +16,6 @@ Pre-built connectors are **configuration-driven integrations** managed by Field 
 
 ### Key Benefits
 
-
   
     Configure through UI - no API development needed for standard workflows
   
@@ -30,16 +29,11 @@ Pre-built connectors are **configuration-driven integrations** managed by Field 
     Work orders flow both ways - create in either system, sync status automatically
   
 
-
 ---
 
 ## Supported Platforms
 
 Field Nation provides pre-built connectors for 9 platforms:
-
-
-
-
 
 ### Professional Services Automation
 
@@ -51,10 +45,6 @@ Field Nation provides pre-built connectors for 9 platforms:
 
 [View all PSA connectors →](#platform-guides)
 
-
-
-
-
 ### CRM & Support
 
 **Salesforce** - Salesforce Service Cloud integration with Flows and Outbound Messages
@@ -62,10 +52,6 @@ Field Nation provides pre-built connectors for 9 platforms:
 **Freshdesk** - Freshdesk ticketing system integration
 
 [View all CRM connectors →](#platform-guides)
-
-
-
-
 
 ### ERP & Project Management
 
@@ -76,10 +62,6 @@ Field Nation provides pre-built connectors for 9 platforms:
 **Smartsheet** - Smartsheet project management data synchronization
 
 [View all platforms →](#platform-guides)
-
-
-
-
 
 ### Universal Integration
 
@@ -93,10 +75,6 @@ Field Nation provides pre-built connectors for 9 platforms:
 Perfect for systems not covered by out-of-the-box connectors.
 
 [Learn more about REST Connector →](/docs/connectors/platforms/rest-connector/overview)
-
-
-
-
 
 ---
 
@@ -122,8 +100,6 @@ sequenceDiagram
     Ext-->>Broker: Confirmation
 ```
 
-
-
 ### Configuration in Field Nation
 
 Configure authentication credentials, specify the external object to integrate, and set up field mappings through the Integration Broker UI.
@@ -139,12 +115,9 @@ The Integration Broker handles bidirectional sync:
 - Syncs status changes, assignments, and completions back to external system
 - Maintains data consistency with automatic retries
 
-
-
 ---
 
 ## When to Use Pre-built Connectors
-
 
   
     - Your platform is supported (Salesforce, ServiceNow, etc.)
@@ -172,7 +145,6 @@ The Integration Broker handles bidirectional sync:
     
     [REST Connector Guide →](/docs/connectors/platforms/rest-connector/overview)
   
-
 
 ---
 
@@ -225,7 +197,6 @@ Pre-built connectors use Field Nation's **Integration Broker** - a microservices
 
 ## Getting Started
 
-
   
     What you need before setting up a connector
   
@@ -239,13 +210,11 @@ Pre-built connectors use Field Nation's **Integration Broker** - a microservices
     Common issues and solutions
   
 
-
 ---
 
 ## Platform Guides
 
 Select your platform to get started:
-
 
   
     Integrate with Salesforce Service Cloud
@@ -274,7 +243,6 @@ Select your platform to get started:
   
     Universal OpenAPI-based integration
   
-
 
 ---
 

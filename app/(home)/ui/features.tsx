@@ -48,14 +48,14 @@ const secondaryFeatures = [
 
 export function Features() {
   return (
-    <section className="relative flex min-h-[600px] items-center justify-center bg-fd-background py-12 lg:py-24 xl:h-screen xl:min-h-0 xl:py-0">
+    <section className="relative flex min-h-150 items-center justify-center bg-fd-background py-12 lg:py-24 xl:h-screen xl:min-h-0 xl:py-0">
       {/* Top gradient line */}
       <div
         aria-hidden="true"
-        className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-fd-border/50 to-transparent"
+        className="absolute top-0 right-0 left-0 h-px bg-linear-to-r from-transparent via-fd-border/50 to-transparent"
       />
 
-      <div className="mx-auto w-full max-w-[var(--fd-layout-width)] px-4 py-16 md:px-6 md:py-20 lg:px-8 lg:py-24">
+      <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-16 md:px-6 md:py-20 lg:px-8 lg:py-24">
         {/* Section header */}
         <div className="mb-12 text-center lg:mb-16">
           <p
@@ -125,7 +125,7 @@ export function Features() {
                 </div>
 
                 {/* Hover overlay - slides up from bottom */}
-                <div className="absolute right-0 bottom-0 left-0 flex translate-y-full items-center justify-start bg-gradient-to-t from-fd-card via-fd-card/95 to-transparent px-6 py-4 transition-transform duration-300 ease-out group-hover:translate-y-0 lg:px-8">
+                <div className="absolute right-0 bottom-0 left-0 flex translate-y-full items-center justify-start bg-linear-to-t from-fd-card via-fd-card/95 to-transparent px-6 py-4 transition-transform duration-300 ease-out group-hover:translate-y-0 lg:px-8">
                   <span
                     className="font-medium text-xs tracking-wide md:text-sm"
                     style={{ color: "var(--color-fd-primary)" }}

@@ -12,17 +12,11 @@ icon: Server
 
 ## Environment Overview
 
-
-
-
-
 ## Sandbox Environment
 
 A complete test environment that mirrors production functionality without affecting live data or operations.
 
 ### Access URLs
-
-
 
 ### Purpose
 
@@ -54,17 +48,11 @@ Whitelist these IPs if your webhook endpoint uses IP filtering:
 
 [Security Guide →](/docs/webhooks/v3/guides/security)
 
-
-
-
-
 ## Production Environment
 
 The live Field Nation platform where real work orders, payments, and operations occur.
 
 ### Access URLs
-
-
 
 ### Purpose
 
@@ -87,10 +75,6 @@ The live Field Nation platform where real work orders, payments, and operations 
 
 Contact Field Nation support for production webhook IP addresses to whitelist.
 
-
-
-
-
 ---
 
 ## Environment Comparison
@@ -111,8 +95,6 @@ Contact Field Nation support for production webhook IP addresses to whitelist.
 ## Getting Access
 
 ### Sandbox Access
-
-
 
 ### Submit Support Case
 
@@ -146,13 +128,9 @@ Log in to sandbox and start building:
 - Configure webhooks
 - Test API integrations
 
-
-
 ---
 
 ### Production Access
-
-
 
 ### Complete Sandbox Testing
 
@@ -202,8 +180,6 @@ Follow deployment best practices:
 - Monitor closely after deployment
 - Have rollback plan ready
 
-
-
 ---
 
 ## Testing Strategy
@@ -233,8 +209,6 @@ graph LR
 ### Integration Testing (Sandbox)
 
 **Goals:** Validate end-to-end flows
-
-
 
 ### Create Test Scenarios
 
@@ -268,8 +242,6 @@ Based on results:
 - Enhance error handling
 - Document learnings
 
-
-
 ---
 
 ### Staging Phase (Sandbox)
@@ -293,10 +265,6 @@ Based on results:
 
 **Goals:** Safe, monitored launch
 
-
-
-
-
 1. **Pre-Deployment**
    ```bash
    # Verify environment variables
@@ -319,10 +287,6 @@ Based on results:
    - Verify webhook deliveries
    - Check error logs
    - Monitor metrics
-
-
-
-
 
 **Critical Metrics:**
 
@@ -352,10 +316,6 @@ const metrics = {
 
 [Monitoring Guide →](/docs/webhooks/v3/guides/monitoring)
 
-
-
-
-
 **If Issues Arise:**
 
 1. **Immediate Actions**
@@ -379,10 +339,6 @@ const metrics = {
    - Fix in sandbox
    - Test thoroughly
    - Redeploy with monitoring
-
-
-
-
 
 ---
 

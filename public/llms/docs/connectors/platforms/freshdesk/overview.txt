@@ -22,7 +22,6 @@ The Freshdesk connector enables seamless integration between Freshdesk and Field
 
 ## At a Glance
 
-
   
     API Key (Basic Auth)
   
@@ -36,12 +35,9 @@ The Freshdesk connector enables seamless integration between Freshdesk and Field
     Bidirectional (create, update, notes)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Configure Automation
 
@@ -62,8 +58,6 @@ Transform Freshdesk ticket into Field Nation work order
 ### Create Work Order
 
 Work order created with correlation ID for bidirectional sync
-
-
 
 ---
 
@@ -107,14 +101,11 @@ FN Work Order = "Completed"
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### Freshdesk Requirements
-
 
   
     Generate in Freshdesk:
@@ -135,7 +126,6 @@ FN Work Order = "Completed"
     - Write access for status updates
     - Access to custom fields
   
-
 
 ---
 

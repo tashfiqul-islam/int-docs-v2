@@ -11,8 +11,6 @@ description: Configure the ServiceNow connector in Field Nation's Integration Br
 
 ## Configuration Steps Overview
 
-
-
 ###Access Integration Broker
 
 Navigate to Field Nation's Integration Broker interface
@@ -40,8 +38,6 @@ Map fields between ServiceNow and Field Nation
 ### Test & Save
 
 Validate configuration and save settings
-
-
 
 ---
 
@@ -123,8 +119,6 @@ ServiceNow connector supports OAuth 2.0 or Basic Auth.
 
 ### OAuth 2.0 (Recommended)
 
-
-
 ### Create OAuth Application in ServiceNow
 
 1. Navigate to **System OAuth → Application Registry**
@@ -150,13 +144,9 @@ In Integration Broker, select **OAuth 2.0** and enter:
 
 **Grant Type**: `client_credentials`
 
-
-
 ---
 
 ### Basic Authentication
-
-
 
 ### Create Integration User in ServiceNow
 
@@ -181,15 +171,11 @@ In Integration Broker, select **Basic Auth** and enter:
 
 **Password**: User's password
 
-
-
 > [INFO] **Best Practice**: OAuth 2.0 is more secure and recommended for production. Basic Auth is simpler for testing/development environments.
 
 ---
 
 ## Step 4: Test Connection
-
-
 
 ### Click "Test Connection"
 
@@ -213,10 +199,7 @@ Button in configuration form
 - Fix configuration
 - Retry
 
-
-
 ### Common Authentication Errors
-
 
   
     **Cause**: Invalid OAuth credentials
@@ -258,7 +241,6 @@ Button in configuration form
     4. Ensure table not in different scope/app
   
 
-
 ---
 
 ## Step 5: Get Trigger URL
@@ -280,8 +262,6 @@ https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
 
 Discover available fields for mapping.
 
-
-
 ### Click "Refresh Fields"
 
 Button in field mapping section
@@ -299,8 +279,6 @@ Dropdown menus fill with:
 - Custom fields (u_custom_field)
 - Reference fields (assignment_group.name, location.city)
 - Choice values (for state, priority, etc.)
-
-
 
 ---
 
@@ -378,8 +356,6 @@ completion_date              → resolved_at                Date Convert
 
 ## Step 8: Save Configuration
 
-
-
 ### Review Settings
 
 Verify all configuration:
@@ -397,8 +373,6 @@ Click "Save" to persist configuration
 ### Note Trigger URL
 
 Copy trigger URL for ServiceNow REST Message configuration
-
-
 
 ---
 

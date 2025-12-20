@@ -22,7 +22,6 @@ The Smartsheet connector enables seamless integration between Smartsheet and Fie
 
 ## At a Glance
 
-
   
     Access Token (OAuth or API Token)
   
@@ -36,12 +35,9 @@ The Smartsheet connector enables seamless integration between Smartsheet and Fie
     Bidirectional (create, update)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Configure Webhook
 
@@ -62,8 +58,6 @@ Transform Smartsheet row into Field Nation work order
 ### Create Work Order
 
 Work order created with correlation ID for bidirectional sync
-
-
 
 ---
 
@@ -107,14 +101,11 @@ FN Work Order = "Completed"
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### Smartsheet Requirements
-
 
   
     Generate in Smartsheet:
@@ -135,7 +126,6 @@ FN Work Order = "Completed"
     - Write access for status updates
     - Create/manage webhooks
   
-
 
 ---
 

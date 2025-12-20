@@ -36,8 +36,6 @@ graph LR
 
 ## Step 1: Configure Webhook in Autotask
 
-
-
 ### Navigate to Webhooks
 
 Autotask → Admin → Webhooks
@@ -60,8 +58,6 @@ https://api.fieldnation.com/integrations/trigger/{YOUR_CLIENT_TOKEN}
 **HTTP Method**: `POST`
 
 **Content Type**: `application/json`
-
-
 
 ---
 
@@ -128,8 +124,6 @@ Field Nation will fetch complete ticket data via SOAP API.
 
 ## Step 3: Test Webhook
 
-
-
 ### Create Test Ticket
 
 1. Navigate to Autotask Tickets
@@ -152,12 +146,9 @@ Check Autotask Admin → Webhooks → Delivery Log:
 3. Find newly created work order
 4. Verify field values correct
 
-
-
 ---
 
 ## Troubleshooting
-
 
   
     **Check:**
@@ -209,7 +200,6 @@ Check Autotask Admin → Webhooks → Delivery Log:
     - Add transformations as needed
   
 
-
 ---
 
 ## Advanced Configurations
@@ -217,8 +207,6 @@ Check Autotask Admin → Webhooks → Delivery Log:
 ### Prevent Duplicate Sends
 
 Add tracking UDF to Autotask Tickets:
-
-
 
 ### Create UDF
 
@@ -242,8 +230,6 @@ Configure outbound mapping to set:
 ```
 FN Sync Status = "Sent" (after successful creation)
 ```
-
-
 
 ---
 
@@ -299,8 +285,6 @@ Configured in Field Nation's event trigger settings.
 
 ### Launch Steps
 
-
-
 ### Export Webhook Config
 
 Save webhook configuration details
@@ -318,8 +302,6 @@ Watch first few synchronizations:
 - Check webhook delivery log
 - Review work order data
 - Verify bidirectional sync
-
-
 
 ---
 

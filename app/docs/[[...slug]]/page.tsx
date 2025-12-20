@@ -15,9 +15,11 @@ import {
 } from "fumadocs-ui/page";
 import { ArrowBigRight, BookOpen, Hand, Shovel } from "lucide-react";
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { source } from "@/lib/source";
+import { withBasePath } from "@/lib/utils";
 import { getMDXComponents } from "@/mdx-components";
+import { ClientRedirect } from "~/components/client-redirect";
 import { LLMActions } from "~/components/llm-actions";
 import { TypeTable } from "~/components/type-table";
 import { Accordion, Accordions } from "~/components/ui/accordion";
@@ -31,8 +33,9 @@ export default async function Page({
   const slugs = resolvedParams.slug ?? [];
 
   // Handle empty slug (root /docs) - redirect to getting-started/introduction
+  // Handle empty slug (root /docs) - redirect to getting-started/introduction
   if (slugs.length === 0) {
-    redirect("/docs/getting-started/introduction");
+    return <ClientRedirect to="/docs/getting-started/introduction" />;
   }
 
   const page = source.getPage(slugs);
@@ -73,13 +76,11 @@ export default async function Page({
       toc={pageData.toc}
     >
       <DocsTitle>{frontmatter.title}</DocsTitle>
-      <DocsDescription className="!mb-2">
+      <DocsDescription className="mb-2!">
         {frontmatter.description}
       </DocsDescription>
       <div className="w-fit">
-        <LLMActions
-          markdownUrl={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/llms${page.url}.txt`}
-        />
+        <LLMActions markdownUrl={withBasePath(`/llms${page.url}.txt`)} />
       </div>
       <hr className="mt-4 border-fd-border" />
       <DocsBody>
@@ -111,9 +112,9 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  // Only generate params for non-.mdx routes
-  // .mdx files are served as static files from public/
-  return source.generateParams();
+  const params = await source.generateParams();
+  // Ensure root /docs is generated for the redirect
+  return [...params, { slug: [] }];
 }
 
 export async function generateMetadata({

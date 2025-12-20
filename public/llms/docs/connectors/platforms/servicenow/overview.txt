@@ -22,7 +22,6 @@ The ServiceNow connector enables seamless integration between ServiceNow ITSM an
 
 ## At a Glance
 
-
   
     OAuth 2.0 or Basic Auth (username + password)
   
@@ -36,12 +35,9 @@ The ServiceNow connector enables seamless integration between ServiceNow ITSM an
     Bidirectional (create, update, messages)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Configure Business Rule
 
@@ -62,8 +58,6 @@ Broker applies field mappings and transformations to convert ServiceNow data int
 ### Create Work Order
 
 Transformed data creates or updates Field Nation work order with correlation ID stored for bidirectional sync
-
-
 
 ---
 
@@ -140,14 +134,11 @@ sequenceDiagram
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### ServiceNow Requirements
-
 
   
     - Create and modify Business Rules
@@ -168,7 +159,6 @@ sequenceDiagram
     - Whitelist Field Nation IP addresses if using IP restrictions
     - Enable "web_service_provider" plugin (usually enabled)
   
-
 
 ### Field Nation Requirements
 

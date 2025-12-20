@@ -12,14 +12,13 @@ const config: Config = {
       fontFamily: {
         sans: [
           "var(--font-open-sans)",
-          "Open Sans",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
           "Roboto",
           "sans-serif",
         ],
-        mono: ["JetBrains Mono", "Courier New", "monospace"],
+        mono: ["var(--font-jetbrains-mono)", "Courier New", "monospace"],
       },
       fontSize: {
         // Scale all font sizes by 87.5% (14px base instead of 16px)

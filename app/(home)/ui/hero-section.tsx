@@ -9,8 +9,8 @@ import pomeroyLight from "~/assets/companies/pomeroy-light.svg";
 import worldlink from "~/assets/companies/worldlink.svg";
 import xtium from "~/assets/companies/xtium.svg";
 import xtiumDark from "~/assets/companies/xtium-dark.svg";
-import homeDark from "~/assets/home_dark.png";
-import homeLight from "~/assets/home_light.png";
+import homeDark from "~/assets/swags/home_dark.webp";
+import homeLight from "~/assets/swags/home_light.webp";
 import { buttonVariants } from "~/components/ui/button";
 import { IconCode, IconFolderOpen } from "~/components/ui/icons";
 import { cn } from "~/lib/utils";
@@ -22,10 +22,10 @@ export function HeroSection() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.12),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--color-fd-primary)/0.18),transparent_50%)]" />
 
       {/* Grid pattern overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+      <div className="mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--color-fd-border)/0.05)_1px,transparent_1px)] bg-size-[4rem_4rem]" />
 
       {/* Main content - this is the only flex child */}
-      <div className="relative z-10 mx-auto flex w-full max-w-[var(--fd-layout-width)] flex-col items-center justify-center px-4 md:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex w-full max-w-(--fd-layout-width) flex-col items-center justify-center px-4 md:px-6 lg:px-8">
         <div className="grid w-full items-center gap-12 lg:grid-cols-[45%_55%] lg:gap-16">
           {/* Left: Text Content */}
           <div className="text-center lg:text-left">
@@ -93,8 +93,8 @@ export function HeroSection() {
                 )}
                 href="/docs/getting-started/introduction"
                 style={{
-                  backgroundColor: "var(--color-fd-primary)",
-                  color: "var(--color-fd-primary-foreground)",
+                  backgroundColor: "#bc5409",
+                  color: "#ffffff",
                   boxShadow: "0 8px 24px -4px hsl(var(--color-fd-primary)/0.3)",
                 }}
               >
@@ -174,19 +174,21 @@ export function HeroSection() {
                   <Image
                     alt="Field Nation Developer Portal"
                     className="block h-auto w-full dark:hidden"
-                    height={600}
+                    height={706}
                     priority
+                    sizes="(max-width: 1024px) 100vw, 60vw"
                     src={homeLight}
-                    width={1000}
+                    width={1400}
                   />
                   {/* Dark mode image */}
                   <Image
                     alt="Field Nation Developer Portal"
                     className="hidden h-auto w-full dark:block"
-                    height={600}
+                    height={706}
                     priority
+                    sizes="(max-width: 1024px) 100vw, 60vw"
                     src={homeDark}
-                    width={1000}
+                    width={1400}
                   />
                 </div>
               </div>
@@ -205,9 +207,9 @@ export function HeroSection() {
 
         {/* Trusted By - Company Logos */}
         <div className="mt-20 animate-fade-in-delay md:mt-36">
-          <h3 className="mb-8 text-center font-semibold text-fd-muted-foreground text-sm uppercase tracking-widest">
+          <h2 className="mb-8 text-center font-semibold text-fd-muted-foreground text-sm uppercase tracking-widest">
             Trusted by Industry Leaders
-          </h3>
+          </h2>
           <div className="grid grid-cols-2 gap-x-12 gap-y-10 md:flex md:gap-0">
             {/* Fujitsu */}
             <div className="flex items-center justify-center px-0 md:px-8 lg:px-12">

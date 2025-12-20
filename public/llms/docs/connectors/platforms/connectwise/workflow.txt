@@ -19,8 +19,6 @@ description: Configure ConnectWise callbacks to automatically send service ticke
 
 ## Configure Callback in ConnectWise
 
-
-
 ### Navigate to Callbacks
 
 System → Setup Tables → Callbacks
@@ -45,8 +43,6 @@ Click "+" to add new callback
 - ☐ Deleted (optional)
 
 **Inactive Members**: Unchecked
-
-
 
 ---
 
@@ -82,7 +78,6 @@ Use ConnectWise workflow rules or automation to set these conditions.
 
 ## Troubleshooting
 
-
   
     Check:
     - Callback active
@@ -98,6 +93,5 @@ Use ConnectWise workflow rules or automation to set these conditions.
     - Callback log for errors
     - Integration Broker logs
   
-
 
 ---

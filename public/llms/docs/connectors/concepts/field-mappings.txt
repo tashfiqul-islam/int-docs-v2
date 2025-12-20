@@ -13,8 +13,6 @@ description: Configure how data transforms between Field Nation and external pla
 
 Every field mapping consists of:
 
-
-
 ---
 
 ## Transformation Actions
@@ -339,7 +337,6 @@ The `lookup_custom_field` function handles Field Nation's custom field structure
 
 ### Field Mapping Strategy
 
-
   
     Begin with essential fields using Sync actions. Add complex transformations only after core synchronization works.
 
@@ -380,7 +377,6 @@ The `lookup_custom_field` function handles Field Nation's custom field structure
     3. Confirm target field accepts the value
     4. Check edge cases (null, empty, unexpected values)
   
-
 
 ### Performance Considerations
 
@@ -495,7 +491,6 @@ The Integration Broker automatically discovers available fields from external sy
 
 ## Troubleshooting
 
-
   
     **Possible Causes:**
     - Source field path incorrect (check dot notation)
@@ -560,6 +555,5 @@ The Integration Broker automatically discovers available fields from external sy
     }
     ```
   
-
 
 ---

@@ -105,8 +105,6 @@ define(['N/https', 'N/record'], (https, record) => {
 
 ## Step 2: Upload & Deploy Script
 
-
-
 ### Create Script File
 
 Save the script as `fieldnation_trigger_ue.js`
@@ -137,13 +135,9 @@ Customization → Scripting → Scripts → New
 
 Click "Save"
 
-
-
 ---
 
 ## Step 3: Test Integration
-
-
 
 ### Create Test Record
 
@@ -164,8 +158,6 @@ Verify work order created with correct data
 ### Review Logs
 
 Check for any errors in execution log
-
-
 
 ---
 
@@ -216,7 +208,6 @@ record.submitFields({
 
 ## Troubleshooting
 
-
   
     - Check deployment status = "Released"
     - Verify record type matches deployment
@@ -238,12 +229,9 @@ record.submitFields({
     - Test with minimal field set
   
 
-
 ---
 
 ## Production Deployment
-
-
 
 ### Test in Sandbox
 
@@ -260,7 +248,5 @@ Watch script execution logs for first week
 ### Optimize
 
 Adjust conditions, improve performance, reduce API calls
-
-
 
 ---

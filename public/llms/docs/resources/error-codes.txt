@@ -14,8 +14,6 @@ icon: CircleAlert
 
 ### Success Codes (2xx)
 
-
-
 **When you see these:** Your request was processed successfully. No action needed.
 
 ---

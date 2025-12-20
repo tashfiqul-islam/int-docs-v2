@@ -24,8 +24,6 @@ description: Configure Smartsheet webhooks to trigger Field Nation work order cr
 
 ### Using Smartsheet API
 
-
-
 ### Create Webhook via API
 
 **Endpoint:**
@@ -81,13 +79,9 @@ curl -X PUT https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
   -d '{"enabled": true}'
 ```
 
-
-
 ---
 
 ## Alternative: Using Smartsheet API via Postman
-
-
 
 ### Import Smartsheet Collection
 
@@ -107,8 +101,6 @@ Use "Create Webhook" request from collection
 
 Use "Update Webhook" request with `enabled: true`
 
-
-
 ---
 
 ## Verify Webhook
@@ -125,8 +117,6 @@ Look for your webhook with `enabled: true` and `status: ENABLED`
 ---
 
 ## Test Integration
-
-
 
 ### Add Test Row
 
@@ -146,8 +136,6 @@ curl https://api.smartsheet.com/2.0/webhooks/{webhook_id} \
 ### Check Field Nation
 
 Verify work order created with correct data
-
-
 
 ---
 
@@ -186,7 +174,6 @@ Integration Broker filters out rows where "Synced to FN" = checked.
 
 ## Troubleshooting
 
-
   
     - Verify access token has create webhook permission
     - Check Sheet ID correct
@@ -214,7 +201,6 @@ Integration Broker filters out rows where "Synced to FN" = checked.
     - Use "Synced to FN" checkbox
     - Implement idempotency in Field Nation
   
-
 
 ---
 

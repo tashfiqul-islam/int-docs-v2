@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export function constructMetadata({
   title = "Field Nation Developer Portal",
   description = "Documentation and API references for Field Nation integrations.",
-  image = "/og-image.png",
+  image = "/og/docs/getting-started/introduction/image.webp",
   icons = "/favicon.ico",
   noIndex = false,
 }: {

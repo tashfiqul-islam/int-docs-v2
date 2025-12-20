@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { ImageResponse } from "@takumi-rs/image-response";
 import DocsTemplateV1 from "@takumi-rs/template/docs-template-v1";
 import { notFound } from "next/navigation";
@@ -36,9 +34,6 @@ export async function GET(
     return notFound();
   }
 
-  const logoPath = join(process.cwd(), "public", "light", "logo_light.png");
-  const logo = readFileSync(logoPath);
-
   const title = page.data.title ?? "Field Nation Developer Platform";
   const description =
     truncate(page.data.description) || "Field Nation developer documentation";
@@ -47,11 +42,22 @@ export async function GET(
     <DocsTemplateV1
       description={description}
       icon={
-        <img
-          alt="Field Nation"
-          src="logo_light.png"
-          style={{ width: "4rem", height: "4rem" }}
-        />
+        <div
+          style={{
+            width: "4rem",
+            height: "4rem",
+            backgroundColor: "#f16a22",
+            borderRadius: "0.5rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "2rem",
+            fontWeight: "bold",
+            color: "white",
+          }}
+        >
+          FN
+        </div>
       }
       primaryColor="#f16a22"
       primaryTextColor="#f16a22"
@@ -59,12 +65,6 @@ export async function GET(
       title={title}
     />,
     {
-      persistentImages: [
-        {
-          src: "logo_light.png",
-          data: Buffer.from(logo),
-        },
-      ],
       width: 1200,
       height: 630,
       format: "webp",

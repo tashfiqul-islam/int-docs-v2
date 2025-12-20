@@ -19,8 +19,6 @@ description: Configure Freshdesk automation rules to trigger Field Nation work o
 
 ## Configure Automation in Freshdesk
 
-
-
 ### Navigate to Automations
 
 Admin → Workflows → Automations
@@ -74,13 +72,9 @@ Tags contains "on-site"
 
 Save rule → Toggle to "Active"
 
-
-
 ---
 
 ## Test Integration
-
-
 
 ### Create Test Ticket
 
@@ -99,12 +93,9 @@ Check Admin → Audit Logs:
 
 Verify work order created with correct data
 
-
-
 ---
 
 ## Troubleshooting
-
 
   
     - Check rule is Active
@@ -126,7 +117,6 @@ Verify work order created with correct data
     - Review Integration Broker logs
     - Test with minimal ticket data
   
-
 
 ---
 

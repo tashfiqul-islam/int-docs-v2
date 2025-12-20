@@ -22,7 +22,6 @@ The NetSuite connector enables seamless integration between NetSuite ERP and Fie
 
 ## At a Glance
 
-
   
     Token-Based Authentication (TBA) - Account ID + Consumer Key/Secret + Token Key/Secret
   
@@ -36,12 +35,9 @@ The NetSuite connector enables seamless integration between NetSuite ERP and Fie
     Bidirectional (create, update, financial)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Deploy SuiteScript
 
@@ -62,8 +58,6 @@ Broker retrieves complete record via SuiteTalk SOAP API
 ### Create Work Order
 
 Transformed data creates Field Nation work order
-
-
 
 ---
 
@@ -110,14 +104,11 @@ FN Work Order = "Approved"
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### NetSuite Requirements
-
 
   
     Enable TBA in NetSuite:
@@ -148,7 +139,6 @@ FN Work Order = "Approved"
     - Admin or developer role
     - Access to target record types
   
-
 
 ---
 

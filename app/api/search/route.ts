@@ -1,34 +1,34 @@
+import type { StructuredData } from "fumadocs-core/mdx-plugins";
 import { createSearchAPI } from "fumadocs-core/search/server";
 import { apiReferencesSource, source } from "@/lib/source";
 
 export const revalidate = false;
 
+type PageDataWithStructuredData = {
+  title?: string;
+  description?: string;
+  structuredData: StructuredData;
+};
+
 export const { staticGET: GET } = createSearchAPI("advanced", {
   indexes: [
-    ...source.getPages().map((page) => {
-      // biome-ignore lint/suspicious/noExplicitAny: StructuredData type is not exported by fumadocs-core
-      const data = page.data as any;
-      return {
-        title: data.title || "Untitled",
-        description: data.description || "",
-        url: page.url,
-        id: page.url,
-        structuredData: data.structuredData,
-        tag: "doc",
-      };
-    }),
-    ...apiReferencesSource.getPages().map((page) => {
-      // biome-ignore lint/suspicious/noExplicitAny: StructuredData type is not exported by fumadocs-core
-      const data = page.data as any;
-      return {
-        title: data.title || "Untitled",
-        description: data.description || "",
-        url: page.url,
-        id: page.url,
-        structuredData: data.structuredData,
-        tag: "api",
-      };
-    }),
+    ...source.getPages().map((page) => ({
+      title: page.data.title || "",
+      description: page.data.description || "",
+      url: page.url,
+      id: page.url,
+      structuredData: (page.data as unknown as PageDataWithStructuredData)
+        .structuredData,
+      tag: "doc",
+    })),
+    ...apiReferencesSource.getPages().map((page) => ({
+      title: page.data.title || "",
+      description: page.data.description || "",
+      url: page.url,
+      id: page.url,
+      structuredData: (page.data as unknown as PageDataWithStructuredData)
+        .structuredData,
+      tag: "api",
+    })),
   ],
-  language: "english",
 });

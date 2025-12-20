@@ -10,10 +10,6 @@ description: Quick answers to common questions about Field Nation Integration in
 icon: CircleQuestionMark
 ---
 
-
-
-
-
 ## Getting Started & Account Setup
 
 ### What do I need to get started with Field Nation integrations?
@@ -87,10 +83,6 @@ To request API credentials for Sandbox or Production environments:
 No. Currently, Field Nation only provides API and integration access to **buyers** (companies that post work orders). Service companies and providers do not have access to API credentials or integration features.
 
 If you're a service company interested in integration capabilities, please contact your Field Nation representative to discuss available options.
-
-
-
-
 
 ## Integration Architecture & Options
 
@@ -176,10 +168,6 @@ Yes. Using templates and projects is strongly recommended:
 - Contact information
 
 **Best Practice**: Set up templates in Field Nation before building your integration. This minimizes the data you need to send through the API for each work order.
-
-
-
-
 
 ## REST API & Webhooks
 
@@ -285,10 +273,6 @@ Yes, but with important considerations:
 
 **Important Note**: Unless you're a W2 provider, direct assignment bypasses Field Nation's marketplace matching algorithms.
 
-
-
-
-
 ## Field Service Connectors
 
 ### What is the Integration Broker and how does it work?
@@ -354,10 +338,6 @@ When an integration stops syncing, check these common issues in order:
 5. **Network Connectivity** - Verify network connectivity between systems and check firewall rules.
 
 [Troubleshooting Guide →](/docs/webhooks/v3/troubleshooting/common-issues)
-
-
-
-
 
 ## Support & Resources
 
@@ -427,16 +407,11 @@ Follow this recommended order:
 
 [Getting Started →](/docs/getting-started/introduction)
 
-
-
-
-
 ---
 
 ## Still Have Questions?
 
 ### Additional Resources
-
 
   
     Submit a support case or call us
@@ -450,7 +425,6 @@ Follow this recommended order:
   
     Check system status
   
-
 
 ---
 

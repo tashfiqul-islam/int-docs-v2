@@ -20,8 +20,6 @@ description: Configure the Smartsheet connector in Field Nation with access toke
 
 ## Step 1: Generate Smartsheet Access Token
 
-
-
 ### Log into Smartsheet
 
 Use admin or dedicated integration user
@@ -38,13 +36,9 @@ Click "Generate new access token"
 
 **Copy token immediately** (shown once!)
 
-
-
 ---
 
 ## Step 2: Get Sheet ID
-
-
 
 ### Open Your Sheet
 
@@ -61,8 +55,6 @@ https://app.smartsheet.com/sheets/{sheet_id}
 File → Properties → Sheet ID
 
 Example: `1234567890123456`
-
-
 
 ---
 
@@ -97,7 +89,6 @@ Click "Test Connection"
 
 **Failure** ❌: Check:
 
-
   
     - Verify token copied correctly
     - Ensure token not revoked
@@ -115,7 +106,6 @@ Click "Test Connection"
     - Grant "Admin" or "Editor" access
     - Verify user can edit sheet
   
-
 
 ---
 
@@ -159,7 +149,6 @@ Review → Save → Copy trigger URL for webhook setup
 
 ## Troubleshooting
 
-
   
     - Verify token has sheet access
     - Check Sheet ID correct
@@ -173,6 +162,5 @@ Review → Save → Copy trigger URL for webhook setup
     - Use proper transformation actions
     - Test with sample row
   
-
 
 ---

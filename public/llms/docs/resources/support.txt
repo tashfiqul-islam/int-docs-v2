@@ -56,8 +56,6 @@ For urgent issues or immediate assistance:
 
 Always include these details when submitting a support case:
 
-
-
 ### Environment Details
 
 Specify which environment you're working with:
@@ -100,8 +98,6 @@ Help us prioritize:
 - How many users/work orders affected?
 - Is this blocking production operations?
 - Is there a workaround available?
-
-
 
 ---
 

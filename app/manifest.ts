@@ -1,11 +1,9 @@
 import type { MetadataRoute } from "next";
 
-import android192 from "~/assets/light/android-chrome-192x192.png";
-import android512 from "~/assets/light/android-chrome-512x512.png";
-import appleTouch from "~/assets/light/apple-touch-icon.png";
-import favicon from "~/assets/light/favicon.ico";
-import favicon16 from "~/assets/light/favicon-16x16.png";
-import favicon32 from "~/assets/light/favicon-32x32.png";
+import appleTouch from "~/assets/swags/apple-touch-icon.png";
+import favicon from "~/assets/swags/favicon.ico";
+import icon192 from "~/assets/swags/icon-192.png";
+import icon512 from "~/assets/swags/icon-512.png";
 
 // Required for static export
 export const dynamic = "force-static";
@@ -31,28 +29,18 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     icons: [
       {
-        src: android192.src,
+        src: icon192.src,
         sizes: "192x192",
         type: "image/png",
       },
       {
-        src: android512.src,
+        src: icon512.src,
         sizes: "512x512",
         type: "image/png",
       },
       {
         src: appleTouch.src,
         sizes: "180x180",
-        type: "image/png",
-      },
-      {
-        src: favicon32.src,
-        sizes: "32x32",
-        type: "image/png",
-      },
-      {
-        src: favicon16.src,
-        sizes: "16x16",
         type: "image/png",
       },
       {

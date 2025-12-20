@@ -22,7 +22,6 @@ The Autotask connector enables seamless integration between Datto Autotask PSA a
 
 ## At a Glance
 
-
   
     API Integration Token + SOAP Credentials
   
@@ -36,12 +35,9 @@ The Autotask connector enables seamless integration between Datto Autotask PSA a
     Bidirectional (create, update, notes)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Configure Webhook
 
@@ -62,8 +58,6 @@ Broker transforms Autotask ticket data into Field Nation work order format
 ### Create Work Order
 
 Work order created in Field Nation with correlation ID stored for bidirectional sync
-
-
 
 ---
 
@@ -136,14 +130,11 @@ sequenceDiagram
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### Autotask Requirements
-
 
   
     - Autotask PSA license with API access enabled
@@ -175,7 +166,6 @@ sequenceDiagram
     - Access to related entities (Account, Contact, Resource)
     - Permission to view User-Defined Fields
   
-
 
 ### Field Nation Requirements
 

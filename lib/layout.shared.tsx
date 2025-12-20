@@ -1,6 +1,7 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import CustomNavBar from "@/app/components/ui/nav-bar";
 import { ThemeLogo } from "~/components/theme-logo";
+import { MobileMenuTrigger } from "~/components/ui/mobile-menu-trigger";
+import CustomNavBar from "~/components/ui/nav-bar";
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -11,11 +12,16 @@ export function baseOptions(): BaseLayoutProps {
           <span className="font-semibold text-base">Developer Platform</span>
         </div>
       ),
+      children: <MobileMenuTrigger />,
     },
     links: [
       {
         type: "custom",
-        children: <CustomNavBar />,
+        children: (
+          <div className="flex items-center" key="custom-nav">
+            <CustomNavBar />
+          </div>
+        ),
       },
     ],
   };

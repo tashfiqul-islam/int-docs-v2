@@ -10,7 +10,6 @@ description: Comprehensive A-Z glossary of Field Nation Integration terminology,
 icon: BookOpen
 ---
 
-
   
     - **API (Application Programming Interface)** — Protocols enabling software to talk to each other. Field Nation exposes REST API v2.  
     - **Access Token** — OAuth2 client-credentials token; expires in 1 hour.  
@@ -144,9 +143,7 @@ icon: BookOpen
     - **Zendesk** — Customer service platform with connector.
   
 
-
 ## Additional Resources
-
 
   
     Begin your integration journey

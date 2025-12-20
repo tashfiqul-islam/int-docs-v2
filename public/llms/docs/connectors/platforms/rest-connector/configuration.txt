@@ -33,8 +33,6 @@ Navigate to Field Nation's Integration Broker:
 **Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
 **Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
 
-
-
 ### Log In
 
 Use your Field Nation buyer account credentials
@@ -46,8 +44,6 @@ Find "REST Connector" in the list of available connectors
 ### Click Configure
 
 Open the REST Connector configuration form
-
-
 
 ---
 
@@ -80,8 +76,6 @@ swagger-cli validate openapi.json
 
 ### Upload Process
 
-
-
 ### Click "Upload OpenAPI Spec"
 
 In the REST Connector configuration form
@@ -97,8 +91,6 @@ Integration Broker parses and validates the specification
 ### Confirm Success
 
 Green confirmation message: "OpenAPI specification uploaded successfully"
-
-
 
 **What Happens:**
 - Broker parses spec to discover endpoints
@@ -251,7 +243,6 @@ client_12345:abc123xyz789
 
 ### Security Best Practices
 
-
   
     Don't use personal account credentials.
     
@@ -299,14 +290,11 @@ client_12345:abc123xyz789
     - Document access in secure location
   
 
-
 ---
 
 ## Step 5: Test Connection
 
 Verify REST Connector can communicate with your API.
-
-
 
 ### Click "Test Connection"
 
@@ -331,12 +319,9 @@ Button near authentication section
 - Network error: Check firewall/VPN
 - SSL error: Verify certificate validity
 
-
-
 ---
 
 ### Common Connection Errors
-
 
   
     **Cause**: Invalid credentials
@@ -385,14 +370,11 @@ Button near authentication section
     4. For testing: Use non-production environment with valid cert
   
 
-
 ---
 
 ## Step 6: Refresh Fields
 
 Discover available fields for mapping.
-
-
 
 ### Click "Refresh Fields"
 
@@ -411,8 +393,6 @@ Available fields appear in dropdown menus:
 - Custom fields
 - Required vs optional
 - Data types
-
-
 
 **Field Discovery Includes:**
 - Field names and API keys
@@ -504,8 +484,6 @@ Use standard transformation actions:
 
 ## Step 8: Save & Test
 
-
-
 ### Review Configuration
 
 Verify all settings:
@@ -536,12 +514,9 @@ Watch first few synchronizations:
 - Verify field mappings working
 - Adjust as needed
 
-
-
 ---
 
 ## Troubleshooting
-
 
   
     **Issue**: Dropdown menus empty or missing expected fields
@@ -573,6 +548,5 @@ Watch first few synchronizations:
     3. Add default values for optional fields
     4. Review error message for specific field
   
-
 
 ---

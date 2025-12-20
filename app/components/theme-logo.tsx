@@ -1,38 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import logoLight from "~/assets/light/logo_light.png";
+import primaryLogo from "~/assets/swags/primary-logo.svg";
 
 /**
- * Theme-aware logo component that switches between light and dark logos
- * based on the current theme mode.
+ * Logo component using Field Nation's primary brand logo.
+ * Uses the primary-logo.svg from swags folder for consistent branding.
  * Note: Fumadocs navbar already wraps the title in a Link, so we don't need to add one here.
  */
 export function ThemeLogo({ className }: { className?: string }) {
-  const [mounted, setMounted] = useState(false);
-
-  // Prevent hydration mismatch by only rendering after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    // Return a placeholder with the same dimensions to prevent layout shift
-    return <div className={className} style={{ width: 100, height: 24 }} />;
-  }
-
-  const logoSrc = logoLight;
-
   return (
     <Image
       alt="Field Nation"
-      className={className}
-      height={24}
-      priority
-      src={logoSrc}
-      style={{ width: "auto" }}
-      width={100}
+      className={`${className ?? ""}`}
+      height={36}
+      src={primaryLogo}
+      style={{ width: "auto", height: "36px", maxHeight: "36px" }}
+      width={36}
     />
   );
 }

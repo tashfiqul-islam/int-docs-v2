@@ -32,49 +32,33 @@ Field Nation publishes events for key work order lifecycle milestones. Configure
 
 ### Work Order Creation & Status
 
-
-
 ---
 
 ### Provider Assignment
-
-
 
 ---
 
 ### Work Execution
 
-
-
 ---
 
 ### Schedule & Timeline
-
-
 
 ---
 
 ### Updates & Changes
 
-
-
 ---
 
 ### Messages & Communication
-
-
 
 ---
 
 ### Financial Events
 
-
-
 ---
 
 ### Additional Events
-
-
 
 ---
 
@@ -83,8 +67,6 @@ Field Nation publishes events for key work order lifecycle milestones. Configure
 ### Selecting Events
 
 In the Integration Broker UI, configure which events trigger synchronization:
-
-
 
 ### Navigate to Event Configuration
 
@@ -107,8 +89,6 @@ For each event, specify the action:
 ### Save Configuration
 
 Test event triggers with sample work orders
-
-
 
 ---
 
@@ -243,7 +223,6 @@ Events include complete work order context:
 
 ### Event Selection
 
-
   
     Begin with minimal sync (assigned, done, approved). Add more events after core sync is stable.
     
@@ -268,7 +247,6 @@ Events include complete work order context:
     
     Ensure your external system can handle the volume or implement batching.
   
-
 
 ---
 
@@ -317,7 +295,6 @@ Monitor key indicators:
 
 ## Troubleshooting Events
 
-
   
     **Check:**
     - Event enabled in connector configuration
@@ -349,7 +326,6 @@ Monitor key indicators:
     **Debug:**
     Check Integration Broker logs for API call details and response
   
-
 
 [Complete troubleshooting guide →](/docs/connectors/concepts/troubleshooting)
 

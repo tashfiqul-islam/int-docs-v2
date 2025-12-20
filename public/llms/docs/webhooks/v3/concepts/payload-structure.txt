@@ -150,7 +150,7 @@ You can configure additional headers when creating the webhook:
 
 ## Work Order Data Object
 
-The `data` field contains the complete work order object, which matches the structure returned by the [REST API](/docs/rest-api/introduction).
+The `data` field contains the complete work order object, which matches the structure returned by the [REST API](/docs/rest-api/v2/introduction).
 
 ### Key Fields Overview
 
@@ -248,7 +248,7 @@ The `data` field contains the complete work order object, which matches the stru
     ```
   
 
-> [INFO] **Full Schema**: The complete work order schema includes 100+ fields. Refer to the [REST API documentation](/docs/rest-api/introduction) for the full specification.
+> [INFO] **Full Schema**: The complete work order schema includes 100+ fields. Refer to the [REST API documentation](/docs/rest-api/v2/introduction) for the full specification.
 
 ---
 
@@ -270,7 +270,7 @@ app.use(express.raw({ type: 'application/json' }));
 app.post('/webhooks', (req, res) => {
   const rawBody = req.body; // Buffer
   const payload = JSON.parse(rawBody.toString());
-  
+
   // Now you can verify signature with rawBody
   // and work with parsed payload
 });
@@ -289,7 +289,7 @@ function verifySignature(rawBody, signature, secret) {
     .createHmac(algorithm, secret)
     .update(rawBody)
     .digest('hex');
-  
+
   return crypto.timingSafeEqual(
     Buffer.from(expectedHash),
     Buffer.from(hash)
@@ -356,11 +356,11 @@ app.post('/webhooks/fieldnation', async (req, res) => {
     // 1. Verify signature
     const signature = req.headers['x-fn-signature'];
     const secret = process.env.WEBHOOK_SECRET;
-    
+
     if (!verifySignature(req.body, signature, secret)) {
       return res.status(401).send('Invalid signature');
     }
-    
+
     // 2. Parse payload
     const payload = JSON.parse(req.body.toString());
     const {
@@ -370,16 +370,16 @@ app.post('/webhooks/fieldnation', async (req, res) => {
       timestamp,
       data
     } = payload;
-    
+
     // 3. Check idempotency
     if (await hasProcessedEvent(eventId)) {
       console.log(`Duplicate event: ${eventId}`);
       return res.status(200).send('Already processed');
     }
-    
+
     // 4. Respond immediately (< 5 seconds)
     res.status(200).send('OK');
-    
+
     // 5. Process asynchronously
     await processEventAsync({
       eventName,
@@ -388,7 +388,7 @@ app.post('/webhooks/fieldnation', async (req, res) => {
       timestamp,
       data
     });
-    
+
   } catch (error) {
     console.error('Webhook processing error:', error);
     res.status(500).send('Internal error');
@@ -397,13 +397,13 @@ app.post('/webhooks/fieldnation', async (req, res) => {
 
 function verifySignature(rawBody, signature, secret) {
   if (!signature) return false;
-  
+
   const [algorithm, hash] = signature.split('=');
   const expectedHash = crypto
     .createHmac(algorithm, secret)
     .update(rawBody)
     .digest('hex');
-  
+
   return crypto.timingSafeEqual(
     Buffer.from(expectedHash),
     Buffer.from(hash)
@@ -418,23 +418,23 @@ async function hasProcessedEvent(eventId) {
 async function processEventAsync(event) {
   // Mark as processing
   await redis.setex(`event:${event.eventId}`, 86400, 'processed');
-  
+
   // Handle based on event type
   switch (event.eventName) {
     case 'workorder.status.published':
       await syncToSalesforce(event.data);
       await notifyProviders(event.data);
       break;
-      
+
     case 'workorder.status.assigned':
       await updateDispatchBoard(event.data);
       await notifyTechnician(event.data);
       break;
-      
+
     case 'workorder.status.work_done':
       await triggerApprovalFlow(event.data);
       break;
-      
+
     case 'workorder.status.approved':
       await generateInvoice(event.data);
       await updateAccounting(event.data);
@@ -457,15 +457,15 @@ Webhooks may be delivered more than once (due to retries). Always check if you'v
 // Redis example
 async function processWebhook(payload) {
   const key = `webhook:${payload.eventId}`;
-  
+
   // Try to set key with NX (only if not exists)
   const wasSet = await redis.set(key, '1', 'EX', 86400, 'NX');
-  
+
   if (!wasSet) {
     console.log('Duplicate webhook, skipping');
     return;
   }
-  
+
   // Process the webhook
   await handleEvent(payload);
 }

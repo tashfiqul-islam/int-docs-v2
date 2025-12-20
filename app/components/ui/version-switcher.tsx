@@ -1,63 +1,130 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
+
+const VERSION_REGEX = /^v\d+$/;
 
 type Section = "rest-api" | "webhooks" | null;
 
-export default function VersionSwitcher() {
+export default function VersionSwitcher({
+  availableVersions,
+}: {
+  availableVersions: Record<string, string[]>;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const [section, setSection] = useState<Section>(null);
   const [currentVersion, setCurrentVersion] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
+    // Current sections supported: rest-api, webhooks
+    const pathSegments = pathname.split("/").filter(Boolean);
+    // Path structure is usually: [prefix, section, version, ...]
+    // prefix is 'docs' or 'api-references'
+
+    let activeSection: Section = null;
+    let activeVersion = "";
+
     if (pathname.includes("/rest-api/")) {
-      setSection("rest-api");
-      setCurrentVersion("v2");
+      activeSection = "rest-api";
     } else if (pathname.includes("/webhooks/")) {
-      setSection("webhooks");
-      setCurrentVersion("v3");
-    } else {
-      setSection(null);
+      activeSection = "webhooks";
     }
+
+    if (activeSection) {
+      // Find the version segment in the path (first segment that matches v\d+)
+      const foundVersion = pathSegments.find((s) => VERSION_REGEX.test(s));
+      if (foundVersion) {
+        activeVersion = foundVersion;
+      }
+    }
+
+    setSection(activeSection);
+    setCurrentVersion(activeVersion);
   }, [pathname]);
 
   if (!section) {
     return null;
   }
 
-  const handleVersionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newVersion = e.target.value;
-    setCurrentVersion(newVersion);
+  const options = availableVersions[section] || [];
 
-    if (section === "rest-api") {
-      router.push(`/docs/rest-api/${newVersion}/introduction`);
-    } else {
-      router.push(`/docs/webhooks/${newVersion}/introduction`);
+  // Don't show if no versions discovered for this section
+  if (options.length === 0) {
+    return null;
+  }
+
+  const handleVersionSelect = (newVersion: string) => {
+    if (newVersion === currentVersion) {
+      setOpen(false);
+      return;
     }
+
+    setCurrentVersion(newVersion);
+    setOpen(false);
+
+    // Replace the version segment in the current path and navigate
+    // Example: /docs/rest-api/v2/intro -> /docs/rest-api/v1/intro
+    const newPath = pathname.replace(`/${currentVersion}/`, `/${newVersion}/`);
+    router.push(newPath);
   };
 
   return (
-    <select
-      aria-label="Select version"
-      className="w-auto rounded-md border border-fd-border bg-fd-background px-1 py-1 text-center text-fd-primary text-sm hover:bg-fd-accent focus:border-fd-primary focus:outline-none"
-      onChange={handleVersionChange}
-      style={{
-        appearance: "none",
-        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888888' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "right 0.3rem center",
-        paddingRight: "1.25rem",
-        minWidth: "48px",
+    <div
+      className="flex items-center"
+      ref={(node) => {
+        if (node) {
+          setContainerRef(node);
+        }
       }}
-      value={currentVersion}
     >
-      {section === "rest-api" ? (
-        <option value="v2">v2</option>
-      ) : (
-        <option value="v3">v3</option>
-      )}
-    </select>
+      <Popover onOpenChange={setOpen} open={open}>
+        <PopoverTrigger
+          aria-label="Select version"
+          className="flex h-8 w-auto items-center gap-1.5 rounded-full border border-fd-border/50 bg-fd-secondary/50 px-3 py-1 text-fd-primary text-sm transition-colors hover:bg-fd-accent focus:border-fd-primary focus:outline-none"
+        >
+          <span className="font-medium">{currentVersion}</span>
+          <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 opacity-50 transition-transform duration-200",
+              open && "rotate-180"
+            )}
+          />
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          className="z-50 min-w-[100px] gap-1 p-1"
+          container={containerRef}
+          side="top"
+          sideOffset={8}
+        >
+          {options.map((option) => (
+            <button
+              className={cn(
+                "flex w-full items-center rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-fd-accent",
+                currentVersion === option
+                  ? "bg-fd-accent font-medium text-fd-primary"
+                  : "text-fd-muted-foreground"
+              )}
+              key={option}
+              onClick={() => handleVersionSelect(option)}
+              type="button"
+            >
+              {option}
+            </button>
+          ))}
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

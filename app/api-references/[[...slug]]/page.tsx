@@ -17,6 +17,7 @@ import { ArrowBigRight, BookOpen, Hand, Shovel } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { apiReferencesSource } from "@/lib/source";
+import { withBasePath } from "@/lib/utils";
 import { getMDXComponents } from "@/mdx-components";
 import { LLMActions } from "~/components/llm-actions";
 import { TypeTable } from "~/components/type-table";
@@ -73,13 +74,11 @@ export default async function Page({
       toc={pageData.toc}
     >
       <DocsTitle>{frontmatter.title}</DocsTitle>
-      <DocsDescription className="!mb-2">
+      <DocsDescription className="mb-2!">
         {frontmatter.description}
       </DocsDescription>
       <div className="w-fit">
-        <LLMActions
-          markdownUrl={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/llms${page.url}.txt`}
-        />
+        <LLMActions markdownUrl={withBasePath(`/llms${page.url}.txt`)} />
       </div>
       <hr className="mt-4 border-fd-border" />
       <DocsBody>

@@ -22,7 +22,6 @@ The Salesforce connector enables seamless integration between Salesforce CRM and
 
 ## At a Glance
 
-
   
     Username + Password + Security Token
   
@@ -36,12 +35,9 @@ The Salesforce connector enables seamless integration between Salesforce CRM and
     Bidirectional (create, update, messages)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Configure Flow
 
@@ -62,8 +58,6 @@ Broker applies field mappings and transformations to convert Salesforce data int
 ### Create Work Order
 
 Transformed data creates or updates Field Nation work order with correlation ID stored for bidirectional sync
-
-
 
 ---
 
@@ -154,14 +148,11 @@ sequenceDiagram
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### Salesforce Requirements
-
 
   
     - Create and modify Flows
@@ -189,7 +180,6 @@ sequenceDiagram
     - Whitelist Field Nation IP addresses if using IP restrictions
     - Enable "API Enabled" permission for integration user
   
-
 
 ### Field Nation Requirements
 

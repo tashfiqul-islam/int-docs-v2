@@ -22,7 +22,7 @@ export function ConnectorCard({
 }: ConnectorCardProps) {
   const sizeClasses =
     "needsLargerSize" in connector && connector.needsLargerSize
-      ? "!h-16 md:!h-20 lg:!h-24"
+      ? "!h-10 md:!h-12 lg:!h-14"
       : "";
 
   const darkEnhanceClasses =
@@ -32,7 +32,7 @@ export function ConnectorCard({
 
   return (
     <Link
-      className="group relative flex aspect-[3/2] items-center justify-center overflow-hidden rounded-2xl border border-fd-border/50 bg-fd-card p-4 transition-all duration-300 hover:border-fd-primary/40 hover:shadow-fd-primary/10 hover:shadow-xl md:p-8"
+      className="group relative flex aspect-5/2 items-center justify-center overflow-hidden rounded-xl border border-fd-border/50 bg-fd-card p-2.5 transition-all duration-300 hover:border-fd-primary/40 hover:shadow-fd-primary/10 hover:shadow-xl md:p-4"
       href={connector.href}
       key={connector.name}
       onMouseEnter={onMouseEnter}
@@ -44,32 +44,29 @@ export function ConnectorCard({
           {/* Light mode logo */}
           <Image
             alt={`${connector.name} logo`}
-            className={`h-12 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-16 lg:h-20 dark:hidden ${sizeClasses}`}
-            height={80}
+            className={`h-6 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-8 lg:h-9 dark:hidden ${sizeClasses}`}
             src={connector.logo}
-            width={160}
+            style={{ width: "auto" }}
           />
           {/* Dark mode logo */}
           <Image
             alt={`${connector.name} logo`}
-            className={`hidden h-12 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-16 lg:h-20 dark:block ${sizeClasses}`}
-            height={80}
+            className={`hidden h-6 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-8 lg:h-9 dark:block ${sizeClasses}`}
             src={connector.logoDark ?? connector.logo}
-            width={160}
+            style={{ width: "auto" }}
           />
         </>
       ) : (
         <Image
           alt={`${connector.name} logo`}
-          className={`h-12 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-16 lg:h-20 ${darkEnhanceClasses} ${sizeClasses}`}
-          height={80}
+          className={`h-6 w-auto max-w-full object-contain transition-all duration-300 group-hover:scale-110 md:h-8 lg:h-9 ${darkEnhanceClasses} ${sizeClasses}`}
           src={connector.logo}
-          width={160}
+          style={{ width: "auto" }}
         />
       )}
 
       {/* Hover overlay */}
-      <div className="absolute right-0 bottom-0 left-0 flex translate-y-full items-center justify-center bg-gradient-to-t from-fd-card via-fd-card/95 to-transparent px-4 py-3 transition-transform duration-300 ease-out group-hover:translate-y-0">
+      <div className="absolute right-0 bottom-0 left-0 flex translate-y-full items-center justify-center bg-linear-to-t from-fd-card via-fd-card/95 to-transparent px-4 py-3 transition-transform duration-300 ease-out group-hover:translate-y-0">
         <span
           className="font-medium text-xs tracking-wide md:text-sm"
           style={{ color: "var(--color-fd-primary)" }}

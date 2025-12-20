@@ -50,6 +50,7 @@ const connectors = [
     logo: freshdesk,
     logoDark: freshdeskWhite,
     href: "/docs/connectors/platforms/freshdesk/overview",
+    needsLargerSize: true,
   },
   {
     name: "NetSuite",
@@ -79,20 +80,20 @@ const connectors = [
 
 export function ConnectorsShowcase() {
   return (
-    <section className="relative flex min-h-[600px] items-center justify-center bg-slate-50 py-12 lg:py-24 xl:h-screen xl:min-h-0 xl:py-0 dark:bg-neutral-900/40">
+    <section className="relative flex min-h-150 items-center justify-center bg-slate-50 py-12 lg:py-16 xl:h-screen xl:min-h-0 xl:py-0 dark:bg-neutral-900/40">
       {/* Top gradient line */}
       <div
         aria-hidden="true"
-        className="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-fd-border/50 to-transparent"
+        className="absolute top-0 right-0 left-0 h-px bg-linear-to-r from-transparent via-fd-border/50 to-transparent"
       />
 
-      <div className="mx-auto w-full max-w-[var(--fd-layout-width)] px-4 py-16 md:px-6 md:py-20 lg:px-8 lg:py-24">
+      <div className="mx-auto w-full max-w-(--fd-layout-width) px-4 py-10 md:px-6 md:py-12 lg:px-8 lg:py-16">
         {/* Section header */}
-        <div className="mb-12 text-center lg:mb-16">
-          <h2 className="mb-4 font-bold text-3xl text-fd-foreground tracking-tight md:text-4xl lg:text-5xl">
+        <div className="mb-10 text-center lg:mb-12">
+          <h2 className="mb-2 font-bold text-3xl text-fd-foreground tracking-tight md:text-4xl lg:text-5xl">
             Connect to What You're Already Using
           </h2>
-          <p className="mx-auto max-w-3xl text-fd-muted-foreground text-lg leading-relaxed md:text-xl">
+          <p className="mx-auto max-w-3xl text-base text-fd-muted-foreground leading-relaxed md:text-lg lg:text-xl">
             Maintain one source of truth by seamlessly integrating Field Nation
             into your existing field service management solution. All in one
             system.
@@ -100,9 +101,9 @@ export function ConnectorsShowcase() {
         </div>
 
         {/* Connectors grid - Fluid columns */}
-        <div className="mx-auto mb-12 max-w-4xl">
+        <div className="mx-auto mb-10 max-w-5xl">
           <HoverEffect
-            className="grid-cols-2 py-0 md:grid-cols-3"
+            className="grid-cols-2 gap-3 py-0 md:grid-cols-3 md:gap-3.5 lg:gap-4"
             items={[...connectors]}
             keyExtractor={(connector) => connector.name}
             renderItem={(connector, handlers) => (
@@ -113,7 +114,7 @@ export function ConnectorsShowcase() {
 
         {/* "More connectors" message */}
         <div className="text-center">
-          <p className="mb-6 text-fd-muted-foreground">
+          <p className="mb-4 text-fd-muted-foreground text-sm md:text-base">
             <span className="font-medium text-fd-foreground">
               Don't see your integration?
             </span>{" "}
@@ -122,10 +123,10 @@ export function ConnectorsShowcase() {
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium text-fd-primary-foreground text-sm transition-all hover:scale-[1.02] hover:shadow-lg"
+              className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium text-sm text-white transition-all hover:scale-[1.02] hover:shadow-lg"
               href="/docs/connectors/introduction"
               style={{
-                backgroundColor: "var(--color-fd-primary)",
+                backgroundColor: "#bc5409",
                 boxShadow: "0 4px 16px -2px hsl(var(--color-fd-primary)/0.3)",
               }}
             >

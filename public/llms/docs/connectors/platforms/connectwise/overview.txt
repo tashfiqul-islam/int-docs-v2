@@ -22,7 +22,6 @@ The ConnectWise connector enables seamless integration between ConnectWise Manag
 
 ## At a Glance
 
-
   
     API Keys (Company ID + Public/Private Key + Member ID)
   
@@ -36,12 +35,9 @@ The ConnectWise connector enables seamless integration between ConnectWise Manag
     Bidirectional (create, update, notes)
   
 
-
 ---
 
 ## How It Works
-
-
 
 ### Configure Callback
 
@@ -62,8 +58,6 @@ Broker transforms ConnectWise data into Field Nation work order format
 ### Create Work Order
 
 Work order created with correlation ID stored for bidirectional sync
-
-
 
 ---
 
@@ -137,14 +131,11 @@ sequenceDiagram
 
 ### Supported Operations
 
-
-
 ---
 
 ## Prerequisites
 
 ### ConnectWise Requirements
-
 
   
     - ConnectWise Manage license with API access
@@ -175,7 +166,6 @@ sequenceDiagram
     - Access to related objects (Company, Contact, Site)
     - Permission to view custom fields
   
-
 
 ### Field Nation Requirements
 

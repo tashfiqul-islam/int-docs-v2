@@ -207,7 +207,7 @@ Real-time event notifications delivered to your endpoint when things happen on F
 - Signature verification
 - Retry logic with exponential backoff
 
-[Explore Webhooks →](/docs/webhooks/introduction)
+[Explore Webhooks →](/docs/webhooks/v3/introduction)
 
 ### Pre-built Connectors
 

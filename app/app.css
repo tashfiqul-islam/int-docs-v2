@@ -5,85 +5,21 @@
 @import "fumadocs-openapi/css/preset.css";
 @config "../tailwind.config.ts";
 
-/* Open Sans Font Family */
-@font-face {
-  font-family: "Open Sans";
-  src: url("/fonts/contents/OpenSans-Light.ttf") format("truetype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sans";
-  src: url("/fonts/contents/OpenSans-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sans";
-  src: url("/fonts/contents/OpenSans-Italic.ttf") format("truetype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sans";
-  src: url("/fonts/contents/OpenSans-SemiBold.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sans";
-  src: url("/fonts/contents/OpenSans-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Open Sans";
-  src: url("/fonts/contents/OpenSans-ExtraBold.ttf") format("truetype");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* JetBrains Mono for code blocks */
-@font-face {
-  font-family: "JetBrains Mono";
-  src: url("/fonts/code/JetBrainsMono-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "JetBrains Mono";
-  src: url("/fonts/code/JetBrainsMono-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "JetBrains Mono";
-  src: url("/fonts/code/JetBrainsMono-Italic.ttf") format("truetype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
+/* Fonts are loaded via Next.js font optimization in layout.tsx */
+/* Open Sans via Google Fonts: var(--font-open-sans) */
+/* JetBrains Mono via localFont: var(--font-jetbrains-mono) */
 
 /* Field Nation Theme Colors */
 :root {
   --fd-layout-width: 1440px;
   --color-fd-primary: #f16a22;
   --color-fd-primary-foreground: white;
+  --color-fd-ring: var(--color-fd-primary);
+  --ring-color: var(--color-fd-primary);
+
+  /* Shadcn/Tailwind primary colors - darker for WCAG 4.5:1 contrast with white */
+  --color-primary: #bc5409;
+  --color-primary-foreground: #ffffff;
 
   /* Spacing System (8px Grid) */
   --spacing-xs: 0.5rem; /* 8px */
@@ -110,7 +46,7 @@
 
 @theme inline {
   /* Custom Fonts */
-  --default-mono-font-family: "JetBrains Mono";
+  --default-mono-font-family: var(--font-jetbrains-mono);
 
   /* Custom Animations */
   --animate-fade-in: fadeIn 0.5s ease-out forwards;
@@ -183,13 +119,13 @@ html {
 
 body {
   font-family:
-    "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    var(--font-open-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
 }
 
 code,
 pre {
-  font-family: "JetBrains Mono", "Courier New", monospace;
+  font-family: var(--font-jetbrains-mono), "Courier New", monospace;
 }
 
 /* View Transitions for Theme Switching */
@@ -269,26 +205,12 @@ pre {
   opacity: 0;
 }
 
-/* Sidebar footer inline layout - make version switcher appear on same line as theme toggle */
+/* Sidebar footer: Minimize padding to allow items to reach edges */
 #nd-sidebar > div:last-child,
 .nd-sidebar > div:last-child,
 [data-sidebar] > div:last-child {
-  display: flex !important;
-  flex-direction: row-reverse !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 0.5rem !important;
-  padding: 0.75rem 1rem !important;
-  border-top: 1px solid var(--color-fd-border) !important;
-}
-
-/* Make footer children not take full width */
-#nd-sidebar > div:last-child > *,
-.nd-sidebar > div:last-child > *,
-[data-sidebar] > div:last-child > * {
-  flex-shrink: 0 !important;
-  width: auto !important;
-  max-width: none !important;
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
 }
 
 /* Force full-width header with centered content */
@@ -304,3 +226,34 @@ header > div {
   margin-right: auto;
   width: 100%;
 }
+
+/* Position custom theme switcher in navbar after the search */
+/* The parent container uses flex, so we use order to move it after search */
+.theme-switcher-nav {
+  order: 999;
+  margin-left: 0.75rem;
+}
+
+/* Hide Fumadocs default theme switcher */
+/* Only target the specific Fumadocs toggle button, not our custom ThemeSwitcher */
+button[aria-label="Toggle Theme"],
+[data-theme-toggle],
+button[data-theme-toggle] {
+  display: none !important;
+}
+
+@layer base {
+  *:focus-visible {
+    outline-color: var(--color-fd-primary) !important;
+    outline-width: 2px;
+    outline-offset: 2px;
+  }
+}
+
+/* Hide default Fumadocs mobile menu toggle to replace with custom hamburger */
+button[aria-label="Toggle Menu"] {
+  display: none !important;
+}
+
+/* Add spacing between search icon and custom hamburger menu - only on home page */
+/* On subpages, the hamburger is hidden so no extra margin needed */
