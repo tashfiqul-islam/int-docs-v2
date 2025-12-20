@@ -13,6 +13,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <DocsLayout
       nav={base.nav}
       sidebar={{
+        prefetch: false,
         footer: (
           <div className="flex w-full items-center">
             <VersionSwitcher availableVersions={versions} />
