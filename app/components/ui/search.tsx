@@ -15,7 +15,7 @@ import {
 } from "fumadocs-ui/components/dialog/search";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import { buttonVariants } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
@@ -61,7 +61,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
   const [open, setOpen] = useState(false);
   const { search, setSearch, query } = useDocsSearch({
     type: "static",
-    from: "/api/search",
+    from: withBasePath("/api/search"),
     // biome-ignore lint/suspicious/noExplicitAny: complex Orama type mismatch
     initOrama: initOrama as any,
     tag,
