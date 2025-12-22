@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Attachmentid delete
 URL: /api-references/rest-api/v2/attachments/attachmentid-delete
 Source: content/api-references/rest-api/v2/attachments/attachmentid-delete.mdx
 

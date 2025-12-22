@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import primaryLogo from "~/assets/swags/primary-logo.svg";
+import primaryLogo from "@/app/assets/swags/primary-logo.svg";
 
 /**
  * Logo component using Field Nation's primary brand logo.

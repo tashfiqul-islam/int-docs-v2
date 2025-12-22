@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Clientid get
 URL: /api-references/rest-api/v2/clients/clientid-get
 Source: content/api-references/rest-api/v2/clients/clientid-get.mdx
 

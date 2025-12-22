@@ -1,4 +1,4 @@
-# Getting Started: undefined
+# Getting Started: Platform overview
 URL: /docs/getting-started/platform-overview
 Source: content/docs/getting-started/platform-overview.mdx
 
@@ -17,6 +17,7 @@ Every work order on Field Nation progresses through a well-defined lifecycle. Yo
 ![Work Order Lifecycle](./wo_lifecycle.png)
 
 ### Lifecycle Stages Explained
+
 
   
     ### Draft
@@ -102,6 +103,7 @@ Every work order on Field Nation progresses through a well-defined lifecycle. Yo
     - Update financial records
   
 
+
 > [INFO] Work orders can also be **Cancelled** at any stage or **Postponed** if work needs to be rescheduled indefinitely.
 
 ---
@@ -163,9 +165,12 @@ Buyers post work orders to the marketplace. As a buyer, you can:
 
 Field Nation offers three integration approaches, each suited for different use cases:
 
+
   ![Field Nation Integration Architecture (light)](./architecture-light.svg)
 
+
   ![Field Nation Integration Architecture (dark)](./architecture-dark.svg)
+
 
 The architecture diagram shows how external systems connect to Field Nation through different layers. Code-based integrations communicate directly with the Client API and Webhooks, while connector-based integrations flow through the Field Service Broker middleware.
 
@@ -178,6 +183,7 @@ Full programmatic control over the platform. Create, read, update, and delete wo
 - Complex workflows
 - Bi-directional synchronization
 - Automated operations
+
 
     Direct programmatic access to Field Nation data and workflow operations.
   
@@ -234,6 +240,7 @@ Out-of-the-box integrations with leading platforms require minimal code.
 
 Field Nation provides two environments for integration development and production use:
 
+
   
     ### Sandbox Environment
 
@@ -284,6 +291,7 @@ Field Nation provides two environments for integration development and productio
     - Have rollback procedures ready
     - Monitor error rates closely
   
+
 
 ---
 

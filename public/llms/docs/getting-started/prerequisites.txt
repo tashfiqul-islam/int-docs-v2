@@ -1,4 +1,4 @@
-# Getting Started: undefined
+# Getting Started: Prerequisites
 URL: /docs/getting-started/prerequisites
 Source: content/docs/getting-started/prerequisites.mdx
 
@@ -32,6 +32,7 @@ Field Nation requires an integration contract before provisioning API access. Th
 - **Support commitment** - Program management assistance
 - **Sandbox access** - Development environment provisioning
 
+
   
     ### Contact Sales
     
@@ -53,6 +54,7 @@ Field Nation requires an integration contract before provisioning API access. Th
     - Webhook access
     - Documentation access
   
+
 
 ## Technical Requirements
 
@@ -76,6 +78,7 @@ Your systems should be able to:
 - Process asynchronous operations
 
 ### Network Requirements
+
 
   
     **Outbound Access Required:**
@@ -107,6 +110,7 @@ Your systems should be able to:
     
     If your firewall requires IP whitelisting, add these addresses to your allowlist.
   
+
 
 ## Knowledge Requirements
 
@@ -165,6 +169,7 @@ Consider setting up monitoring for:
 
 You'll need your Field Nation Company ID for API requests and support cases. Here's how to find it:
 
+
   
     Log in to the [Field Nation Platform](https://app.fieldnation.com)
   
@@ -186,6 +191,7 @@ You'll need your Field Nation Company ID for API requests and support cases. Her
     
     ![Company Profile](./company_profile.png)
   
+
 
 > Keep your Company ID handy—you'll need it when requesting sandbox access, submitting support cases, and configuring certain integrations.
 

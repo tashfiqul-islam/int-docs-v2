@@ -1,4 +1,4 @@
-# Resources: undefined
+# Resources: Glossary
 URL: /docs/resources/glossary
 Source: content/docs/resources/glossary.mdx
 
@@ -9,6 +9,7 @@ title: Glossary
 description: Comprehensive A-Z glossary of Field Nation Integration terminology, platform concepts, and technical terms.
 icon: BookOpen
 ---
+
 
   
     - **API (Application Programming Interface)** — Protocols enabling software to talk to each other. Field Nation exposes REST API v2.  
@@ -143,7 +144,9 @@ icon: BookOpen
     - **Zendesk** — Customer service platform with connector.
   
 
+
 ## Additional Resources
+
 
   
     Begin your integration journey

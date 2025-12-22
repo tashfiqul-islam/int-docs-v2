@@ -29,38 +29,40 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
-import { cn } from "~/lib/utils";
+import homeDark from "@/app/assets/swags/home_dark.webp";
+import homeLight from "@/app/assets/swags/home_light.webp";
+import { Badge } from "@/app/components/ui/badge";
+import { Button } from "@/app/components/ui/button";
+import { Card } from "@/app/components/ui/card";
+import { Input } from "@/app/components/ui/input";
+import { Separator } from "@/app/components/ui/separator";
+import { cn } from "@/lib/utils";
 
-type Tab = {
+interface Tab {
   id: string;
   title: string;
   url: string;
   favicon?: string;
   isActive: boolean;
   isLoading: boolean;
-};
+}
 
-type Bookmark = {
+interface Bookmark {
   id: string;
   title: string;
   url: string;
   favicon?: string;
-};
+}
 
-type HistoryItem = {
+interface HistoryItem {
   id: string;
   title: string;
   url: string;
   timestamp: Date;
   favicon?: string;
-};
+}
 
-type BrowserProps = {
+interface BrowserProps {
   image?: string;
   initialUrl?: string;
   initialTabs?: Partial<Tab>[];
@@ -89,7 +91,7 @@ type BrowserProps = {
   autoFocusAddressBar?: boolean;
   simulateLoading?: boolean;
   loadingDuration?: number;
-};
+}
 
 export function Browser({
   image,
@@ -128,9 +130,7 @@ export function Browser({
   // Use theme-aware images if image prop is not provided
   const displayImage =
     image ??
-    (mounted && resolvedTheme === "dark"
-      ? "/home_dark.png"
-      : "/home_light.png");
+    (mounted && resolvedTheme === "dark" ? homeDark.src : homeLight.src);
   const [tabs, setTabs] = useState<Tab[]>(() => {
     if (initialTabs && initialTabs.length > 0) {
       return initialTabs.map((tab, index) => ({

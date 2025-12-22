@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Eta get
 URL: /api-references/rest-api/v2/schedule/eta-get
 Source: content/api-references/rest-api/v2/schedule/eta-get.mdx
 

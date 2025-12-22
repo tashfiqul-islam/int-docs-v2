@@ -7,10 +7,60 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import type {
+  Node as PageTreeNode,
+  Root as PageTreeRoot,
+} from "fumadocs-core/page-tree";
 import { getLLMText } from "../lib/get-llm-text";
 import { apiReferencesSource, source } from "../lib/source";
 
 const LEADING_SLASH_REGEX = /^\//;
+
+/**
+ * Extract URL->Name mapping from pageTree recursively
+ * The pageTree contains the actual page names from frontmatter
+ */
+function buildNameMap(tree: PageTreeRoot): Map<string, string> {
+  const map = new Map<string, string>();
+
+  function traverse(node: PageTreeNode) {
+    if (node.type === "page" && node.url && node.name) {
+      map.set(node.url, String(node.name));
+    } else if (node.type === "folder") {
+      if (node.index?.url && node.name) {
+        map.set(node.index.url, String(node.name));
+      }
+      for (const child of node.children) {
+        traverse(child);
+      }
+    }
+  }
+
+  for (const child of tree.children) {
+    traverse(child);
+  }
+
+  return map;
+}
+
+// Build name maps from both pageTrees
+const docsNameMap = buildNameMap(source.pageTree);
+const apiNameMap = buildNameMap(apiReferencesSource.pageTree);
+
+// Get page name from map, fallback to URL-based title
+function getPageName(url: string, map: Map<string, string>): string {
+  const name = map.get(url);
+  if (name) {
+    return name;
+  }
+
+  // Fallback: extract name from URL slug
+  const segments = url.split("/").filter(Boolean);
+  const lastSegment = segments.at(-1) ?? "page";
+  return lastSegment
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 function buildOutline(): string {
   const docs = source.getPages();
@@ -39,15 +89,21 @@ function buildOutline(): string {
 
   const API_ORDER = ["rest-api", "webhooks"] as const;
 
-  function formatPages(title: string, pages: typeof docs): string {
+  function formatPages(
+    title: string,
+    pages: typeof docs,
+    nameMap: Map<string, string>
+  ): string {
     if (pages.length === 0) {
       return "";
     }
-    const sorted = [...pages].sort((a, b) =>
-      (a.data.title ?? "").localeCompare(b.data.title ?? "")
-    );
+    const sorted = [...pages].sort((a, b) => {
+      const nameA = getPageName(a.url, nameMap);
+      const nameB = getPageName(b.url, nameMap);
+      return nameA.localeCompare(nameB);
+    });
     const items = sorted.map(
-      (page) => `- ${page.data.title ?? "Untitled"} — ${page.url}`
+      (page) => `- ${getPageName(page.url, nameMap)} — ${page.url}`
     );
     return [`### ${title}`, ...items, ""].join("\n");
   }
@@ -93,7 +149,7 @@ function buildOutline(): string {
   lines.push("## Documentation", "");
   for (const [key, pages] of orderedEntries(docsGrouped, DOC_ORDER)) {
     const label = DOC_CATEGORY_LABELS[key] ?? key;
-    const block = formatPages(label, pages);
+    const block = formatPages(label, pages, docsNameMap);
     if (block) {
       lines.push(block);
     }
@@ -102,7 +158,7 @@ function buildOutline(): string {
   lines.push("## API References", "");
   for (const [key, pages] of orderedEntries(apiGrouped, API_ORDER)) {
     const label = API_CATEGORY_LABELS[key] ?? key;
-    const block = formatPages(label, pages);
+    const block = formatPages(label, pages, apiNameMap);
     if (block) {
       lines.push(block);
     }
@@ -203,8 +259,17 @@ async function buildFull(): Promise<string> {
     const label = DOC_CATEGORY_LABELS[key] ?? key;
     lines.push(`## ${label} (${pages.length})`, "");
     for (const page of pages) {
-      lines.push(`### ${page.data.title}`, `URL: ${page.url}`, "");
-      lines.push(await getLLMText(page), "", "---", "");
+      lines.push(
+        `### ${getPageName(page.url, docsNameMap)}`,
+        `URL: ${page.url}`,
+        ""
+      );
+      lines.push(
+        await getLLMText(page, { title: getPageName(page.url, docsNameMap) }),
+        "",
+        "---",
+        ""
+      );
     }
   }
 
@@ -214,8 +279,17 @@ async function buildFull(): Promise<string> {
     const label = API_CATEGORY_LABELS[key] ?? key;
     lines.push(`## ${label} (${pages.length})`, "");
     for (const page of pages) {
-      lines.push(`### ${page.data.title}`, `URL: ${page.url}`, "");
-      lines.push(await getLLMText(page), "", "---", "");
+      lines.push(
+        `### ${getPageName(page.url, apiNameMap)}`,
+        `URL: ${page.url}`,
+        ""
+      );
+      lines.push(
+        await getLLMText(page, { title: getPageName(page.url, apiNameMap) }),
+        "",
+        "---",
+        ""
+      );
     }
   }
 
@@ -264,7 +338,9 @@ async function generateLLMFiles() {
 
   for (const page of docsPages) {
     try {
-      const content = await getLLMText(page);
+      const content = await getLLMText(page, {
+        title: getPageName(page.url, docsNameMap),
+      });
       // Create path: public/llms/docs/getting-started/introduction.txt
       // URL: /llms/docs/getting-started/introduction.txt -> served as static file
       // This matches what LLMActions component expects: /llms${page.url}.txt
@@ -292,7 +368,9 @@ async function generateLLMFiles() {
 
   for (const page of apiPages) {
     try {
-      const content = await getLLMText(page);
+      const content = await getLLMText(page, {
+        title: getPageName(page.url, apiNameMap),
+      });
       // Create path: public/llms/api-references/rest-api/v2/index.txt
       // URL: /llms/api-references/rest-api/v2/index.txt -> served as static file
       // This matches what LLMActions component expects: /llms${page.url}.txt

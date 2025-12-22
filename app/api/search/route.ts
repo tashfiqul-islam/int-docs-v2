@@ -4,12 +4,13 @@ import { apiReferencesSource, source } from "@/lib/source";
 
 export const revalidate = false;
 
-type PageDataWithStructuredData = {
+interface PageDataWithStructuredData {
   title?: string;
   description?: string;
   structuredData: StructuredData;
-};
+}
 
+/** Search API endpoint combining docs and API reference indexes */
 export const { staticGET: GET } = createSearchAPI("advanced", {
   indexes: [
     ...source.getPages().map((page) => ({

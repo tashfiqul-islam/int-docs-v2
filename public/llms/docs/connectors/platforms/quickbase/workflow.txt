@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Workflow
 URL: /docs/connectors/platforms/quickbase/workflow
 Source: content/docs/connectors/platforms/quickbase/workflow.mdx
 
@@ -18,6 +18,8 @@ description: Configure Quickbase automations to trigger Field Nation work order 
 ---
 
 ## Configure Automation in Quickbase
+
+
 
 ### Navigate to Automations
 
@@ -70,9 +72,13 @@ Use Quickbase merge fields (buttons in automation builder) to insert dynamic val
 
 Save automation → Toggle to "Active"
 
+
+
 ---
 
 ## Test Integration
+
+
 
 ### Create Test Record
 
@@ -89,6 +95,8 @@ Check "Recent runs" for execution
 ### Check Field Nation
 
 Verify work order created with correct data
+
+
 
 ---
 
@@ -141,6 +149,7 @@ AND Priority != "Urgent"
 
 ## Troubleshooting
 
+
   
     - Check automation is "Active"
     - Verify record meets conditions
@@ -161,6 +170,7 @@ AND Priority != "Urgent"
     - Review Integration Broker logs
     - Test with minimal record data
   
+
 
 ---
 

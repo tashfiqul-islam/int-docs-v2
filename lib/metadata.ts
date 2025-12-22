@@ -51,7 +51,7 @@ export function constructMetadata({
     },
     verification: {
       google:
-        "google-site-verification=gJthkFVvVwWskOEuM41ma1sg-JB_yY_I8zctc9ZH2Gg", // need to replace or genearate again (https://search.google.com/search-console/welcome)
+        "google-site-verification=gJthkFVvVwWskOEuM41ma1sg-JB_yY_I8zctc9ZH2Gg", // need to replace or generate again (https://search.google.com/search-console/welcome)
     },
     appleWebApp: {
       capable: true,

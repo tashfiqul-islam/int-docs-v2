@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Talent pool groups get
 URL: /api-references/rest-api/v2/talent-pool-groups/talent-pool-groups-get
 Source: content/api-references/rest-api/v2/talent-pool-groups/talent-pool-groups-get.mdx
 

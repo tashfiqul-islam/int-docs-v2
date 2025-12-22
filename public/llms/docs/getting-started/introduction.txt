@@ -1,4 +1,4 @@
-# Getting Started: undefined
+# Getting Started: Introduction
 URL: /docs/getting-started/introduction
 Source: content/docs/getting-started/introduction.mdx
 
@@ -24,6 +24,7 @@ Field Nation is the world's most active field service marketplace and software s
 
 ## Quick Links
 
+
   
     Programmatic access to Field Nation platform via REST API
   
@@ -36,6 +37,7 @@ Field Nation is the world's most active field service marketplace and software s
   
     Reference materials, support, and additional resources
   
+
 
 ## Integration Approaches
 
@@ -77,6 +79,7 @@ Automatically sync photos, documentation, and completion notes from Field Nation
 
 ## Key Features
 
+
   
     Manage every aspect of work orders—creation, scheduling, pay, assignments, tasks, messages, and more—through our REST API with 150+ endpoints.
   
@@ -96,6 +99,7 @@ Automatically sync photos, documentation, and completion notes from Field Nation
   
     OAuth 2.0 authentication, HMAC-SHA256 webhook signatures, IP whitelisting, and AES-256 credential encryption keep your data secure.
   
+
 
 ## Developer Experience
 

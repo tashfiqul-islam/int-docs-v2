@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Bundle delete
 URL: /api-references/rest-api/v2/bundles/bundle-delete
 Source: content/api-references/rest-api/v2/bundles/bundle-delete.mdx
 

@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Penaltyid post
 URL: /api-references/rest-api/v2/finances/penaltyid-post
 Source: content/api-references/rest-api/v2/finances/penaltyid-post.mdx
 

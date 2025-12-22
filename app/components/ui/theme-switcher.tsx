@@ -3,10 +3,10 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import monitorIcon from "~/assets/icons/monitor.svg";
-import moonIcon from "~/assets/icons/moon.svg";
-import sunIcon from "~/assets/icons/sun.svg";
-import { cn } from "~/lib/utils";
+import monitorIcon from "@/app/assets/icons/monitor.svg";
+import moonIcon from "@/app/assets/icons/moon.svg";
+import sunIcon from "@/app/assets/icons/sun.svg";
+import { cn } from "@/lib/utils";
 
 const themes = [
   {
@@ -28,12 +28,12 @@ const themes = [
 
 type ThemeValue = "light" | "dark" | "system";
 
-export type ThemeSwitcherProps = {
+export interface ThemeSwitcherProps {
   value?: ThemeValue;
   onChange?: (theme: ThemeValue) => void;
   defaultValue?: ThemeValue;
   className?: string;
-};
+}
 
 export const ThemeSwitcher = ({
   value,

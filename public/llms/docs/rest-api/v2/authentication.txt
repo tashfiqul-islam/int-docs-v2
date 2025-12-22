@@ -1,4 +1,4 @@
-# REST API: undefined
+# REST API: Authentication
 URL: /docs/rest-api/v2/authentication
 Source: content/docs/rest-api/v2/authentication.mdx
 
@@ -61,6 +61,8 @@ Content-Type: application/json
 
 **Parameters:**
 
+
+
 ---
 
 ### Response
@@ -73,6 +75,8 @@ Content-Type: application/json
   "expires_in": 3600
 }
 ```
+
+
 
 **Error (400/401):**
 ```json
@@ -93,6 +97,7 @@ GET /api/rest/v2/workorders?access_token=YOUR_ACCESS_TOKEN
 ```
 
 ### Example Requests
+
 
   
 ```bash
@@ -119,6 +124,7 @@ response = requests.get(
 work_orders = response.json()
 ```
   
+
 
 > **Security**: Keep your `client_secret` and `access_token` secure. Never expose them in client-side code or public repositories.
 
@@ -303,6 +309,7 @@ Contact support to begin production onboarding process.
 
 ## Common Authentication Errors
 
+
   
     **Cause**: Incorrect `client_id` or `client_secret`
     
@@ -328,11 +335,14 @@ Contact support to begin production onboarding process.
     - Check token not corrupted/truncated
   
 
+
 ---
 
 ## Testing Authentication
 
 Test your authentication setup:
+
+
 
 ### Generate Token
 

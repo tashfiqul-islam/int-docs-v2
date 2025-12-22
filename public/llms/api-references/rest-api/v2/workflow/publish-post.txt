@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Publish post
 URL: /api-references/rest-api/v2/workflow/publish-post
 Source: content/api-references/rest-api/v2/workflow/publish-post.mdx
 

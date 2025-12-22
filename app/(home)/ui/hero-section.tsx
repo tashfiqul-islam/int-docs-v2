@@ -3,18 +3,22 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import fujitsu from "~/assets/companies/fujitsu.svg";
-import pomeroy from "~/assets/companies/pomeroy.svg";
-import pomeroyLight from "~/assets/companies/pomeroy-light.svg";
-import worldlink from "~/assets/companies/worldlink.svg";
-import xtium from "~/assets/companies/xtium.svg";
-import xtiumDark from "~/assets/companies/xtium-dark.svg";
-import homeDark from "~/assets/swags/home_dark.webp";
-import homeLight from "~/assets/swags/home_light.webp";
-import { buttonVariants } from "~/components/ui/button";
-import { IconCode, IconFolderOpen } from "~/components/ui/icons";
-import { cn } from "~/lib/utils";
+import fujitsu from "@/app/assets/companies/fujitsu.svg";
+import pomeroy from "@/app/assets/companies/pomeroy.svg";
+import pomeroyLight from "@/app/assets/companies/pomeroy-light.svg";
+import worldlink from "@/app/assets/companies/worldlink.svg";
+import xtium from "@/app/assets/companies/xtium.svg";
+import xtiumDark from "@/app/assets/companies/xtium-dark.svg";
+import homeDark from "@/app/assets/swags/home_dark.webp";
+import homeLight from "@/app/assets/swags/home_light.webp";
+import { buttonVariants } from "@/app/components/ui/button";
+import { IconCode, IconFolderOpen } from "@/app/components/ui/icons";
+import { cn } from "@/lib/utils";
 
+/**
+ * Landing page hero with animated headline, CTA buttons, 3D perspective
+ * screenshot of the platform, and trusted-by company logos.
+ */
 export function HeroSection() {
   return (
     <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden border-fd-border/50 border-b bg-fd-background py-12 lg:py-24 xl:h-[calc(100vh-4rem)] xl:min-h-[calc(100vh-4rem)] xl:py-0">
@@ -91,7 +95,7 @@ export function HeroSection() {
                   buttonVariants({ size: "lg" }),
                   "group h-12 gap-2 rounded-lg px-8 font-semibold text-base shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
                 )}
-                href="/docs/getting-started/introduction"
+                href="/docs/getting-started/introduction/"
                 style={{
                   backgroundColor: "#bc5409",
                   color: "#ffffff",
@@ -107,7 +111,7 @@ export function HeroSection() {
                   buttonVariants({ variant: "outline", size: "lg" }),
                   "h-12 gap-2 rounded-lg border-2 px-8 font-semibold text-base backdrop-blur-sm transition-all duration-300 hover:border-fd-primary/40 hover:bg-fd-accent/50"
                 )}
-                href="/api-references/rest-api/v2"
+                href="/api-references/rest-api/v2/"
               >
                 <IconCode className="size-4" />
                 Explore API

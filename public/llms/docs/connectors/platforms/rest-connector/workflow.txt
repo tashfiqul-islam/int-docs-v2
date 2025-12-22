@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Workflow
 URL: /docs/connectors/platforms/rest-connector/workflow
 Source: content/docs/connectors/platforms/rest-connector/workflow.mdx
 
@@ -31,6 +31,8 @@ graph TD
 ## Phase 1: Preparation
 
 ### Gather API Documentation
+
+
 
 ### Obtain OpenAPI Spec
 
@@ -84,9 +86,13 @@ Map your business flow to API endpoints:
 | Query record data | `GET /tickets/{id}` | Fetch record |
 | Attachment added | `POST /tickets/{id}/files` | Upload file |
 
+
+
 ---
 
 ### Prepare Test Credentials
+
+
 
 ### Create API User
 
@@ -126,11 +132,15 @@ curl -u "username:password" \
      https://api.example.com/v1/tickets
 ```
 
+
+
 ---
 
 ## Phase 2: Field Nation Configuration
 
 ### Upload & Configure
+
+
 
 ### Access REST Connector
 
@@ -181,11 +191,15 @@ Click "Test Connection" button
 - ✅ Success: Green confirmation
 - ❌ Failure: Review error, fix, retry
 
+
+
 ---
 
 ## Phase 3: Field Mapping
 
 ### Discover & Map Fields
+
+
 
 ### Refresh Fields
 
@@ -290,11 +304,15 @@ completion_date        → completed_at           Date Convert
 
 Click "Save" to persist field mapping configuration
 
+
+
 ---
 
 ## Phase 4: Testing
 
 ### Test Scenarios
+
+
 
 ### Create Test Record in Field Nation
 
@@ -363,9 +381,13 @@ Click "Save" to persist field mapping configuration
 - Retry logic works
 - Dead letter queue captures failures
 
+
+
 ---
 
 ### Review Integration Logs
+
+
 
 ### Access Logs
 
@@ -409,6 +431,8 @@ Error: Endpoint /api/v1/ticket not found
 Solution: Verify endpoint URL, check for typos
 ```
 
+
+
 ---
 
 ## Phase 5: Production Deployment
@@ -425,6 +449,8 @@ Solution: Verify endpoint URL, check for typos
 ---
 
 ### Deploy to Production
+
+
 
 ### Recreate Configuration in Production
 
@@ -463,6 +489,8 @@ After successful soft launch:
 3. Provide user training
 4. Set up monitoring/alerts
 
+
+
 ---
 
 ## Monitoring & Maintenance
@@ -498,6 +526,7 @@ After successful soft launch:
 ---
 
 ## Troubleshooting Common Issues
+
 
   
     **Check:**
@@ -541,5 +570,6 @@ After successful soft launch:
     - Test connection
     - Document new credentials securely
   
+
 
 ---

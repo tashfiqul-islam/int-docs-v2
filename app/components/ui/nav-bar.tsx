@@ -50,7 +50,7 @@ export default function CustomNavBar() {
               <NavigationMenu.Item render={(props) => <div {...props} />}>
                 <Link
                   className={getTriggerClassName(isActive("/docs"))}
-                  href="/docs/getting-started/introduction"
+                  href="/docs/getting-started/introduction/"
                 >
                   <motion.span
                     animate={{ opacity: 1, y: 0 }}
@@ -67,7 +67,7 @@ export default function CustomNavBar() {
               <NavigationMenu.Item render={(props) => <div {...props} />}>
                 <Link
                   className={getTriggerClassName(isActive("/api-references"))}
-                  href="/api-references/rest-api/v2"
+                  href="/api-references/rest-api/v2/"
                 >
                   <motion.span
                     animate={{ opacity: 1, y: 0 }}
@@ -294,7 +294,7 @@ const contentClassName =
 /**
  * List Item Props
  */
-type ListItemProps = {
+interface ListItemProps {
   title: ReactNode;
   children: ReactNode;
   href: string;
@@ -303,7 +303,7 @@ type ListItemProps = {
   className?: string;
   rel?: string;
   target?: string;
-};
+}
 
 /**
  * List Item Component for dropdown menu items

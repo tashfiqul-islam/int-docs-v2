@@ -6,20 +6,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /** SVG viewBox dimensions for coordinate calculations */
 const VIEWBOX = { width: 750, height: 100 } as const;
 
-/** Gradient configuration for the cursor spotlight effect */
-const SPOTLIGHT = {
-  radius: 200,
-  colors: {
-    center: "rgba(180, 180, 180, 0.25)",
-    mid: "rgba(150, 150, 150, 0.12)",
-    edge: "rgba(128, 128, 128, 0.06)",
-  },
-} as const;
+/** Spotlight radius for cursor hover effect */
+const SPOTLIGHT_RADIUS = 200;
 
-type FooterWatermarkProps = {
+interface FooterWatermarkProps {
   /** Text to display as the watermark. Defaults to "FIELD NATION" */
   text?: string;
-};
+}
 
 /**
  * A decorative watermark component that displays large text with a
@@ -116,7 +109,7 @@ export function FooterWatermark({
                 cy={cursorPos.y}
                 gradientUnits="userSpaceOnUse"
                 id="watermark-spotlight"
-                r={SPOTLIGHT.radius}
+                r={SPOTLIGHT_RADIUS}
               >
                 <stop
                   offset="0%"

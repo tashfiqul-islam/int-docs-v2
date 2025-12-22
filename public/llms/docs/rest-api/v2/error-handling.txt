@@ -1,4 +1,4 @@
-# REST API: undefined
+# REST API: Error handling
 URL: /docs/rest-api/v2/error-handling
 Source: content/docs/rest-api/v2/error-handling.mdx
 
@@ -53,11 +53,14 @@ All API errors return JSON with consistent structure:
 }
 ```
 
+
+
 ---
 
 ## Common Error Codes
 
 ### Authentication Errors (401)
+
 
   
     **Cause**: Access token expired or invalid
@@ -91,9 +94,11 @@ All API errors return JSON with consistent structure:
     - Check environment (sandbox vs production)
   
 
+
 ---
 
 ### Validation Errors (400/422)
+
 
   
     **Response:**
@@ -129,6 +134,7 @@ All API errors return JSON with consistent structure:
     - Use ISO 8601 date format
     - Validate data types match expected values
   
+
 
 ---
 

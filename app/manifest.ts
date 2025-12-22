@@ -1,16 +1,13 @@
 import type { MetadataRoute } from "next";
 
-import appleTouch from "~/assets/swags/apple-touch-icon.png";
-import favicon from "~/assets/swags/favicon.ico";
-import icon192 from "~/assets/swags/icon-192.png";
-import icon512 from "~/assets/swags/icon-512.png";
+import appleTouch from "@/app/assets/swags/apple-touch-icon.png";
+import favicon from "@/app/assets/swags/favicon.ico";
+import icon192 from "@/app/assets/swags/icon-192.png";
+import icon512 from "@/app/assets/swags/icon-512.png";
 
 // Required for static export
 export const dynamic = "force-static";
 export const revalidate = false;
-
-const _SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://developers.fieldnation.com";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {

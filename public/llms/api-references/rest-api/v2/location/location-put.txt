@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Location put
 URL: /api-references/rest-api/v2/location/location-put
 Source: content/api-references/rest-api/v2/location/location-put.mdx
 

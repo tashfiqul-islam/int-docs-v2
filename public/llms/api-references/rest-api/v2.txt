@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Index
 URL: /api-references/rest-api/v2
 Source: content/api-references/rest-api/v2/index.mdx
 

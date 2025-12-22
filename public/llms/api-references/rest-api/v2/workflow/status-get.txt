@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Status get
 URL: /api-references/rest-api/v2/workflow/status-get
 Source: content/api-references/rest-api/v2/workflow/status-get.mdx
 

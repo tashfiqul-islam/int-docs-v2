@@ -4,27 +4,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Fragment, useEffect, useState } from "react";
-import ccpaLogo from "~/assets/compliance/ccpa.svg";
-import pciLogo from "~/assets/compliance/pci.svg";
-import soc2Logo from "~/assets/compliance/soc2.svg";
-import appWindow from "~/assets/socials/app-window.svg";
-import linkedInLogo from "~/assets/socials/brand-linkedin.svg";
-import xLogo from "~/assets/socials/brand-x.svg";
-import { ConnectedThemeSwitcher } from "~/components/ui/connected-theme-switcher";
+import ccpaLogo from "@/app/assets/compliance/ccpa.svg";
+import pciLogo from "@/app/assets/compliance/pci.svg";
+import soc2Logo from "@/app/assets/compliance/soc2.svg";
+import appWindow from "@/app/assets/socials/app-window.svg";
+import linkedInLogo from "@/app/assets/socials/brand-linkedin.svg";
+import xLogo from "@/app/assets/socials/brand-x.svg";
+import { ConnectedThemeSwitcher } from "@/app/components/ui/connected-theme-switcher";
 import { FooterWatermark } from "./footer-watermark";
 
-type FooterLink = {
+interface FooterLink {
   text: string;
   href: string;
   external?: boolean;
-};
+}
 
 // Consolidated and expanded link structure
 const footerLinks: Record<string, FooterLink[]> = {
   developers: [
-    { text: "REST API", href: "/api-references/rest-api/v2" },
-    { text: "Webhooks", href: "/docs/webhooks/v3/introduction" },
-    { text: "FSM Connectors", href: "/docs/connectors/introduction" },
+    { text: "REST API", href: "/api-references/rest-api/v2/" },
+    { text: "Webhooks", href: "/docs/webhooks/v3/introduction/" },
+    { text: "FSM Connectors", href: "/docs/connectors/introduction/" },
   ],
   support: [
     {
@@ -89,6 +89,10 @@ const complianceLogos = [
   { src: soc2Logo, alt: "SOC 2", name: "soc2", className: "h-13" },
 ] as const;
 
+/**
+ * Site footer with navigation links, social icons, compliance badges,
+ * theme switcher, and decorative watermark backdrop.
+ */
 export function Footer() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);

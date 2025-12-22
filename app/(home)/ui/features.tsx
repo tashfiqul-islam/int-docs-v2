@@ -9,7 +9,7 @@ const mainFeatures = [
     title: "REST API",
     description:
       "Comprehensive RESTful API with 200+ endpoints for work orders, providers, payments, and more.",
-    href: "/api-references/rest-api/v2",
+    href: "/api-references/rest-api/v2/",
     badge: "v2",
   },
   {
@@ -17,7 +17,7 @@ const mainFeatures = [
     title: "Real-time Webhooks",
     description:
       "Event-driven updates for work order status changes, assignments, completions, and custom events.",
-    href: "/docs/webhooks/introduction",
+    href: "/docs/webhooks/introduction/",
     badge: "30+ Events",
   },
 ] as const;
@@ -46,6 +46,10 @@ const secondaryFeatures = [
   },
 ] as const;
 
+/**
+ * Highlights main developer tools (REST API, Webhooks) and secondary features
+ * (Connectors, Security, Sandbox, Performance) in a responsive grid.
+ */
 export function Features() {
   return (
     <section className="relative flex min-h-150 items-center justify-center bg-fd-background py-12 lg:py-24 xl:h-screen xl:min-h-0 xl:py-0">

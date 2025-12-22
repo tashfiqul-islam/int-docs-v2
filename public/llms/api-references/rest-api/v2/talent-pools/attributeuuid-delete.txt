@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Attributeuuid delete
 URL: /api-references/rest-api/v2/talent-pools/attributeuuid-delete
 Source: content/api-references/rest-api/v2/talent-pools/attributeuuid-delete.mdx
 

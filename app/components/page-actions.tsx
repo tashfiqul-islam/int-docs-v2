@@ -14,8 +14,8 @@ import {
   MessageCircleIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { buttonVariants } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { buttonVariants } from "@/app/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const cache = new Map<string, string>();
 

@@ -84,14 +84,14 @@ export function MobileMenuTrigger() {
             {/* Top-level links */}
             <Link
               className={linkClass(isActive("/docs"))}
-              href="/docs/getting-started/introduction"
+              href="/docs/getting-started/introduction/"
               onClick={() => setIsOpen(false)}
             >
               Documentation
             </Link>
             <Link
               className={linkClass(isActive("/api-references"))}
-              href="/api-references/rest-api/v2"
+              href="/api-references/rest-api/v2/"
               onClick={() => setIsOpen(false)}
             >
               API References

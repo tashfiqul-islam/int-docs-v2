@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Complete delete
 URL: /api-references/rest-api/v2/workflow/complete-delete
 Source: content/api-references/rest-api/v2/workflow/complete-delete.mdx
 

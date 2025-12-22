@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Quickstart
 URL: /docs/webhooks/v3/quickstart
 Source: content/docs/webhooks/v3/quickstart.mdx
 
@@ -26,6 +26,7 @@ By the end of this quickstart, you'll have:
 ## Step 1: Set Up Your Endpoint
 
 You need a publicly accessible HTTPS endpoint to receive webhooks. Choose your approach:
+
 
   
     **Perfect for testing** - No code required!
@@ -128,11 +129,14 @@ You need a publicly accessible HTTPS endpoint to receive webhooks. Choose your a
     Deploy to your cloud provider (AWS, GCP, Azure, Heroku, etc.)
   
 
+
 ---
 
 ## Step 2: Get API Credentials
 
 You need an OAuth access token to create webhooks via API.
+
+
 
 ### Obtain Client Credentials
 
@@ -164,11 +168,14 @@ Response:
 
 > **Important**: Save your access token. It's valid for 1 hour. For production, implement token refresh logic.
 
+
+
 ---
 
 ## Step 3: Create Your Webhook
 
 Choose your preferred method:
+
 
   
     ### Using the Webhooks Dashboard
@@ -250,11 +257,14 @@ Choose your preferred method:
     > **Save the secret!** You'll use this to verify webhook signatures. It's only shown once during creation.
   
 
+
 ---
 
 ## Step 4: Trigger a Test Event
 
 Now let's create an event to trigger your webhook:
+
+
 
 ### Create a Work Order (Sandbox)
 
@@ -303,11 +313,14 @@ Within seconds, you should receive a `workorder.created` event:
 }
 ```
 
+
+
 ---
 
 ## Step 5: Verify Webhook Signature
 
 **Security critical!** Always verify that webhooks actually came from Field Nation:
+
 
   
     ```javascript
@@ -478,6 +491,7 @@ Within seconds, you should receive a `workorder.created` event:
     ```
   
 
+
 > **Critical Security**: Always verify signatures in production. Without verification, anyone can send fake webhooks to your endpoint.
 
 ---
@@ -528,6 +542,7 @@ curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhook
 
 ### Not Receiving Webhooks?
 
+
   
     Ensure your webhook is **active**, not inactive or archived.
     
@@ -564,6 +579,7 @@ curl -X GET "https://api-sandbox.fndev.net/api/v1/webhooks/delivery-logs?webhook
       | jq '.result.events'
     ```
   
+
 
 ### Common Issues
 

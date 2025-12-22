@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Problemid put
 URL: /api-references/rest-api/v2/problems/problemid-put
 Source: content/api-references/rest-api/v2/problems/problemid-put.mdx
 

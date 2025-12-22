@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Creating webhooks
 URL: /docs/webhooks/v3/guides/creating-webhooks
 Source: content/docs/webhooks/v3/guides/creating-webhooks.mdx
 
@@ -29,6 +29,8 @@ Best for:
 - Non-technical users
 - Visual configuration
 - One-off webhook creation
+
+
 
 ### Navigate to Webhooks Dashboard
 
@@ -105,6 +107,8 @@ X-Environment: production
 - Review all settings
 - Click "Create Webhook"
 - **Save the webhook ID and secret** - you'll need these
+
+
 
 ### UI Configuration Example
 
@@ -223,6 +227,8 @@ curl -X GET https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123def456 \
 
 ### Optional Fields
 
+
+
 ---
 
 ## Configuration Examples
@@ -274,6 +280,7 @@ Full configuration with custom headers and notifications:
 ### Multi-Environment Setup
 
 Create separate webhooks for different environments:
+
 
   
     ```json
@@ -338,6 +345,7 @@ Create separate webhooks for different environments:
     }
     ```
   
+
 
 ---
 

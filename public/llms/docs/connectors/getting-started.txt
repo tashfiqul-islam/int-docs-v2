@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Getting started
 URL: /docs/connectors/getting-started
 Source: content/docs/connectors/getting-started.mdx
 
@@ -30,6 +30,7 @@ icon: Rocket
 ---
 
 ### External Platform Requirements
+
 
   
     You need administrative access in your external platform (Salesforce, ServiceNow, etc.) to:
@@ -66,11 +67,14 @@ icon: Rocket
     - **Create/Update permissions** for the object types being synchronized
   
 
+
 ---
 
 ## Common Setup Workflow
 
 All pre-built connectors follow a similar configuration pattern:
+
+
 
 ### Gather Credentials
 
@@ -121,6 +125,8 @@ Collect required information from your external platform:
 4. Document configuration for your team
 5. Set up alerting for integration errors
 
+
+
 ---
 
 ## Integration Broker Access
@@ -139,6 +145,8 @@ All pre-built connectors are configured through Field Nation's **Integration Bro
 Field mappings define how data translates between systems. Each mapping consists of:
 
 ### Mapping Components
+
+
 
 ### Common Transformation Actions
 
@@ -199,6 +207,10 @@ graph LR
 
 Different platforms use different authentication approaches:
 
+
+
+
+
 **Used by**: Freshdesk, some custom REST APIs
 
 **Configuration**:
@@ -207,6 +219,10 @@ Different platforms use different authentication approaches:
 - Optional: Security Token
 
 **Format**: `Authorization: Basic base64(username:password)`
+
+
+
+
 
 **Used by**: Salesforce, ServiceNow (optional)
 
@@ -219,6 +235,10 @@ Different platforms use different authentication approaches:
 
 **Flow**: Authorization Code or Client Credentials
 
+
+
+
+
 **Used by**: Quickbase, Smartsheet
 
 **Configuration**:
@@ -226,6 +246,10 @@ Different platforms use different authentication approaches:
 - Optional: API Secret
 
 **Format**: Custom header (e.g., `X-API-Key: your-key`)
+
+
+
+
 
 **Used by**: NetSuite, Autotask
 
@@ -236,6 +260,10 @@ Different platforms use different authentication approaches:
 - Token Key/Secret
 
 **Format**: Platform-specific SOAP authentication
+
+
+
+
 
 ---
 
@@ -269,6 +297,7 @@ Different platforms use different authentication approaches:
 
 ## Common Pitfalls to Avoid
 
+
   
     **Problem**: Integration fails due to missing permissions
     
@@ -298,6 +327,7 @@ Different platforms use different authentication approaches:
     
     **Solution**: Refresh OAuth tokens, verify credentials haven't been reset, check for password policy changes
   
+
 
 ---
 
@@ -329,6 +359,7 @@ Different platforms use different authentication approaches:
 
 Each platform has detailed configuration instructions:
 
+
   
     Flows & Outbound Messages setup
   
@@ -338,6 +369,7 @@ Each platform has detailed configuration instructions:
   
     OpenAPI spec configuration
   
+
 
 [View all platform guides →](/docs/connectors/introduction)
 

@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: History get
 URL: /api-references/webhooks/v3/history/history-get
 Source: content/api-references/webhooks/v3/history/history-get.mdx
 

@@ -5,6 +5,7 @@ import { source } from "@/lib/source";
 
 export const revalidate = false;
 
+/** Truncates text to max characters with ellipsis */
 function truncate(text: string | undefined, max = 160) {
   if (!text) {
     return "";

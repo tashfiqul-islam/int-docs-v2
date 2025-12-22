@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Delivery logs get
 URL: /api-references/webhooks/v3/delivery-logs/delivery-logs-get
 Source: content/api-references/webhooks/v3/delivery-logs/delivery-logs-get.mdx
 

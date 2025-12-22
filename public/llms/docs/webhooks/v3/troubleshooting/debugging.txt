@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Debugging
 URL: /docs/webhooks/v3/troubleshooting/debugging
 Source: content/docs/webhooks/v3/troubleshooting/debugging.mdx
 

@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Templates get
 URL: /api-references/rest-api/v2/templates/templates-get
 Source: content/api-references/rest-api/v2/templates/templates-get.mdx
 

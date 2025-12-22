@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Workflow
 URL: /docs/connectors/platforms/connectwise/workflow
 Source: content/docs/connectors/platforms/connectwise/workflow.mdx
 
@@ -18,6 +18,8 @@ description: Configure ConnectWise callbacks to automatically send service ticke
 ---
 
 ## Configure Callback in ConnectWise
+
+
 
 ### Navigate to Callbacks
 
@@ -43,6 +45,8 @@ Click "+" to add new callback
 - ☐ Deleted (optional)
 
 **Inactive Members**: Unchecked
+
+
 
 ---
 
@@ -78,6 +82,7 @@ Use ConnectWise workflow rules or automation to set these conditions.
 
 ## Troubleshooting
 
+
   
     Check:
     - Callback active
@@ -93,5 +98,6 @@ Use ConnectWise workflow rules or automation to set these conditions.
     - Callback log for errors
     - Integration Broker logs
   
+
 
 ---

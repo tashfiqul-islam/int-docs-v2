@@ -20,9 +20,15 @@ export function resolveIcon(icon: string | undefined): React.ReactNode {
     return icon;
   }
 
-  // Handle Lucide icon names - use the icons object from lucide-react
+  // Try exact match first
   if (icon in icons) {
     return createElement(icons[icon as keyof typeof icons]);
+  }
+
+  // Try PascalCase conversion (e.g., "server" -> "Server", "rss" -> "Rss")
+  const pascalCase = icon.charAt(0).toUpperCase() + icon.slice(1);
+  if (pascalCase in icons) {
+    return createElement(icons[pascalCase as keyof typeof icons]);
   }
 
   // Log missing icons in development for debugging

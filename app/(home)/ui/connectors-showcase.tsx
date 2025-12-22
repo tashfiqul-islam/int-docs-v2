@@ -1,83 +1,87 @@
 "use client";
 
 import Link from "next/link";
-import autotask from "~/assets/connectors/autotask.svg";
-import autotaskLightBlue from "~/assets/connectors/autotask-light-blue.svg";
-import connectwise from "~/assets/connectors/connectwise.svg";
-import connectwiseLightBlue from "~/assets/connectors/connectwise-light-blue.svg";
-import freshdesk from "~/assets/connectors/freshdesk.svg";
-import freshdeskWhite from "~/assets/connectors/freshdesk-white.svg";
-import netsuite from "~/assets/connectors/netsuite.svg";
-import netsuiteWhite from "~/assets/connectors/netsuite-white.svg";
-import quickbase from "~/assets/connectors/quickbase.svg";
-import quickbaseWhite from "~/assets/connectors/quickbase-white.svg";
-import rest from "~/assets/connectors/rest.svg";
-import restConnectorWhite from "~/assets/connectors/rest-connector-white.svg";
-import salesforce from "~/assets/connectors/salesforce.svg";
-import serviceNow from "~/assets/connectors/service-now.svg";
-import serviceNowWhite from "~/assets/connectors/service-now-white.svg";
-import smartsheet from "~/assets/connectors/smartsheet.svg";
-import smartsheetLightBlue from "~/assets/connectors/smartsheet-light-blue.svg";
-import { HoverEffect } from "~/components/ui/card-hover-effect";
+import autotask from "@/app/assets/connectors/autotask.svg";
+import autotaskLightBlue from "@/app/assets/connectors/autotask-light-blue.svg";
+import connectwise from "@/app/assets/connectors/connectwise.svg";
+import connectwiseLightBlue from "@/app/assets/connectors/connectwise-light-blue.svg";
+import freshdesk from "@/app/assets/connectors/freshdesk.svg";
+import freshdeskWhite from "@/app/assets/connectors/freshdesk-white.svg";
+import netsuite from "@/app/assets/connectors/netsuite.svg";
+import netsuiteWhite from "@/app/assets/connectors/netsuite-white.svg";
+import quickbase from "@/app/assets/connectors/quickbase.svg";
+import quickbaseWhite from "@/app/assets/connectors/quickbase-white.svg";
+import rest from "@/app/assets/connectors/rest.svg";
+import restConnectorWhite from "@/app/assets/connectors/rest-connector-white.svg";
+import salesforce from "@/app/assets/connectors/salesforce.svg";
+import serviceNow from "@/app/assets/connectors/service-now.svg";
+import serviceNowWhite from "@/app/assets/connectors/service-now-white.svg";
+import smartsheet from "@/app/assets/connectors/smartsheet.svg";
+import smartsheetLightBlue from "@/app/assets/connectors/smartsheet-light-blue.svg";
+import { HoverEffect } from "@/app/components/ui/card-hover-effect";
 import { ConnectorCard } from "./connector-card";
 
 const connectors = [
   {
     name: "Salesforce",
     logo: salesforce,
-    href: "/docs/connectors/platforms/salesforce/overview",
+    href: "/docs/connectors/platforms/salesforce/overview/",
   },
   {
     name: "ServiceNow",
     logo: serviceNow,
     logoDark: serviceNowWhite,
-    href: "/docs/connectors/platforms/servicenow/overview",
+    href: "/docs/connectors/platforms/servicenow/overview/",
   },
   {
     name: "ConnectWise",
     logo: connectwise,
     logoDark: connectwiseLightBlue,
-    href: "/docs/connectors/platforms/connectwise/overview",
+    href: "/docs/connectors/platforms/connectwise/overview/",
   },
   {
     name: "Autotask",
     logo: autotask,
     logoDark: autotaskLightBlue,
-    href: "/docs/connectors/platforms/autotask/overview",
+    href: "/docs/connectors/platforms/autotask/overview/",
   },
   {
     name: "Freshdesk",
     logo: freshdesk,
     logoDark: freshdeskWhite,
-    href: "/docs/connectors/platforms/freshdesk/overview",
+    href: "/docs/connectors/platforms/freshdesk/overview/",
     needsLargerSize: true,
   },
   {
     name: "NetSuite",
     logo: netsuite,
     logoDark: netsuiteWhite,
-    href: "/docs/connectors/platforms/netsuite/overview",
+    href: "/docs/connectors/platforms/netsuite/overview/",
   },
   {
     name: "Quickbase",
     logo: quickbase,
     logoDark: quickbaseWhite,
-    href: "/docs/connectors/platforms/quickbase/overview",
+    href: "/docs/connectors/platforms/quickbase/overview/",
   },
   {
     name: "Smartsheet",
     logo: smartsheet,
     logoDark: smartsheetLightBlue,
-    href: "/docs/connectors/platforms/smartsheet/overview",
+    href: "/docs/connectors/platforms/smartsheet/overview/",
   },
   {
     name: "REST Connector",
     logo: rest,
     logoDark: restConnectorWhite,
-    href: "/docs/connectors/platforms/rest-connector/overview",
+    href: "/docs/connectors/platforms/rest-connector/overview/",
   },
 ] as const;
 
+/**
+ * Showcases available FSM platform connectors in an interactive grid.
+ * Features hover effects and links to individual connector documentation.
+ */
 export function ConnectorsShowcase() {
   return (
     <section className="relative flex min-h-150 items-center justify-center bg-slate-50 py-12 lg:py-16 xl:h-screen xl:min-h-0 xl:py-0 dark:bg-neutral-900/40">
@@ -124,7 +128,7 @@ export function ConnectorsShowcase() {
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium text-sm text-white transition-all hover:scale-[1.02] hover:shadow-lg"
-              href="/docs/connectors/introduction"
+              href="/docs/connectors/introduction/"
               style={{
                 backgroundColor: "#bc5409",
                 boxShadow: "0 4px 16px -2px hsl(var(--color-fd-primary)/0.3)",

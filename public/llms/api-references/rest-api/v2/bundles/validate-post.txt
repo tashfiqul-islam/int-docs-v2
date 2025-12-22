@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Validate post
 URL: /api-references/rest-api/v2/bundles/validate-post
 Source: content/api-references/rest-api/v2/bundles/validate-post.mdx
 

@@ -1,9 +1,9 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
+import { ConnectedThemeSwitcher } from "@/app/components/ui/connected-theme-switcher";
+import VersionSwitcher from "@/app/components/ui/version-switcher";
 import { baseOptions } from "@/lib/layout.shared";
 import { apiReferencesSource, getAvailableVersions } from "@/lib/source";
-import { ConnectedThemeSwitcher } from "~/components/ui/connected-theme-switcher";
-import VersionSwitcher from "~/components/ui/version-switcher";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const base = baseOptions();

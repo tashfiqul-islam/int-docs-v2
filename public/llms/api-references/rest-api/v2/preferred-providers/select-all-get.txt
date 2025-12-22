@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Select all get
 URL: /api-references/rest-api/v2/preferred-providers/select-all-get
 Source: content/api-references/rest-api/v2/preferred-providers/select-all-get.mdx
 

@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Common issues
 URL: /docs/webhooks/v3/troubleshooting/common-issues
 Source: content/docs/webhooks/v3/troubleshooting/common-issues.mdx
 
@@ -19,6 +19,7 @@ description: Quick solutions for frequently encountered webhook problems includi
 ```
 
 ### Causes & Solutions
+
 
   
     **Solution**: Verify you're using the correct webhook secret.
@@ -82,6 +83,7 @@ description: Quick solutions for frequently encountered webhook problems includi
     ```
   
 
+
 [Complete security guide →](/docs/webhooks/v3/guides/security)
 
 ---
@@ -96,6 +98,8 @@ description: Quick solutions for frequently encountered webhook problems includi
 ```
 
 ### Diagnostic Steps
+
+
 
 ### Check Webhook Status
 
@@ -141,6 +145,8 @@ Ensure webhook is subscribed to the events you're triggering:
 const webhook = await getWebhook('wh_abc123');
 console.log('Subscribed events:', webhook.result.events);
 ```
+
+
 
 ---
 

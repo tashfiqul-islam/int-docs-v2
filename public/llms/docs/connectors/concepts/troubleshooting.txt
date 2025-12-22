@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Troubleshooting
 URL: /docs/connectors/concepts/troubleshooting
 Source: content/docs/connectors/concepts/troubleshooting.mdx
 
@@ -11,7 +11,13 @@ description: Common issues with pre-built connectors and step-by-step solutions 
 
 ## Quick Diagnosis
 
+
+
+
+
 **Work orders not creating or updating?**
+
+
 
 ### Check Webhook
 
@@ -42,7 +48,15 @@ Trigger a test sync:
 - Verify it meets trigger conditions
 - Monitor logs for processing
 
+
+
+
+
+
+
 **Some fields syncing, others not?**
+
+
 
 ### Check Field Mappings
 
@@ -72,7 +86,15 @@ Look for field-specific errors:
 - Type conversion errors
 - JSONNET execution errors
 
+
+
+
+
+
+
 **Seeing errors in logs?**
+
+
 
 ### Identify Error Category
 
@@ -104,7 +126,15 @@ Verify fix resolves issue:
 - Watch for successful processing
 - Confirm no new errors
 
+
+
+
+
+
+
 **Syncs are slow or delayed?**
+
+
 
 ### Check Queue Depth
 
@@ -134,11 +164,18 @@ If consistently slow:
 - Request additional worker instances
 - Review architecture with support team
 
+
+
+
+
+
+
 ---
 
 ## Common Issues & Solutions
 
 ### Authentication Problems
+
 
   
     **Symptoms**: All sync attempts fail with 401 error
@@ -198,9 +235,11 @@ If consistently slow:
     4. Ensure refresh token URL correct
   
 
+
 ---
 
 ### Data Validation Errors
+
 
   
     **Symptoms**: 400 error - "Required field missing"
@@ -281,9 +320,11 @@ If consistently slow:
     ```
   
 
+
 ---
 
 ### Webhook & Trigger Issues
+
 
   
     **Symptoms**: No events reaching Integration Broker
@@ -328,9 +369,11 @@ If consistently slow:
     4. Enable duplicate detection in Integration Broker
   
 
+
 ---
 
 ### Field Mapping Problems
+
 
   
     **Symptoms**: Transformation fails, JSONNET syntax error
@@ -409,9 +452,11 @@ If consistently slow:
     3. Use try-catch pattern for robust handling
   
 
+
 ---
 
 ### Performance Issues
+
 
   
     **Symptoms**: Messages backing up in queue
@@ -459,6 +504,7 @@ If consistently slow:
     3. Test external API directly for response time
     4. Simplify field mappings as test
   
+
 
 ---
 
@@ -551,6 +597,7 @@ Gather this information to expedite support:
 
 Each platform has unique considerations:
 
+
   
     Flow and Outbound Message issues
   
@@ -560,6 +607,7 @@ Each platform has unique considerations:
   
     OpenAPI spec and endpoint configuration
   
+
 
 [View all platforms →](/docs/connectors/introduction)
 

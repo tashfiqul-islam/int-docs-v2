@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Delivery
 URL: /docs/webhooks/v3/concepts/delivery
 Source: content/docs/webhooks/v3/concepts/delivery.mdx
 
@@ -41,6 +41,8 @@ sequenceDiagram
 ---
 
 ## Delivery Lifecycle
+
+
 
 ### Event Triggered
 
@@ -89,6 +91,8 @@ Your endpoint's response determines the next step:
 - **Success (2xx)**: Job complete, delivery logged
 - **Hard failure (404/410)**: Job failed permanently, no retry
 - **Retriable error**: Job requeued with exponential delay
+
+
 
 ---
 
@@ -439,6 +443,7 @@ async function processWorkOrderEvent(payload) {
 
 ### Deliveries Not Arriving?
 
+
   
     Ensure webhook is `active`:
     
@@ -473,6 +478,7 @@ async function processWorkOrderEvent(payload) {
     
     Look for SSL verification errors.
   
+
 
 ### Common Delivery Errors
 

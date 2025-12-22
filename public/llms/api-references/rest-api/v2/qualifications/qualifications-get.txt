@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Qualifications get
 URL: /api-references/rest-api/v2/qualifications/qualifications-get
 Source: content/api-references/rest-api/v2/qualifications/qualifications-get.mdx
 

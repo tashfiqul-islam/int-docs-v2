@@ -1,4 +1,4 @@
-# Resources: undefined
+# Resources: Error codes
 URL: /docs/resources/error-codes
 Source: content/docs/resources/error-codes.mdx
 
@@ -13,6 +13,8 @@ icon: CircleAlert
 ## HTTP Status Codes
 
 ### Success Codes (2xx)
+
+
 
 **When you see these:** Your request was processed successfully. No action needed.
 

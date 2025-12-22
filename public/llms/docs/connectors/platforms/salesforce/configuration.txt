@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Configuration
 URL: /docs/connectors/platforms/salesforce/configuration
 Source: content/docs/connectors/platforms/salesforce/configuration.mdx
 
@@ -29,6 +29,8 @@ Navigate to Field Nation's Integration Broker interface:
 **Sandbox**: [ui-sandbox.fndev.net/integrations](https://ui-sandbox.fndev.net/integrations)  
 **Production**: [app.fieldnation.com/integrations](https://app.fieldnation.com/integrations)
 
+
+
 ### Log In
 
 Use your Field Nation buyer account credentials
@@ -40,6 +42,8 @@ Find "Salesforce" in the list of available connectors
 ### Click Configure
 
 Open the Salesforce configuration form
+
+
 
 ---
 
@@ -64,6 +68,10 @@ Open the Salesforce configuration form
 
 **Required** - Specifies which Salesforce environment to connect to.
 
+
+
+
+
 **Value**: `production`
 
 **Connects to**: `login.salesforce.com`
@@ -72,6 +80,10 @@ Open the Salesforce configuration form
 - Live Salesforce organization
 - Go-live / production deployment
 - Real customer data
+
+
+
+
 
 **Value**: `test`
 
@@ -82,6 +94,10 @@ Open the Salesforce configuration form
 - Development and testing
 - UAT (User Acceptance Testing)
 - Training environments
+
+
+
+
 
 > **Critical**: Incorrect instance type causes authentication failures. Verify your Salesforce environment type before configuring.
 
@@ -118,6 +134,7 @@ Open the Salesforce configuration form
 
 **Optional** - Enable bidirectional comment synchronization.
 
+
   
     Enable if you want:
     - Field Nation technician messages to appear in Salesforce
@@ -150,6 +167,7 @@ Open the Salesforce configuration form
     
     This field stores the actual message text content.
   
+
 
 **Example Configuration:**
 ```
@@ -193,6 +211,8 @@ System-generated key from Salesforce for API authentication.
 
 #### How to Generate Security Token
 
+
+
 ### Log into Salesforce
 
 Use the account you're configuring for integration
@@ -217,6 +237,8 @@ Copy the token from the email (entire string)
 
 Paste token in the Token field (do NOT append to password)
 
+
+
 **Token Behavior:**
 - Token is appended to password during API authentication
 - Field Nation handles this automatically
@@ -233,6 +255,8 @@ Paste token in the Token field (do NOT append to password)
 
 After entering all configuration details:
 
+
+
 ### Save Configuration
 
 Click "Save" or "Test Connection" button
@@ -246,7 +270,10 @@ Integration Broker attempts to authenticate with Salesforce
 - **Success**: Green confirmation, trigger URL generated
 - **Failure**: Error message with details
 
+
+
 ### Common Authentication Errors
+
 
   
     **Error**: `INVALID_LOGIN: Invalid username, password, security token`
@@ -301,6 +328,7 @@ Integration Broker attempts to authenticate with Salesforce
     2. Or disable IP restrictions for integration user
     3. See [Network Access](/docs/resources/environments)
   
+
 
 ---
 
@@ -384,6 +412,8 @@ Map Field Nation events to Salesforce updates:
 
 ### Final Configuration Steps
 
+
+
 ### Review Settings
 
 Verify all configuration values correct:
@@ -411,6 +441,8 @@ Watch first few synchronizations:
 - Verify field values correct
 - Confirm bidirectional sync works
 - Adjust mappings if needed
+
+
 
 ---
 
@@ -443,6 +475,7 @@ Use this checklist to verify complete setup:
 
 ## Troubleshooting
 
+
   
     **Issue**: Expected fields not showing in mapping dropdowns
     
@@ -472,5 +505,6 @@ Use this checklist to verify complete setup:
     3. Add default values for optional fields
     4. Review error messages for specific field issues
   
+
 
 ---

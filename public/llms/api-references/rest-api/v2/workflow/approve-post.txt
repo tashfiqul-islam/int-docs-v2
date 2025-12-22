@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Approve post
 URL: /api-references/rest-api/v2/workflow/approve-post
 Source: content/api-references/rest-api/v2/workflow/approve-post.mdx
 

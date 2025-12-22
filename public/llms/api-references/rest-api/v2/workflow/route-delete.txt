@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Route delete
 URL: /api-references/rest-api/v2/workflow/route-delete
 Source: content/api-references/rest-api/v2/workflow/route-delete.mdx
 

@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Providerid delete
 URL: /api-references/rest-api/v2/talent-pool-groups/providerid-delete
 Source: content/api-references/rest-api/v2/talent-pool-groups/providerid-delete.mdx
 

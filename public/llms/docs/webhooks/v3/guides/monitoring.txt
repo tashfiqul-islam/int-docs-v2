@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Monitoring
 URL: /docs/webhooks/v3/guides/monitoring
 Source: content/docs/webhooks/v3/guides/monitoring.mdx
 
@@ -42,7 +42,11 @@ graph LR
 
 ### 2. Processing Metrics
 
+
+
 ### 3. Business Metrics
+
+
 
 ---
 
@@ -328,6 +332,7 @@ app.get('/metrics', async (req, res) => {
 
 Create a Grafana dashboard with these panels:
 
+
   
     ```
     # Success rate over 5 minutes
@@ -366,6 +371,7 @@ Create a Grafana dashboard with these panels:
     ```
   
 
+
 ---
 
 ## Alerting Rules
@@ -373,6 +379,7 @@ Create a Grafana dashboard with these panels:
 Set up alerts for critical conditions:
 
 ### Alert Definitions
+
 
   
     ```yaml
@@ -452,6 +459,7 @@ Set up alerts for critical conditions:
         description: "{{ $value }} errors per minute"
     ```
   
+
 
 ### Alert Destinations
 

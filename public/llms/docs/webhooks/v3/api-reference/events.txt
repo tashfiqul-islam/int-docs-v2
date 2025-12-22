@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Events
 URL: /docs/webhooks/v3/api-reference/events
 Source: content/docs/webhooks/v3/api-reference/events.mdx
 
@@ -22,7 +22,10 @@ Retrieve all available webhook events with their details.
 
 **Query Parameters:**
 
+
+
 ### Example Requests
+
 
   
     ```bash
@@ -36,6 +39,7 @@ Retrieve all available webhook events with their details.
       -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
     ```
   
+
 
 ### Response
 
@@ -90,6 +94,8 @@ Retrieve all available webhook events with their details.
 ## Event Object Structure
 
 Each event in the response includes:
+
+
 
 ---
 

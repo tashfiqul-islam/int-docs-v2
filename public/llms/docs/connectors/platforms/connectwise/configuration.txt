@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Configuration
 URL: /docs/connectors/platforms/connectwise/configuration
 Source: content/docs/connectors/platforms/connectwise/configuration.mdx
 
@@ -22,6 +22,8 @@ description: Configure the ConnectWise connector in Field Nation with REST API k
 
 ## Step 1: Generate ConnectWise API Keys
 
+
+
 ### Log into ConnectWise
 
 Use admin account
@@ -44,6 +46,8 @@ System → Members → Select API member (or create new dedicated member)
 ### Note Member ID
 
 Copy Member ID from member profile (needed for authentication)
+
+
 
 ---
 
@@ -105,6 +109,7 @@ Click "Test Connection" → Verify success
 
 **Common Errors:**
 
+
   
     **Solution:**
     - Regenerate keys in ConnectWise
@@ -118,6 +123,7 @@ Click "Test Connection" → Verify success
     - Enable "Read" and "Write" permissions
     - Check security role assignments
   
+
 
 ---
 

@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Handling events
 URL: /docs/webhooks/v3/guides/handling-events
 Source: content/docs/webhooks/v3/guides/handling-events.mdx
 
@@ -49,6 +49,7 @@ graph TD
 ### Implementing Idempotency
 
 Use `eventId` as the unique identifier:
+
 
   
     ```javascript
@@ -228,6 +229,7 @@ Use `eventId` as the unique identifier:
     ```
   
 
+
 > **Important**: Store idempotency keys for at least 7 days to handle late retries and manual replays.
 
 ---
@@ -375,6 +377,7 @@ Robust error handling prevents data loss and ensures reliability.
 
 ### Error Categories
 
+
   
     **Retry these errors** - temporary issues that may resolve:
 
@@ -495,6 +498,7 @@ Robust error handling prevents data loss and ensures reliability.
     }
     ```
   
+
 
 ### Dead Letter Queue (DLQ)
 

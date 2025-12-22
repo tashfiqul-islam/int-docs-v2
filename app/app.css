@@ -5,11 +5,8 @@
 @import "fumadocs-openapi/css/preset.css";
 @config "../tailwind.config.ts";
 
-/* Fonts are loaded via Next.js font optimization in layout.tsx */
-/* Open Sans via Google Fonts: var(--font-open-sans) */
-/* JetBrains Mono via localFont: var(--font-jetbrains-mono) */
+/* Design Tokens */
 
-/* Field Nation Theme Colors */
 :root {
   --fd-layout-width: 1440px;
   --color-fd-primary: #f16a22;
@@ -21,13 +18,12 @@
   --color-primary: #bc5409;
   --color-primary-foreground: #ffffff;
 
-  /* Spacing System (8px Grid) */
-  --spacing-xs: 0.5rem; /* 8px */
-  --spacing-sm: 1rem; /* 16px */
-  --spacing-md: 1.5rem; /* 24px */
-  --spacing-lg: 2rem; /* 32px */
-  --spacing-xl: 3rem; /* 48px */
-  --spacing-2xl: 4rem; /* 64px */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
 
   /* Card Gradients */
   --card-gradient-light: linear-gradient(
@@ -43,6 +39,8 @@
     hsl(0, 0%, 16%)
   );
 }
+
+/* Tailwind Theme Extensions */
 
 @theme inline {
   /* Custom Fonts */
@@ -113,6 +111,8 @@
     var(--delay, 0ms);
 }
 
+/* Base Typography */
+
 html {
   scroll-behavior: smooth;
 }
@@ -128,7 +128,8 @@ pre {
   font-family: var(--font-jetbrains-mono), "Courier New", monospace;
 }
 
-/* View Transitions for Theme Switching */
+/* View Transitions (Theme Switching Animation) */
+
 @supports (view-transition-name: none) {
   ::view-transition-old(root),
   ::view-transition-new(root) {
@@ -157,7 +158,7 @@ pre {
   }
 }
 
-/* Reduced Motion Preference */
+/* Accessibility: Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -169,6 +170,7 @@ pre {
 }
 
 /* Animation Utility Classes */
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
@@ -205,7 +207,9 @@ pre {
   opacity: 0;
 }
 
-/* Sidebar footer: Minimize padding to allow items to reach edges */
+/* Fumadocs Layout Overrides */
+
+/* Sidebar footer spacing */
 #nd-sidebar > div:last-child,
 .nd-sidebar > div:last-child,
 [data-sidebar] > div:last-child {
@@ -213,13 +217,44 @@ pre {
   padding-right: 0.25rem !important;
 }
 
-/* Force full-width header with centered content */
+/* Fumadocs Layout Overrides */
+
+/* Full-width header with background */
 header {
   max-width: none !important;
   width: 100% !important;
   border-bottom: 1px solid var(--color-fd-border);
+  background-color: var(--color-fd-background);
 }
 
+/* Reduce navbar height to 48px and ensure proper alignment */
+header#nd-nav {
+  top: 0 !important;
+  margin-top: 0 !important;
+}
+
+header#nd-nav,
+header#nd-nav nav,
+header#nd-nav ul,
+div.fixed.h-14.lg\:hidden {
+  height: 3rem !important;
+}
+
+/* Match hamburger button size to search button */
+button[aria-label="Toggle Mobile Menu"] {
+  height: 34px !important;
+  width: 34px !important;
+  min-height: 34px !important;
+  min-width: 34px !important;
+}
+
+/* Match hamburger icon size to search icon */
+button[aria-label="Toggle Mobile Menu"] svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Constrain header content to layout width */
 header > div {
   max-width: var(--fd-layout-width);
   margin-left: auto;
@@ -227,20 +262,20 @@ header > div {
   width: 100%;
 }
 
-/* Position custom theme switcher in navbar after the search */
-/* The parent container uses flex, so we use order to move it after search */
+/* Custom theme switcher positioning */
 .theme-switcher-nav {
   order: 999;
   margin-left: 0.75rem;
 }
 
-/* Hide Fumadocs default theme switcher */
-/* Only target the specific Fumadocs toggle button, not our custom ThemeSwitcher */
+/* Hide default Fumadocs toggles (replaced with custom components) */
 button[aria-label="Toggle Theme"],
 [data-theme-toggle],
 button[data-theme-toggle] {
   display: none !important;
 }
+
+/* Accessibility */
 
 @layer base {
   *:focus-visible {
@@ -250,10 +285,6 @@ button[data-theme-toggle] {
   }
 }
 
-/* Hide default Fumadocs mobile menu toggle to replace with custom hamburger */
 button[aria-label="Toggle Menu"] {
   display: none !important;
 }
-
-/* Add spacing between search icon and custom hamburger menu - only on home page */
-/* On subpages, the hamburger is hidden so no extra margin needed */

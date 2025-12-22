@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Increases get
 URL: /api-references/rest-api/v2/finances/increases-get
 Source: content/api-references/rest-api/v2/finances/increases-get.mdx
 

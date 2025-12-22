@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import pivital from "~/assets/companies/pivital.svg";
+import pivital from "@/app/assets/companies/pivital.svg";
 
 const benefits = [
   {
@@ -35,6 +35,10 @@ const benefits = [
   },
 ] as const;
 
+/**
+ * Value proposition section featuring integration benefits grid
+ * and a customer success story card with metrics.
+ */
 export function PlatformStatement() {
   return (
     <section className="relative flex min-h-[600px] items-center justify-center overflow-hidden bg-slate-50 py-12 md:py-16 xl:h-screen xl:min-h-0 xl:py-0 dark:bg-neutral-900/40">
@@ -128,7 +132,7 @@ export function PlatformStatement() {
 
             <Link
               className="group inline-flex items-center gap-2 font-medium text-sm transition-colors"
-              href="/docs/getting-started/introduction"
+              href="/docs/getting-started/introduction/"
               style={{ color: "var(--color-fd-primary)" }}
             >
               Start integrating today

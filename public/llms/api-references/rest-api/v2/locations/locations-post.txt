@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Locations post
 URL: /api-references/rest-api/v2/locations/locations-post
 Source: content/api-references/rest-api/v2/locations/locations-post.mdx
 

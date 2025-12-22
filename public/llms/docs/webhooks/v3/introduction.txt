@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Introduction
 URL: /docs/webhooks/v3/introduction
 Source: content/docs/webhooks/v3/introduction.mdx
 
@@ -38,6 +38,7 @@ sequenceDiagram
 
 ## Why Use Webhooks?
 
+
   
     Receive updates within seconds of events occurring. Keep your systems in sync without polling delays.
   
@@ -50,6 +51,7 @@ sequenceDiagram
   
     Lower infrastructure costs. No need to run continuous polling jobs or maintain complex scheduling logic.
   
+
 
 ---
 
@@ -115,6 +117,7 @@ Field Nation Webhooks support **33 distinct events** covering the complete work 
 
 ### Event Categories
 
+
   
     - **workorder.created** - New work order created
     - **workorder.routed** - Routed to specific provider(s)
@@ -138,6 +141,7 @@ Field Nation Webhooks support **33 distinct events** covering the complete work 
     - **workorder.schedule_updated** - Schedule changed
     - **workorder.tag_added** / **tag_removed** - Tags modified
   
+
 
 [View complete event catalog →](/docs/webhooks/v3/concepts/events)
 
@@ -187,6 +191,8 @@ Field Nation Webhooks support **33 distinct events** covering the complete work 
 
 Before working with webhooks, ensure you have:
 
+
+
 ### Field Nation Account Access
 
 - **Buyer account** with active contract
@@ -205,6 +211,8 @@ Before working with webhooks, ensure you have:
 - **Request inspection tools** - webhook.site, request.bin
 - **Monitoring setup** - Logs, alerts, dashboards
 
+
+
 [Complete prerequisites guide →](/docs/getting-started/prerequisites)
 
 ---
@@ -212,6 +220,7 @@ Before working with webhooks, ensure you have:
 ## Getting Started
 
 Ready to receive your first webhook?
+
 
   
     Create your first webhook and receive events in under 15 minutes
@@ -225,6 +234,7 @@ Ready to receive your first webhook?
   
     Complete API documentation for programmatic management
   
+
 
 ---
 

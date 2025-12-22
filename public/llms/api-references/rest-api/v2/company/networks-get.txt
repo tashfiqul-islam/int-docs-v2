@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Networks get
 URL: /api-references/rest-api/v2/company/networks-get
 Source: content/api-references/rest-api/v2/company/networks-get.mdx
 

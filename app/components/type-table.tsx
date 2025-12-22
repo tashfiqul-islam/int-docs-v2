@@ -1,14 +1,14 @@
 import { cva } from "class-variance-authority";
 import Link from "fumadocs-core/link";
 import type { ReactNode } from "react";
-import { cn } from "~/lib/utils";
+import { cn } from "@/lib/utils";
 
-export type ParameterNode = {
+export interface ParameterNode {
   name: string;
   description: ReactNode;
-};
+}
 
-export type TypeNode = {
+export interface TypeNode {
   /**
    * Additional description of the field
    */
@@ -37,7 +37,7 @@ export type TypeNode = {
   parameters?: ParameterNode[];
 
   returns?: ReactNode;
-};
+}
 
 const keyVariants = cva("text-fd-primary", {
   variants: {

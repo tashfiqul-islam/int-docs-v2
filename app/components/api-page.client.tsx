@@ -4,7 +4,7 @@ import { defineClientConfig } from "fumadocs-openapi/ui/client";
 
 const AUTH_TOKEN_KEY = "fn_api_auth_token";
 
-type AuthField = {
+interface AuthField {
   fieldName: string;
   defaultValue: unknown;
   original?: {
@@ -13,7 +13,7 @@ type AuthField = {
   };
   children: React.ReactNode;
   mapOutput?: (values: unknown) => unknown;
-};
+}
 
 function extractToken(value: unknown): string | null {
   if (typeof value !== "string") {

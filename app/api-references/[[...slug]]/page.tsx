@@ -16,12 +16,12 @@ import {
 import { ArrowBigRight, BookOpen, Hand, Shovel } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { LLMActions } from "@/app/components/llm-actions";
+import { TypeTable } from "@/app/components/type-table";
+import { Accordion, Accordions } from "@/app/components/ui/accordion";
 import { apiReferencesSource } from "@/lib/source";
 import { withBasePath } from "@/lib/utils";
 import { getMDXComponents } from "@/mdx-components";
-import { LLMActions } from "~/components/llm-actions";
-import { TypeTable } from "~/components/type-table";
-import { Accordion, Accordions } from "~/components/ui/accordion";
 
 export default async function Page({
   params,
@@ -33,7 +33,7 @@ export default async function Page({
 
   // Handle empty slug (root /api-references) - redirect to REST API index
   if (slugs.length === 0) {
-    redirect("/api-references/rest-api/v2");
+    redirect("/api-references/rest-api/v2/");
   }
 
   const page = apiReferencesSource.getPage(slugs);

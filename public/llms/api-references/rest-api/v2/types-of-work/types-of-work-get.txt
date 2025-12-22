@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Types of work get
 URL: /api-references/rest-api/v2/types-of-work/types-of-work-get
 Source: content/api-references/rest-api/v2/types-of-work/types-of-work-get.mdx
 

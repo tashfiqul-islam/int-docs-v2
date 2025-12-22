@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Alertid delete
 URL: /api-references/rest-api/v2/tasks/alertid-delete
 Source: content/api-references/rest-api/v2/tasks/alertid-delete.mdx
 

@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Preferred provider groups get
 URL: /api-references/rest-api/v2/preferred-providers/preferred-provider-groups-get
 Source: content/api-references/rest-api/v2/preferred-providers/preferred-provider-groups-get.mdx
 

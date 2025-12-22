@@ -1,4 +1,4 @@
-# Getting Started: undefined
+# Getting Started: Choosing your approach
 URL: /docs/getting-started/choosing-your-approach
 Source: content/docs/getting-started/choosing-your-approach.mdx
 
@@ -11,6 +11,7 @@ icon: GitBranch
 ---
 
 ## Quick Comparison
+
 
   
     ### Code-Based Integration
@@ -54,14 +55,17 @@ icon: GitBranch
     **Flexibility:** ⭐⭐⭐ Configurable within connector capabilities
   
 
+
 ---
 
 ## Integration Architecture
 
 Understanding how data flows through Field Nation helps you choose the right approach:
 
+
   
   
+
 
 ### How the Architecture Works
 
@@ -107,6 +111,7 @@ The combination of **REST API + Webhooks** provides powerful and flexible integr
 
 ### How It Works
 
+
   
     ### Inbound: REST API
 
@@ -130,6 +135,7 @@ The combination of **REST API + Webhooks** provides powerful and flexible integr
 
     **Example:** When a provider completes work, Field Nation sends a webhook to your endpoint, triggering ticket closure in your system.
   
+
 
 ### Current Webhook Events
 
@@ -171,6 +177,7 @@ Pre-built connectors provide **turnkey integrations** with leading platforms, re
 
 ### Supported Platforms
 
+
   
   
   
@@ -179,6 +186,7 @@ Pre-built connectors provide **turnkey integrations** with leading platforms, re
   
   
   
+
 
 ### Special: REST Connector
 

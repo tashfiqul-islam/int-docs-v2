@@ -1,4 +1,4 @@
-# Getting Started: undefined
+# Getting Started: Key concepts
 URL: /docs/getting-started/key-concepts
 Source: content/docs/getting-started/key-concepts.mdx
 

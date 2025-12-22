@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Projects get
 URL: /api-references/rest-api/v2/projects/projects-get
 Source: content/api-references/rest-api/v2/projects/projects-get.mdx
 

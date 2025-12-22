@@ -1,4 +1,4 @@
-# REST API: undefined
+# REST API: Api playground
 URL: /docs/rest-api/v2/api-playground
 Source: content/docs/rest-api/v2/api-playground.mdx
 
@@ -13,5 +13,6 @@ icon: SatelliteDish
 import Link from "next/link";
 
 Visit the REST API v2 playground to try requests, view examples, and inspect responses:
+
 
   Open REST API Playground

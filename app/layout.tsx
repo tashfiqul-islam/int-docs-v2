@@ -1,9 +1,10 @@
-import { Provider } from "~/components/provider";
-import "./app.css";
 import type { Metadata, Viewport } from "next";
 import { Open_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
+import { Provider } from "@/app/components/provider";
+import { SafeA11yFix } from "@/app/components/safe-a11y-fix";
+import "./app.css";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -34,10 +35,10 @@ const jetBrainsMono = localFont({
 });
 
 // Favicons from swags folder (theme-independent, using primary branding)
-import appleTouch from "~/assets/swags/apple-touch-icon.png";
-import favicon from "~/assets/swags/favicon.ico";
-import faviconSvg from "~/assets/swags/favicon.svg";
-import icon192 from "~/assets/swags/icon-192.png";
+import appleTouch from "@/app/assets/swags/apple-touch-icon.png";
+import favicon from "@/app/assets/swags/favicon.ico";
+import faviconSvg from "@/app/assets/swags/favicon.svg";
+import icon192 from "@/app/assets/swags/icon-192.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -131,8 +132,6 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };
-
-import { SafeA11yFix } from "./components/safe-a11y-fix";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

@@ -1,7 +1,7 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import { ThemeLogo } from "~/components/theme-logo";
-import { MobileMenuTrigger } from "~/components/ui/mobile-menu-trigger";
-import CustomNavBar from "~/components/ui/nav-bar";
+import { ThemeLogo } from "@/app/components/theme-logo";
+import { MobileMenuTrigger } from "@/app/components/ui/mobile-menu-trigger";
+import CustomNavBar from "@/app/components/ui/nav-bar";
 
 export function baseOptions(): BaseLayoutProps {
   return {

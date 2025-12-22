@@ -118,7 +118,10 @@ function stripMDXComponents(text: string): string {
   return cleaned.trim();
 }
 
-export async function getLLMText(page: Page) {
+export async function getLLMText(
+  page: Page,
+  options?: { title?: string; description?: string }
+) {
   const firstSlug = page.slugs?.[0] ?? "";
   const isApiRef = page.url.startsWith("/api-references");
   const categoryMap = {
@@ -151,11 +154,19 @@ export async function getLLMText(page: Page) {
   // Strip MDX components to get pure markdown for better LLM consumption
   const cleanMarkdown = stripMDXComponents(processed);
 
-  return `# ${category}: ${page.data.title}
+  // Use provided title/description or fall back to page.data (which may be undefined at build time)
+  const title =
+    options?.title ?? (page.data as { title?: string })?.title ?? "Untitled";
+  const description =
+    options?.description ??
+    (page.data as { description?: string })?.description ??
+    "";
+
+  return `# ${category}: ${title}
 URL: ${page.url}
 Source: ${sourceUrl}
 
-${page.data.description ?? ""}
+${description}
 
 ${cleanMarkdown}`;
 }

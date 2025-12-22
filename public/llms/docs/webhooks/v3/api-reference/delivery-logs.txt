@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Delivery logs
 URL: /docs/webhooks/v3/api-reference/delivery-logs
 Source: content/docs/webhooks/v3/api-reference/delivery-logs.mdx
 
@@ -29,7 +29,10 @@ Retrieve paginated list of webhook delivery attempts.
 
 **Query Parameters:**
 
+
+
 ### Example Requests
+
 
   
     ```bash
@@ -55,6 +58,7 @@ Retrieve paginated list of webhook delivery attempts.
       -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
     ```
   
+
 
 ### Response
 

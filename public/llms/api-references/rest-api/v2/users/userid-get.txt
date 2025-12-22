@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Userid get
 URL: /api-references/rest-api/v2/users/userid-get
 Source: content/api-references/rest-api/v2/users/userid-get.mdx
 

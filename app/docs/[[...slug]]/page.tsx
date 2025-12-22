@@ -16,13 +16,13 @@ import {
 import { ArrowBigRight, BookOpen, Hand, Shovel } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ClientRedirect } from "@/app/components/client-redirect";
+import { LLMActions } from "@/app/components/llm-actions";
+import { TypeTable } from "@/app/components/type-table";
+import { Accordion, Accordions } from "@/app/components/ui/accordion";
 import { source } from "@/lib/source";
 import { withBasePath } from "@/lib/utils";
 import { getMDXComponents } from "@/mdx-components";
-import { ClientRedirect } from "~/components/client-redirect";
-import { LLMActions } from "~/components/llm-actions";
-import { TypeTable } from "~/components/type-table";
-import { Accordion, Accordions } from "~/components/ui/accordion";
 
 export default async function Page({
   params,
@@ -32,10 +32,9 @@ export default async function Page({
   const resolvedParams = await params;
   const slugs = resolvedParams.slug ?? [];
 
-  // Handle empty slug (root /docs) - redirect to getting-started/introduction
-  // Handle empty slug (root /docs) - redirect to getting-started/introduction
+  // Handle empty slug - redirect to getting-started/introduction
   if (slugs.length === 0) {
-    return <ClientRedirect to="/docs/getting-started/introduction" />;
+    return <ClientRedirect to="/docs/getting-started/introduction/" />;
   }
 
   const page = source.getPage(slugs);

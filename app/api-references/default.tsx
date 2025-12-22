@@ -1,3 +1,4 @@
+/** Default OG image template for API references landing page */
 export default function Image() {
   return (
     <div
@@ -21,11 +22,9 @@ export default function Image() {
   );
 }
 
-const devicePixelRatio = 1.0;
-
 export const options = {
-  width: 1200 * devicePixelRatio,
-  height: 630 * devicePixelRatio,
+  width: 1200,
+  height: 630,
   format: "png" as const,
-  devicePixelRatio,
+  devicePixelRatio: 1.0,
 };

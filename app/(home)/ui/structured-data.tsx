@@ -1,6 +1,6 @@
 type StructuredDataType = "organization" | "software" | "faq";
 
-import primaryLogo from "~/assets/swags/primary-logo.svg";
+import primaryLogo from "@/app/assets/swags/primary-logo.svg";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://developers.fieldnation.com";
@@ -66,6 +66,10 @@ const structuredDataMap = {
   },
 } as const;
 
+/**
+ * Injects JSON-LD structured data into the page for SEO.
+ * Supports organization, software application, and FAQ schemas.
+ */
 export function StructuredData({ type }: { type: StructuredDataType }) {
   const data = structuredDataMap[type];
 

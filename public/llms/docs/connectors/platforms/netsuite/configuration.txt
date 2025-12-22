@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Configuration
 URL: /docs/connectors/platforms/netsuite/configuration
 Source: content/docs/connectors/platforms/netsuite/configuration.mdx
 
@@ -21,6 +21,8 @@ description: Configure the NetSuite connector with Token-Based Authentication an
 
 ## Step 1: Enable Token-Based Authentication
 
+
+
 ### Navigate to Features
 
 Setup → Company → Enable Features
@@ -33,9 +35,13 @@ Setup → Company → Enable Features
 
 Click "Save" to enable feature
 
+
+
 ---
 
 ## Step 2: Create Integration Record
+
+
 
 ### Navigate to Integrations
 
@@ -57,9 +63,13 @@ After save, copy:
 
 Store securely immediately!
 
+
+
 ---
 
 ## Step 3: Generate Access Token
+
+
 
 ### Navigate to Access Tokens
 
@@ -80,6 +90,8 @@ Setup → Users/Roles → Access Tokens → New
 After save, copy:
 - **Token ID**
 - **Token Secret** (shown once!)
+
+
 
 > **Critical**: Token Secret displayed ONCE. Save immediately to secure password manager.
 
@@ -146,6 +158,7 @@ Click "Test Connection"
 
 **Failure** ❌: Review error:
 
+
   
     - Verify all 5 credentials correct
     - Ensure Token not expired/revoked
@@ -157,6 +170,7 @@ Click "Test Connection"
     - Check user has role assigned
     - Verify TBA enabled
   
+
 
 ---
 
@@ -188,6 +202,7 @@ Review settings → Save → Copy trigger URL
 
 ## Troubleshooting
 
+
   
     - Verify TBA enabled in features
     - Check all 5 credentials correct
@@ -200,5 +215,6 @@ Review settings → Save → Copy trigger URL
     - Check API name (camelCase)
     - For custom records: Use `customRecord_{id}`
   
+
 
 ---

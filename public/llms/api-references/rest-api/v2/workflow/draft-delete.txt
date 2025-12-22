@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Draft delete
 URL: /api-references/rest-api/v2/workflow/draft-delete
 Source: content/api-references/rest-api/v2/workflow/draft-delete.mdx
 

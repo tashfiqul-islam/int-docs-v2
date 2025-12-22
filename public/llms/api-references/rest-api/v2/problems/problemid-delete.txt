@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Problemid delete
 URL: /api-references/rest-api/v2/problems/problemid-delete
 Source: content/api-references/rest-api/v2/problems/problemid-delete.mdx
 

@@ -1,4 +1,4 @@
-# REST API: undefined
+# REST API: Common patterns
 URL: /docs/rest-api/v2/common-patterns
 Source: content/docs/rest-api/v2/common-patterns.mdx
 

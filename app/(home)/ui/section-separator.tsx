@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
 
-type SectionSeparatorProps = {
+interface SectionSeparatorProps {
   children: ReactNode;
-};
+}
 
+/**
+ * Decorative wrapper that adds a gradient line and diagonal pattern
+ * above its children to visually separate page sections.
+ */
 export function SectionSeparator({ children }: SectionSeparatorProps) {
   return (
     <div className="relative">

@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Expenseid put
 URL: /api-references/rest-api/v2/finances/expenseid-put
 Source: content/api-references/rest-api/v2/finances/expenseid-put.mdx
 

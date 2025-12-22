@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Workflow
 URL: /docs/connectors/platforms/servicenow/workflow
 Source: content/docs/connectors/platforms/servicenow/workflow.mdx
 
@@ -30,6 +30,8 @@ graph LR
 
 REST Messages define the HTTP request sent to Field Nation.
 
+
+
 ### Navigate to REST Messages
 
 ServiceNow → System Web Services → Outbound → REST Message
@@ -54,9 +56,13 @@ https://api.fieldnation.com/integrations/trigger/{CLIENT_TOKEN}
 
 Click **Submit**
 
+
+
 ---
 
 ### Create HTTP Method
+
+
 
 ### Open REST Message
 
@@ -95,9 +101,13 @@ Value: application/json
 
 Click **Submit**
 
+
+
 ---
 
 ### Test REST Message
+
+
 
 ### Open HTTP Method
 
@@ -121,11 +131,15 @@ Button at bottom of form
 **Success**: 200 OK response  
 **Failure**: Check error message, verify trigger URL
 
+
+
 ---
 
 ## Step 2: Create Business Rule
 
 Business Rules provide the automation logic to trigger REST Messages.
+
+
 
 ### Navigate to Business Rules
 
@@ -144,6 +158,8 @@ Click **New**
 **Active**: ✅ Checked
 
 **Advanced**: ✅ Checked (required for script)
+
+
 
 ---
 
@@ -274,6 +290,8 @@ Click **Submit**
 
 ## Step 3: Test Integration
 
+
+
 ### Create Test Record
 
 1. Navigate to your table (e.g., Incidents)
@@ -301,9 +319,12 @@ Check **System Logs → System Log → All**:
 2. Check ServiceNow record updates
 3. Verify Work Notes added
 
+
+
 ---
 
 ## Troubleshooting
+
 
   
     **Check:**
@@ -362,6 +383,7 @@ Check **System Logs → System Log → All**:
     3. Add condition: "Changes" instead of just "="
     4. Check for other Business Rules on same table
   
+
 
 ---
 
@@ -475,6 +497,8 @@ To update ServiceNow when Field Nation changes:
 
 ### Deployment via Update Set
 
+
+
 ### Create Update Set
 
 1. Navigate to **System Update Sets → Local Update Sets**
@@ -509,6 +533,8 @@ Switch Field Nation from Sandbox to Production:
 - Test connection
 - Copy new trigger URL
 - Update REST Message endpoint in Production ServiceNow
+
+
 
 ---
 

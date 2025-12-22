@@ -1,4 +1,4 @@
-# Webhooks: undefined
+# Webhooks: Webhooks
 URL: /docs/webhooks/v3/api-reference/webhooks
 Source: content/docs/webhooks/v3/api-reference/webhooks.mdx
 
@@ -139,7 +139,10 @@ Retrieve a paginated list of webhooks.
 
 **Query Parameters:**
 
+
+
 ### Example Requests
+
 
   
     ```bash
@@ -165,6 +168,7 @@ Retrieve a paginated list of webhooks.
       -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
     ```
   
+
 
 ### Response
 
@@ -232,7 +236,10 @@ Retrieve detailed information about a specific webhook.
 
 **Query Parameters:**
 
+
+
 ### Example Requests
+
 
   
     ```bash
@@ -246,6 +253,7 @@ Retrieve detailed information about a specific webhook.
       -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
     ```
   
+
 
 ### Response
 
@@ -321,6 +329,7 @@ Update an existing webhook configuration. Only include fields you want to change
 
 ### Example Requests
 
+
   
     ```bash
     curl -X PUT https://api-sandbox.fndev.net/api/v1/webhooks/wh_abc123 \
@@ -371,6 +380,7 @@ Update an existing webhook configuration. Only include fields you want to change
       }'
     ```
   
+
 
 ### Response
 

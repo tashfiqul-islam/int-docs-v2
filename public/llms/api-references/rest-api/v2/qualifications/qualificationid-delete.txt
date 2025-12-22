@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Qualificationid delete
 URL: /api-references/rest-api/v2/qualifications/qualificationid-delete
 Source: content/api-references/rest-api/v2/qualifications/qualificationid-delete.mdx
 

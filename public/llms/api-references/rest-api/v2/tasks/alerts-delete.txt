@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Alerts delete
 URL: /api-references/rest-api/v2/tasks/alerts-delete
 Source: content/api-references/rest-api/v2/tasks/alerts-delete.mdx
 

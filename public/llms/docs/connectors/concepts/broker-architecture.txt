@@ -1,4 +1,4 @@
-# Connectors: undefined
+# Connectors: Broker architecture
 URL: /docs/connectors/concepts/broker-architecture
 Source: content/docs/connectors/concepts/broker-architecture.mdx
 
@@ -97,6 +97,8 @@ JSONNET-based transformation engine for:
 
 ### Inbound: External System → Field Nation
 
+
+
 ### Trigger Reception
 
 External system sends webhook notification when record is created/updated. Each connector has a unique trigger URL with embedded authentication token.
@@ -117,9 +119,13 @@ Transformed data is validated and submitted to Field Nation API. System stores c
 
 Failed operations are logged, retried with exponential backoff, and moved to DLQ if max retries exceeded. Email notifications sent for persistent failures.
 
+
+
 ---
 
 ### Outbound: Field Nation → External System
+
+
 
 ### Event Detection
 
@@ -136,6 +142,8 @@ System constructs API request (REST, SOAP, or platform SDK) and submits update t
 ### Sync Confirmation
 
 Successful updates logged, work order sync status updated. Failed updates trigger retry with exponential backoff.
+
+
 
 ---
 
@@ -186,10 +194,15 @@ After maximum retries, operation moves to Dead Letter Queue for manual review.
 
 ### Authentication Methods Supported
 
+
+
+
 ```
 Authorization: Basic base64(username:password)
 ```
 Used by: Freshdesk, REST Connector
+
+
 
 ```
 Authorization: Bearer {access_token}
@@ -197,12 +210,16 @@ Authorization: Bearer {access_token}
 Automatic token refresh with refresh tokens  
 Used by: Salesforce, ServiceNow
 
+
+
 ```
 X-API-Key: {api_key}
 Authorization: Bearer {token}
 ```
 Platform-specific header formats  
 Used by: Quickbase, Smartsheet
+
+
 
 ```xml
 <soap:Header>
@@ -214,6 +231,9 @@ Used by: Quickbase, Smartsheet
 </soap:Header>
 ```
 Used by: NetSuite, Autotask
+
+
+
 
 ### Request Authentication
 
@@ -394,6 +414,7 @@ The Integration Broker supports:
 
 ### Common Issues
 
+
   
     **Check:**
     - Webhook triggering correctly
@@ -420,6 +441,7 @@ The Integration Broker supports:
     - Data validation errors
     - Network connectivity
   
+
 
 [Complete troubleshooting guide →](/docs/connectors/concepts/troubleshooting)
 

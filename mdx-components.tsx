@@ -21,9 +21,9 @@ import {
 } from "fumadocs-ui/components/tabs";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
+import { APIPage as BaseAPIPage } from "@/app/components/api-page";
+import { Mermaid } from "@/app/components/mdx/mermaid";
 import { resolveIcon } from "@/lib/source";
-import { APIPage as BaseAPIPage } from "~/components/api-page";
-import { Mermaid } from "~/components/mdx/mermaid";
 
 // Custom Card wrapper that resolves icon strings to React elements
 function Card({

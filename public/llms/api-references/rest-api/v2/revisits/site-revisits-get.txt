@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Site revisits get
 URL: /api-references/rest-api/v2/revisits/site-revisits-get
 Source: content/api-references/rest-api/v2/revisits/site-revisits-get.mdx
 

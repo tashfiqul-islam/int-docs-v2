@@ -2,7 +2,7 @@ import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
-type ConnectorCardProps = {
+interface ConnectorCardProps {
   connector: {
     name: string;
     href: string;
@@ -13,8 +13,12 @@ type ConnectorCardProps = {
   };
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-};
+}
 
+/**
+ * Interactive card displaying a connector logo with light/dark mode support.
+ * Shows a hover overlay with "Learn More" prompt.
+ */
 export function ConnectorCard({
   connector,
   onMouseEnter,

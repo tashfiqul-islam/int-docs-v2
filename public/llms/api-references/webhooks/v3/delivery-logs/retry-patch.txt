@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Retry patch
 URL: /api-references/webhooks/v3/delivery-logs/retry-patch
 Source: content/api-references/webhooks/v3/delivery-logs/retry-patch.mdx
 

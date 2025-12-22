@@ -10,27 +10,28 @@ import { Check, ChevronDown, Copy, ExternalLinkIcon } from "lucide-react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
-import claudeIcon from "~/assets/logo/llm-icons/claude-ai-icon.svg";
-import geminiIcon from "~/assets/logo/llm-icons/gemini.svg";
-import markdownDark from "~/assets/logo/llm-icons/markdown_dark.svg";
-import markdownLight from "~/assets/logo/llm-icons/markdown_light.svg";
-import openAiDark from "~/assets/logo/llm-icons/OpenAI_dark.svg";
-import openAiLight from "~/assets/logo/llm-icons/OpenAI_light.svg";
-import perplexityIcon from "~/assets/logo/llm-icons/perplexity.svg";
-import { buttonVariants } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import aiStudioDark from "@/app/assets/logo/llm-icons/aistudio-dark.svg";
+import aiStudioLight from "@/app/assets/logo/llm-icons/aistudio-light.svg";
+import claudeIcon from "@/app/assets/logo/llm-icons/claude-ai-icon.svg";
+import markdownDark from "@/app/assets/logo/llm-icons/markdown_dark.svg";
+import markdownLight from "@/app/assets/logo/llm-icons/markdown_light.svg";
+import openAiDark from "@/app/assets/logo/llm-icons/OpenAI_dark.svg";
+import openAiLight from "@/app/assets/logo/llm-icons/OpenAI_light.svg";
+import perplexityIcon from "@/app/assets/logo/llm-icons/perplexity.svg";
+import { buttonVariants } from "@/app/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const cache = new Map<string, string>();
 
 const optionVariants = (className?: string) =>
   `inline-flex items-center gap-2 rounded-lg p-2 text-sm hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4 ${className ?? ""}`;
 
-type LLMActionProps = {
+interface LLMActionProps {
   /**
    * A URL to fetch the raw Markdown/MDX content of page
    */
   markdownUrl: string;
-};
+}
 
 export function LLMActions({ markdownUrl }: LLMActionProps) {
   const { resolvedTheme } = useTheme();
@@ -95,6 +96,7 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
     const isDark = mounted && resolvedTheme === "dark";
     const openAILogo = isDark ? openAiDark : openAiLight;
     const markdownLogo = isDark ? markdownDark : markdownLight;
+    const aiStudioIcon = isDark ? aiStudioDark : aiStudioLight;
 
     return [
       {
@@ -127,16 +129,18 @@ export function LLMActions({ markdownUrl }: LLMActionProps) {
         ),
       },
       {
-        title: "Open in Gemini",
-        href: `https://gemini.google.com/?${new URLSearchParams({
-          q,
-        })}`,
+        title: "Open in AI Studio",
+        href: `https://aistudio.google.com/prompts/new_chat?${new URLSearchParams(
+          {
+            prompt: q,
+          }
+        )}`,
         icon: (
           <Image
-            alt="Gemini"
+            alt="AI Studio"
             className="size-4"
             height={16}
-            src={geminiIcon}
+            src={aiStudioIcon}
             width={16}
           />
         ),

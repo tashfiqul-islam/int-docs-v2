@@ -1,10 +1,10 @@
 import { FileQuestion } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import appWindowIcon from "~/assets/icons/app-window.svg";
-import { buttonVariants } from "~/components/ui/button";
-import { IconFolderOpen } from "~/components/ui/icons";
-import { cn } from "~/lib/utils";
+import appWindowIcon from "@/app/assets/icons/app-window.svg";
+import { buttonVariants } from "@/app/components/ui/button";
+import { IconFolderOpen } from "@/app/components/ui/icons";
+import { cn } from "@/lib/utils";
 
 export function Custom404() {
   return (
@@ -68,7 +68,7 @@ export function Custom404() {
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "h-12 gap-2 rounded-lg border-2 px-8 font-semibold text-base backdrop-blur-sm transition-all duration-300 hover:border-fd-primary/40 hover:bg-fd-accent/50"
               )}
-              href="/docs/getting-started/introduction"
+              href="/docs/getting-started/introduction/"
             >
               <IconFolderOpen className="size-4" />
               View Documentation
@@ -85,7 +85,7 @@ export function Custom404() {
                   buttonVariants({ variant: "ghost", size: "sm" }),
                   "text-fd-primary hover:bg-fd-primary/10 hover:text-fd-primary/80"
                 )}
-                href="/docs/api/clients"
+                href="/docs/api/clients/"
               >
                 Client API
               </Link>
@@ -94,7 +94,7 @@ export function Custom404() {
                   buttonVariants({ variant: "ghost", size: "sm" }),
                   "text-fd-primary hover:bg-fd-primary/10 hover:text-fd-primary/80"
                 )}
-                href="/docs/webhooks"
+                href="/docs/webhooks/"
               >
                 Webhook
               </Link>
@@ -103,7 +103,7 @@ export function Custom404() {
                   buttonVariants({ variant: "ghost", size: "sm" }),
                   "text-fd-primary hover:bg-fd-primary/10 hover:text-fd-primary/80"
                 )}
-                href="/docs/connectors"
+                href="/docs/connectors/"
               >
                 FSM Connectors
               </Link>
@@ -112,7 +112,7 @@ export function Custom404() {
                   buttonVariants({ variant: "ghost", size: "sm" }),
                   "text-fd-primary hover:bg-fd-primary/10 hover:text-fd-primary/80"
                 )}
-                href="/docs/api-references"
+                href="/docs/api-references/"
               >
                 API References
               </Link>

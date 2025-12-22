@@ -1,4 +1,4 @@
-# REST API: undefined
+# REST API: Quickstart
 URL: /docs/rest-api/v2/quickstart
 Source: content/docs/rest-api/v2/quickstart.mdx
 
@@ -27,6 +27,7 @@ Before you begin, ensure you have:
 ## Step 1: Obtain Access Token
 
 First, authenticate to get an access token:
+
 
   
 ```bash
@@ -81,6 +82,7 @@ print(f'Access Token: {access_token}')
 ```
   
 
+
 **Response:**
 ```json
 {
@@ -97,6 +99,7 @@ print(f'Access Token: {access_token}')
 ## Step 2: Create a Simple Work Order
 
 Now create a work order with minimal required fields:
+
 
   
 ```bash
@@ -191,6 +194,7 @@ print(f"Work Order Created: {work_order_data['id']}")
 ```
   
 
+
 **Response:**
 ```json
 {
@@ -230,6 +234,7 @@ print(f"Work Order Created: {work_order_data['id']}")
 
 Publish the work order to make it available to providers:
 
+
   
 ```bash
 curl -X POST "https://api-sandbox.fndev.net/api/rest/v2/workorders/12345/publish?access_token=YOUR_ACCESS_TOKEN"
@@ -257,6 +262,7 @@ print('Work Order Published!')
 ```
   
 
+
 **Response:**
 ```json
 {
@@ -275,6 +281,7 @@ print('Work Order Published!')
 ## Step 4: Retrieve Work Order Details
 
 Check the work order status:
+
 
   
 ```bash
@@ -303,6 +310,7 @@ work_order_details = details.json()
 print(f"Status: {work_order_details['status']['name']}")
 ```
   
+
 
 ---
 

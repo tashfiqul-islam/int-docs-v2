@@ -7,8 +7,8 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "~/components/ui/popover";
-import { cn } from "~/lib/utils";
+} from "@/app/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const VERSION_REGEX = /^v\d+$/;
 

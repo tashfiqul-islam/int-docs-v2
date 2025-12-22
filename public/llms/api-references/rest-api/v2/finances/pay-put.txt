@@ -1,4 +1,4 @@
-# API References: undefined
+# API References: Pay put
 URL: /api-references/rest-api/v2/finances/pay-put
 Source: content/api-references/rest-api/v2/finances/pay-put.mdx
 
